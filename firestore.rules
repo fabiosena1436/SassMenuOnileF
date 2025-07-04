@@ -1,0 +1,45 @@
+// Ficheiro completo: firestore.rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // Função para verificar se o utilizador é o dono do tenant
+    function isTenantOwner(tenantId) {
+      return request.auth != null && get(/databases/$(database)/documents/tenants/$(tenantId)).data.ownerId == request.auth.uid;
+    }
+    
+    // Função para verificar se o utilizador é um Super Admin
+    function isSuperAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin';
+    }
+
+    // Regra para a coleção 'users'
+    match /users/{userId} {
+      // Um utilizador só pode ler e escrever no seu próprio perfil
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Um Super Admin pode ler o perfil de qualquer utilizador
+      allow read: if isSuperAdmin();
+    }
+
+    // Regra para a coleção 'tenants'
+    match /tenants/{tenantId} {
+      // O Super Admin pode ler a lista de todos os tenants
+      allow list: if isSuperAdmin();
+      // O Super Admin pode ler os dados de um tenant específico
+      allow get: if isSuperAdmin();
+      
+      // O dono do tenant pode ler e escrever nos dados do seu próprio tenant
+      allow read, write: if isTenantOwner(tenantId);
+    }
+    
+    // Regra para as subcoleções dentro de um tenant (produtos, categorias, etc.)
+    match /tenants/{tenantId}/{subcollection}/{docId} {
+      // O público pode ler produtos e categorias
+      allow get, list: if subcollection == 'products' || subcollection == 'categories' || subcollection == 'storeSettings';
+      
+      // O dono do tenant pode fazer tudo nas suas subcoleções
+      allow read, write, delete: if isTenantOwner(tenantId);
+    }
+  }
+}
