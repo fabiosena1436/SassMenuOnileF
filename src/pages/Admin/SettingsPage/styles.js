@@ -1,8 +1,12 @@
-// src/pages/Admin/SettingsPage/styles.js
+// Arquivo: src/pages/Admin/SettingsPage/styles.js
 
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+
   h1 { 
     font-size: 2em; 
     color: #333; 
@@ -13,14 +17,10 @@ export const PageWrapper = styled.div`
 export const SectionTitle = styled.h2`
   font-size: 1.5em; 
   color: #555; 
-  margin-top: 0; 
+  margin-top: 40px; 
   margin-bottom: 20px; 
   border-bottom: 1px solid #ddd; 
   padding-bottom: 10px; 
-  
-  &:not(:first-child){ 
-    margin-top: 40px; 
-  }
 `;
 
 export const Form = styled.form`
@@ -38,9 +38,10 @@ export const Form = styled.form`
 export const FormGroup = styled.div`
   display: flex; 
   flex-direction: column; 
+  flex-grow: 1;
   
   label { 
-    margin-bottom: 5px; 
+    margin-bottom: 8px; 
     font-weight: 600; 
     color: #444; 
   } 
@@ -66,7 +67,7 @@ export const FormGroup = styled.div`
   }
   
   img {
-    max-width: 100%; 
+    max-width: 150px; 
     height: auto;
     margin-top: 10px; 
     border-radius: 8px; 
@@ -82,13 +83,14 @@ export const LoadingText = styled.p`
 `;
 
 export const StatusDisplay = styled.div`
+  margin-bottom: 10px; 
+  font-size: 1.1em; 
+  font-weight: bold;
   padding: 1rem;
   border-radius: 8px;
-  font-weight: bold;
   text-align: center;
-  margin-bottom: 1rem;
-  background-color: ${({ $isOpen }) => ($isOpen ? '#c6f6d5' : '#fed7d7')}; // MUDANÇA AQUI
-  color: ${({ $isOpen }) => ($isOpen ? '#2f855a' : '#c53030')};             // MUDANÇA AQUI
+  background-color: ${({ $isOpen }) => ($isOpen ? '#dcfce7' : '#fee2e2')};
+  color: ${({ $isOpen }) => ($isOpen ? '#166534' : '#991b1b')};
 `;
 
 export const SettingsBlock = styled.div`
@@ -102,7 +104,6 @@ export const SettingsGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
-  margin-bottom: 40px;
 
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr;
