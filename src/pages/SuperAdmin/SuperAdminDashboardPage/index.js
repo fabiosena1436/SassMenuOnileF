@@ -1,67 +1,147 @@
-// Ficheiro completo: src/pages/SuperAdmin/SuperAdminDashboardPage/index.js
+// Arquivo: src/pages/SuperAdmin/SuperAdminDashboardPage/index.js
 
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../../services/firebaseConfig';
-import { PageWrapper, Title, TenantTable, Th, Td, Tr } from './styles';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../../contexts/AuthContext';
+
+import {
+  PageWrapper, Header, Title, SearchInput, Table, Th, Td, Tr, SelectRole,
+  LoadingText, InfoText, Tag, TenantLink
+} from './styles';
 
 const SuperAdminDashboardPage = () => {
+  const { user: superAdminUser } = useAuth();
+  const [users, setUsers] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const fetchTenants = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const tenantsRef = collection(db, 'tenants');
-        const q = query(tenantsRef, orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        
-        const tenantsList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        setTenants(tenantsList);
+        const usersCollectionRef = collection(db, 'users');
+        const tenantsCollectionRef = collection(db, 'tenants');
+
+        const [usersSnapshot, tenantsSnapshot] = await Promise.all([
+          getDocs(usersCollectionRef),
+          getDocs(tenantsCollectionRef)
+        ]);
+
+        setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setTenants(tenantsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
       } catch (error) {
-        console.error("Erro ao buscar lojistas:", error);
+        console.error("Erro ao buscar dados:", error);
+        toast.error("Falha ao carregar dados do painel.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchTenants();
+    fetchData();
   }, []);
 
+  const handleRoleChange = async (userId, newRole) => {
+    if (userId === superAdminUser.uid) {
+        toast.error("Não pode alterar a sua própria função.");
+        return;
+    }
+
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      await updateDoc(userDocRef, { role: newRole });
+      
+      setUsers(prevUsers => 
+        prevUsers.map(u => u.id === userId ? { ...u, role: newRole } : u)
+      );
+      toast.success("Função do utilizador atualizada!");
+
+    } catch (error) {
+      console.error("Erro ao atualizar função:", error);
+      toast.error("Não foi possível atualizar a função.");
+    }
+  };
+
+  // <<< MUDANÇA PRINCIPAL AQUI >>>
+  const filteredUsers = useMemo(() => {
+    return users.filter(user =>
+      // Se user.email não existir, trata-o como uma string vazia '' para evitar o erro.
+      (user.email || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [users, searchTerm]);
+  
+  const tenantsByOwner = useMemo(() => {
+    return tenants.reduce((acc, tenant) => {
+        if(tenant.ownerId) {
+            acc[tenant.ownerId] = tenant;
+        }
+        return acc;
+    }, {});
+  }, [tenants]);
+
   if (loading) {
-    return <PageWrapper><Title>Carregando Lojistas...</Title></PageWrapper>;
+    return <PageWrapper><LoadingText>A carregar gestor de utilizadores...</LoadingText></PageWrapper>;
   }
 
   return (
     <PageWrapper>
-      <Title>Painel Super Admin - Gestão de Lojistas</Title>
-      <TenantTable>
+      <Header>
+        <Title>Gestão de Utilizadores</Title>
+        <SearchInput
+          type="text"
+          placeholder="Pesquisar por email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </Header>
+      
+      <Table>
         <thead>
           <Tr>
-            <Th>Nome da Loja</Th>
-            <Th>Plano</Th>
-            <Th>Status da Assinatura</Th>
-            <Th>Email do Dono</Th>
+            <Th>Email</Th>
+            <Th>Função (Role)</Th>
+            <Th>Loja Associada</Th>
+            <Th>ID do Utilizador</Th>
           </Tr>
         </thead>
         <tbody>
-          {tenants.map(tenant => (
-            <Tr key={tenant.id}>
-              <Td>{tenant.storeName}</Td>
-              <Td>{tenant.plan}</Td>
-              <Td className={tenant.mp_subscription_status === 'authorized' ? 'status-active' : 'status-cancelled'}>
-                {tenant.mp_subscription_status || 'N/A'}
-              </Td>
-              {/* Para obter o email, precisaríamos de outra consulta. Deixaremos para um próximo passo. */}
-              <Td>--</Td> 
+          {filteredUsers.length > 0 ? filteredUsers.map(u => {
+            const associatedTenant = tenantsByOwner[u.id];
+            return (
+              <Tr key={u.id}>
+                <Td data-label="Email">{u.email || 'Email não disponível'}</Td>
+                <Td data-label="Função">
+                   <SelectRole
+                     value={u.role || 'user'}
+                     onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                     disabled={u.id === superAdminUser.uid}
+                   >
+                     <option value="user">Utilizador</option>
+                     <option value="lojista">Lojista</option>
+                     <option value="superadmin">Super Admin</option>
+                   </SelectRole>
+                </Td>
+                <Td data-label="Loja">
+                    {associatedTenant ? (
+                        <TenantLink href={`/loja/${associatedTenant.slug}`} target="_blank">
+                            {associatedTenant.name} {associatedTenant.plan && <Tag>{associatedTenant.plan}</Tag>}
+                        </TenantLink>
+                    ) : (
+                        '-'
+                    )}
+                </Td>
+                <Td data-label="ID do Utilizador">{u.id}</Td>
+              </Tr>
+            )
+          }) : (
+            <Tr>
+              <Td colSpan="4"><InfoText>Nenhum utilizador encontrado.</InfoText></Td>
             </Tr>
-          ))}
+          )}
         </tbody>
-      </TenantTable>
+      </Table>
     </PageWrapper>
   );
 };

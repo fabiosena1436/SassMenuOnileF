@@ -11,7 +11,7 @@ import {
   Features,
   FeatureCard,
   CallToAction
-} from './styles'; // Esta linha precisa que o styles.js exista
+} from './styles';
 import { FaRocket, FaStore, FaMobileAlt } from 'react-icons/fa';
 
 const LandingPage = () => {

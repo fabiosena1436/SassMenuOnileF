@@ -14,13 +14,13 @@ export const Header = styled.header`
 `;
 
 export const Title = styled.h1`
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: 3rem;
   max-width: 800px;
   margin: 0 auto 1rem auto;
 `;
 
 export const Subtitle = styled.p`
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-size: 1.2rem;
   max-width: 600px;
   margin: 0 auto;
   opacity: 0.9;
