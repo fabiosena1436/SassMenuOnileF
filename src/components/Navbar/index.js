@@ -17,20 +17,21 @@ import {
 } from './styles';
 
 const Navbar = () => {
-  //                                           👇 MUDANÇA AQUI
-  const { cart = [] } = useCart() || {}; // Garante que 'cart' seja sempre um array
+  const { totalItems } = useCart();
   const store = useStore();
   const { pathname } = useLocation();
 
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-
   if (!store) {
-    return null;
+    return null; 
   }
 
+  // Define os links com base no slug da loja
   const homeLink = `/loja/${store.slug}`;
   const menuLink = `/loja/${store.slug}/cardapio`;
-  const cartLink = `/loja/${store.slug}/cart`;
+  
+  // <<< MUDANÇA PRINCIPAL AQUI >>>
+  // Corrigimos o caminho de "cart" para "carrinho"
+  const cartLink = `/loja/${store.slug}/carrinho`;
 
   const isActive = (path) => pathname === path;
 
