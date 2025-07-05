@@ -33,7 +33,7 @@ export const ButtonWrapper = styled.button`
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out, transform 0.1s ease-in-out;
   
-  ${({ variant }) => variants[variant] || variants.primary}
+  ${({ $variant }) => variants[$variant] || variants.primary}
 
   &:active:not(:disabled) {
     transform: scale(0.98);

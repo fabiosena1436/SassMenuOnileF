@@ -1,124 +1,139 @@
-// Arquivo: src/pages/Admin/CategoriesPage/index.js (VERSÃO MULTI-TENANT)
+// Arquivo: src/pages/Admin/CategoriesPage/index.js
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../../services/firebaseConfig';
-import { useAuth } from '../../../contexts/AuthContext'; // Passo 1
+import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/Button';
+import toast from 'react-hot-toast';
+
 import {
   PageWrapper,
   SectionTitle,
-  AddForm,
+  FormContainer,
   FormGroup,
   CategoryList,
   CategoryListItem,
-  LoadingText
+  CategoryInfo,
+  ActionButtons,
+  LoadingText,
+  InfoText
 } from './styles';
-import { FaTrash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [editingCategoryId, setEditingCategoryId] = useState(null);
-  const [editingCategoryName, setEditingCategoryName] = useState('');
-  const { tenantId } = useAuth(); // Passo 2
+  const { tenantId } = useAuth();
 
-  // Função para buscar as categorias (agora depende do tenantId)
+  // Estado para o formulário de nova categoria
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Função para buscar as categorias do lojista logado
   const fetchCategories = useCallback(async () => {
-    if (!tenantId) return; // Só executa se tivermos o tenantId
+    if (!tenantId) return;
     setLoading(true);
-    // Passo 3: O caminho da coleção agora inclui o tenantId
-    const categoriesCollectionRef = collection(db, 'tenants', tenantId, 'categories');
-    const data = await getDocs(categoriesCollectionRef);
-    setCategories(data.docs.map(d => ({ ...d.data(), id: d.id })));
-    setLoading(false);
-  }, [tenantId]); // Passo 4
+    try {
+      const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
+      const q = query(categoriesRef, orderBy('name'));
+      const querySnapshot = await getDocs(q);
+      setCategories(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    } catch (error) {
+      console.error("Erro ao buscar categorias:", error);
+      toast.error("Não foi possível carregar as categorias.");
+    } finally {
+      setLoading(false);
+    }
+  }, [tenantId]);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Função para ADICIONAR uma categoria
+  // Função para lidar com o envio do formulário
   const handleAddCategory = async (e) => {
     e.preventDefault();
-    if (newCategoryName.trim() === '' || !tenantId) return;
-    const categoriesCollectionRef = collection(db, 'tenants', tenantId, 'categories'); // Passo 3
-    await addDoc(categoriesCollectionRef, {
-      name: newCategoryName,
-      name_lowercase: newCategoryName.toLowerCase(),
-    });
-    setNewCategoryName('');
-    fetchCategories(); // Recarrega a lista
+    if (!newCategoryName.trim()) {
+      toast.error("O nome da categoria não pode estar vazio.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
+      await addDoc(categoriesRef, {
+        name: newCategoryName.trim(),
+        // Adicione aqui outros campos se necessário no futuro
+      });
+      toast.success(`Categoria "${newCategoryName.trim()}" adicionada!`);
+      setNewCategoryName(''); // Limpa o campo
+      fetchCategories(); // Atualiza a lista
+    } catch (error) {
+      console.error("Erro ao adicionar categoria:", error);
+      toast.error("Falha ao adicionar a categoria.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // Função para DELETAR uma categoria
-  const handleDeleteCategory = async (id) => {
-    if (!tenantId) return;
-    const categoryDoc = doc(db, 'tenants', tenantId, 'categories', id); // Passo 3
-    await deleteDoc(categoryDoc);
-    fetchCategories();
-  };
-  
-  // Funções para EDITAR uma categoria
-  const handleEditCategory = async (id) => {
-    if (!tenantId) return;
-    const categoryDoc = doc(db, 'tenants', tenantId, 'categories', id); // Passo 3
-    await updateDoc(categoryDoc, { name: editingCategoryName, name_lowercase: editingCategoryName.toLowerCase() });
-    setEditingCategoryId(null);
-    fetchCategories();
-  };
-
-  const startEditing = (category) => {
-    setEditingCategoryId(category.id);
-    setEditingCategoryName(category.name);
+  // Função para apagar uma categoria
+  const handleDeleteCategory = async (categoryId, categoryName) => {
+    if (!window.confirm(`Tem a certeza que quer apagar a categoria "${categoryName}"?`)) {
+      return;
+    }
+    try {
+      const categoryDocRef = doc(db, 'tenants', tenantId, 'categories', categoryId);
+      await deleteDoc(categoryDocRef);
+      toast.success(`Categoria "${categoryName}" apagada.`);
+      fetchCategories(); // Atualiza a lista
+    } catch (error) {
+      console.error("Erro ao apagar categoria:", error);
+      toast.error("Falha ao apagar a categoria.");
+    }
   };
 
   if (loading) {
-    return <PageWrapper><LoadingText>Carregando categorias...</LoadingText></PageWrapper>;
+    return <PageWrapper><LoadingText>A carregar categorias...</LoadingText></PageWrapper>;
   }
 
   return (
     <PageWrapper>
-      <SectionTitle>Gerenciar Categorias</SectionTitle>
-      <AddForm onSubmit={handleAddCategory}>
+      <SectionTitle>Gerir Categorias</SectionTitle>
+
+      <FormContainer onSubmit={handleAddCategory}>
         <FormGroup>
+          <label htmlFor="categoryName">Nome da Nova Categoria</label>
           <input
+            id="categoryName"
             type="text"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
-            placeholder="Nome da nova categoria"
+            placeholder="Ex: Pizzas Tradicionais"
+            disabled={isSubmitting}
           />
-          <Button type="submit">Adicionar</Button>
         </FormGroup>
-      </AddForm>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'A adicionar...' : 'Adicionar Categoria'}
+        </Button>
+      </FormContainer>
 
       <CategoryList>
-        {categories.map((category) => (
-          <CategoryListItem key={category.id}>
-            {editingCategoryId === category.id ? (
-              <>
-                <input
-                  type="text"
-                  value={editingCategoryName}
-                  onChange={(e) => setEditingCategoryName(e.target.value)}
-                />
-                <div>
-                  <button onClick={() => handleEditCategory(category.id)} className="icon-btn-save"><FaCheck /></button>
-                  <button onClick={() => setEditingCategoryId(null)} className="icon-btn-cancel"><FaTimes /></button>
-                </div>
-              </>
-            ) : (
-              <>
-                <span>{category.name}</span>
-                <div>
-                  <button onClick={() => startEditing(category)} className="icon-btn-edit"><FaEdit /></button>
-                  <button onClick={() => handleDeleteCategory(category.id)} className="icon-btn-delete"><FaTrash /></button>
-                </div>
-              </>
-            )}
-          </CategoryListItem>
-        ))}
+        {categories.length > 0 ? (
+          categories.map(category => (
+            <CategoryListItem key={category.id}>
+              <CategoryInfo>{category.name}</CategoryInfo>
+              <ActionButtons>
+                <Button 
+                  variant="danger" 
+                  onClick={() => handleDeleteCategory(category.id, category.name)}
+                >
+                  Apagar
+                </Button>
+              </ActionButtons>
+            </CategoryListItem>
+          ))
+        ) : (
+          <InfoText>Nenhuma categoria cadastrada ainda.</InfoText>
+        )}
       </CategoryList>
     </PageWrapper>
   );

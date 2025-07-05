@@ -17,7 +17,7 @@ const Button = ({ onClick, children, variant = 'primary', disabled = false, type
     // --- ERRO CORRIGIDO: Usa ButtonWrapper ---
     <ButtonWrapper
       onClick={onClick}
-      variant={variant}
+      $variant={variant}
       disabled={disabled}
       type={type}
       style={style}

@@ -82,10 +82,13 @@ export const LoadingText = styled.p`
 `;
 
 export const StatusDisplay = styled.div`
-  margin-bottom: 10px; 
-  font-size: 1.1em; 
+  padding: 1rem;
+  border-radius: 8px;
   font-weight: bold;
-  color: ${props => props.isOpen ? '#16a34a' : '#b91c1c'};
+  text-align: center;
+  margin-bottom: 1rem;
+  background-color: ${({ $isOpen }) => ($isOpen ? '#c6f6d5' : '#fed7d7')}; // MUDANÇA AQUI
+  color: ${({ $isOpen }) => ($isOpen ? '#2f855a' : '#c53030')};             // MUDANÇA AQUI
 `;
 
 export const SettingsBlock = styled.div`

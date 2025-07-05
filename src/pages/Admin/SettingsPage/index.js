@@ -67,7 +67,7 @@ const SettingsPage = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   // Função para salvar todas as configurações de uma vez
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -75,7 +75,7 @@ const SettingsPage = () => {
     if (isNaN(feeValue) || feeValue < 0) {
       toast.error('Valor inválido para taxa de entrega.'); return;
     }
-    
+
     handleUpdateSettings({
       isStoreOpen,
       deliveryFee: feeValue,
@@ -97,10 +97,10 @@ const SettingsPage = () => {
     <PageWrapper>
       <h1>Configurações da Loja</h1>
       <Form onSubmit={handleFormSubmit}>
-        
+
         <SettingsBlock>
           <SectionTitle>Status e Horários</SectionTitle>
-          <StatusDisplay isOpen={isStoreOpen}>
+          <StatusDisplay $isOpen={isStoreOpen}>  // MUDANÇA AQUI
             Status Atual: {isStoreOpen ? 'ABERTA' : 'FECHADA'}
           </StatusDisplay>
           <Button type="button" onClick={() => setIsStoreOpen(!isStoreOpen)} style={{ marginBottom: '20px' }}>
@@ -115,18 +115,18 @@ const SettingsPage = () => {
 
         <SettingsBlock>
           <SectionTitle>Identidade Visual</SectionTitle>
-           <SettingsGrid>
-              <FormGroup>
-                <label htmlFor="logoUrl">URL da Logo:</label>
-                <input type="text" id="logoUrl" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://servidor.com/sua-logo.png" />
-                {logoUrl && <img src={logoUrl} alt="Pré-visualização do logo" />}
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="bannerUrl">URL do Banner da Página Inicial:</label>
-                <input type="text" id="bannerUrl" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} placeholder="https://servidor.com/seu-banner.jpg" />
-                {bannerUrl && <img src={bannerUrl} alt="Pré-visualização do banner" />}
-              </FormGroup>
-           </SettingsGrid>
+          <SettingsGrid>
+            <FormGroup>
+              <label htmlFor="logoUrl">URL da Logo:</label>
+              <input type="text" id="logoUrl" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://servidor.com/sua-logo.png" />
+              {logoUrl && <img src={logoUrl} alt="Pré-visualização do logo" />}
+            </FormGroup>
+            <FormGroup>
+              <label htmlFor="bannerUrl">URL do Banner da Página Inicial:</label>
+              <input type="text" id="bannerUrl" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} placeholder="https://servidor.com/seu-banner.jpg" />
+              {bannerUrl && <img src={bannerUrl} alt="Pré-visualização do banner" />}
+            </FormGroup>
+          </SettingsGrid>
         </SettingsBlock>
 
         <SettingsBlock>
@@ -146,7 +146,7 @@ const SettingsPage = () => {
             </FormGroup>
           </SettingsGrid>
         </SettingsBlock>
-        
+
         <SettingsBlock>
           <SectionTitle>Pagamento e Entrega</SectionTitle>
           <SettingsGrid>
