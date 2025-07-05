@@ -1,22 +1,21 @@
 // Arquivo: src/pages/MenuPage/index.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useStore } from '../../contexts/StoreContext';
 import { db } from '../../services/firebaseConfig';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { useSearchParams } from 'react-router-dom';
+import { FiSearch } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import ProductCard from '../../components/ProductCard';
 
-// O nome correto dos seus estilos
-import {
-  MenuPageWrapper as MenuContainer, // Usando um alias para manter a compatibilidade
-  CategorySectionTitle as CategoryTitle,
-  ProductListContainer as ProductGrid,
-  LoadingText,
-  NoProductsText as InfoText,
-  StoreClosedWarning,
-} from './styles';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
 
+import {
+  MenuPageWrapper, MenuHeader, MenuTitle, SearchContainer, SearchInput, 
+  CategoryCarouselWrapper, CategoryButton, ProductListContainer, LoadingText, NoProductsText
+} from './styles';
 
 const MenuPage = () => {
   const store = useStore();
@@ -24,73 +23,103 @@ const MenuPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // <<< MUDANÇA: REMOVEMOS toda a lógica de modal daqui >>>
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [selectedProduct, setSelectedProduct] = useState(null);
-  // const handleOpenModal = (product) => { ... };
+  // Estados para os filtros
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState('');
+  const activeCategory = searchParams.get('category') || 'Todos';
 
-  useEffect(() => {
-    const fetchMenuData = async () => {
-      if (!store || !store.id) return;
-      // ... (a lógica para buscar dados continua a mesma)
-      setLoading(true);
-      try {
-        const tenantId = store.id;
-        const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
-        const productsRef = collection(db, 'tenants', tenantId, 'products');
+  const fetchMenuData = useCallback(async () => {
+    if (!store?.id) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const tenantId = store.id;
+      const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
+      const productsRef = collection(db, 'tenants', tenantId, 'products');
 
-        const categoriesQuery = query(categoriesRef, orderBy('name'));
-        const productsQuery = query(productsRef, where('isAvailable', '==', true));
+      const categoriesQuery = query(categoriesRef, orderBy('name'));
+      const productsQuery = query(productsRef, where('isAvailable', '==', true));
 
-        const [categoriesSnapshot, productsSnapshot] = await Promise.all([
-          getDocs(categoriesQuery),
-          getDocs(productsQuery)
-        ]);
+      const [categoriesSnap, productsSnap] = await Promise.all([
+        getDocs(categoriesQuery),
+        getDocs(productsQuery)
+      ]);
 
-        setCategories(categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setProducts(productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
-      } catch (error) {
-        toast.error("Não foi possível carregar o cardápio.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMenuData();
+      setCategories(categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setProducts(productsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    } catch (error) {
+      toast.error("Erro ao carregar o cardápio.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   }, [store]);
 
+  useEffect(() => {
+    fetchMenuData();
+  }, [fetchMenuData]);
+
+  const handleCategoryClick = (categoryName) => {
+    setSearchParams(categoryName === 'Todos' ? {} : { category: categoryName });
+  };
+  
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesCategory = activeCategory === 'Todos' || product.category === activeCategory;
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, activeCategory, searchTerm]);
+
   if (loading) {
-    return <LoadingText>Montando o cardápio...</LoadingText>;
+    return <LoadingText>A carregar o cardápio...</LoadingText>;
   }
 
   return (
-    <MenuContainer>
-      <h1>Nosso Cardápio</h1>
-      {store && !store.isStoreOpen && (
-          <StoreClosedWarning>
-              A loja está fechada no momento. Você pode visualizar os produtos, mas não poderá fazer pedidos.
-          </StoreClosedWarning>
-      )}
+    <MenuPageWrapper>
+      <MenuHeader>
+        <MenuTitle>Nosso Cardápio</MenuTitle>
+      </MenuHeader>
 
-      {categories.map(category => {
-        const productsInCategory = products.filter(p => p.category === category.name);
-        if (productsInCategory.length > 0) {
-          return (
-            <section key={category.id}>
-              <CategoryTitle>{category.name}</CategoryTitle>
-              <ProductGrid>
-                {productsInCategory.map(product => (
-                  // <<< MUDANÇA: Chamamos o ProductCard sem a prop onProductClick >>>
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </ProductGrid>
-            </section>
-          );
-        }
-        return null;
-      })}
-    </MenuContainer>
+      <SearchContainer>
+        <FiSearch size={20} />
+        <SearchInput 
+          type="text" 
+          placeholder="Pesquisar no cardápio..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </SearchContainer>
+
+      <CategoryCarouselWrapper>
+        <Swiper slidesPerView="auto" spaceBetween={10}>
+          <SwiperSlide>
+            <CategoryButton $isActive={activeCategory === 'Todos'} onClick={() => handleCategoryClick('Todos')}>
+              Todos
+            </CategoryButton>
+          </SwiperSlide>
+          {categories.map(category => (
+            <SwiperSlide key={category.id}>
+              <CategoryButton $isActive={activeCategory === category.name} onClick={() => handleCategoryClick(category.name)}>
+                {category.name}
+              </CategoryButton>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </CategoryCarouselWrapper>
+      
+      {filteredProducts.length > 0 ? (
+        <ProductListContainer>
+          {filteredProducts.map(product => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </ProductListContainer>
+      ) : (
+        <NoProductsText>Nenhum produto encontrado com estes filtros.</NoProductsText>
+      )}
+    </MenuPageWrapper>
   );
 };
 

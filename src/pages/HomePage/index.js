@@ -2,140 +2,119 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../../services/firebaseConfig';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import toast from 'react-hot-toast';
 import { useStore } from '../../contexts/StoreContext';
-import styled from 'styled-components'; // <<< MUDANÇA 1: Importar o 'styled'
+import { db } from '../../services/firebaseConfig';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 
+import ProductCard from '../../components/ProductCard';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, A11y } from 'swiper/modules';
-import ProductCard from '../../components/ProductCard';
-import AcaiCustomizationModal from '../../components/AcaiCustomizationModal';
 
 import {
-  HomePageWrapper, HeroSection, HeroContent, LogoOverlay, StatusInfo, HeroMenuButton,
-  Section, SectionTitle, ContentGrid, LoadingText, StoreClosedWarning, CarouselWrapper
+  PageWrapper, HeroSection, StoreLogo, StoreName, StoreStatus, ContentSection,
+  SectionTitle, CategoryGrid, CategoryCard, ProductCarousel, LoadingText
 } from './styles';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const store = useStore();
+  const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loadingContent, setLoadingContent] = useState(true);
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleOpenModal = (product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-  
   useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      if (!store || !store.id) return;
-      setLoadingContent(true);
+    if (!store?.id) {
+      setLoading(false);
+      return;
+    }
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const productsRef = collection(db, 'tenants', store.id, 'products');
-        const q = query(productsRef, where("isFeatured", "==", true), where("isAvailable", "==", true));
-        
-        const querySnapshot = await getDocs(q);
-        const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setFeaturedProducts(products);
+        const tenantId = store.id;
+        // Buscar categorias e produtos em paralelo
+        const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
+        const productsRef = collection(db, 'tenants', tenantId, 'products');
 
+        const categoriesQuery = query(categoriesRef, orderBy('name'));
+        const featuredQuery = query(productsRef, where('isFeatured', '==', true), where('isAvailable', '==', true), limit(10));
+
+        const [categoriesSnap, featuredSnap] = await Promise.all([
+          getDocs(categoriesQuery),
+          getDocs(featuredQuery),
+        ]);
+
+        setCategories(categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setFeaturedProducts(featuredSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } catch (error) {
-        console.error("Erro ao buscar produtos em destaque:", error);
-        toast.error("Não foi possível carregar os destaques da loja.");
+        toast.error("Erro ao carregar os dados da loja.");
+        console.error(error);
       } finally {
-        setLoadingContent(false);
+        setLoading(false);
       }
     };
-    
-    fetchFeaturedProducts();
+    fetchData();
   }, [store]);
 
-  if (!store) {
-    return <LoadingText>Carregando loja...</LoadingText>;
-  }
-  
-  return (
-      <>
-        <HomePageWrapper>
-            <HeroSection $bgImage={store.bannerUrl}>
-              <HeroContent>
-                {store.logoUrl ? (
-                  <LogoOverlay>
-                    <img src={store.logoUrl} alt={store.storeName} />
-                  </LogoOverlay>
-                ) : (
-                  <h1 style={{ color: 'white', textShadow: '2px 2px 4px #000' }}>{store.storeName}</h1>
-                )}
-                <StatusInfo $isOpen={store.isStoreOpen}>
-                  {store.isStoreOpen ? '● Aberto agora' : '● Fechado no momento'}
-                </StatusInfo>
-                 <HeroMenuButton onClick={() => navigate(`/loja/${store.slug}/cardapio`)}>
-                  Ver Cardápio Completo
-                </HeroMenuButton>
-              </HeroContent>
-            </HeroSection>
-            
-            {loadingContent ? (
-              <LoadingText>Carregando destaques...</LoadingText>
-            ) : featuredProducts.length > 0 ? (
-              <Section>
-                <SectionTitle>🔥 Nossos Destaques</SectionTitle>
-                <CarouselWrapper>
-                   <Swiper
-                    modules={[Navigation, Pagination, A11y]}
-                    spaceBetween={30}
-                    slidesPerView={1}
-                    navigation
-                    pagination={{ clickable: true }}
-                    breakpoints={{
-                      640: { slidesPerView: 2 },
-                      1024: { slidesPerView: 4 },
-                    }}
-                  >
-                  {featuredProducts.map(product => (
-                    <SwiperSlide key={product.id}>
-                      <ProductCard 
-                        product={product} 
-                        onProductClick={() => handleOpenModal(product)}
-                      />
-                    </SwiperSlide>
-                  ))}
-                  </Swiper>
-                </CarouselWrapper>
-              </Section>
-            ) : (
-                <Section>
-                  <InfoText>Nenhum produto em destaque no momento.</InfoText>
-                </Section>
-            )}
+  const handleCategoryClick = (categoryName) => {
+    navigate(`cardapio?category=${encodeURIComponent(categoryName)}`);
+  };
 
-        </HomePageWrapper>
-        {selectedProduct && 
-            <AcaiCustomizationModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                productToCustomize={selectedProduct} 
-            />
-        }
-      </>
+  if (loading) {
+    return <LoadingText>A carregar a loja...</LoadingText>;
+  }
+
+  return (
+    <PageWrapper>
+      <HeroSection $bgImage={store?.bannerUrl}>
+        {store?.logoUrl && <StoreLogo src={store.logoUrl} alt={`Logo de ${store.storeName}`} />}
+        <StoreName>{store?.storeName || 'Nome da Loja'}</StoreName>
+        <StoreStatus $isOpen={store?.isStoreOpen}>
+          {store?.isStoreOpen ? 'Aberto Agora' : 'Fechado no momento'}
+        </StoreStatus>
+      </HeroSection>
+
+      {categories.length > 0 && (
+        <ContentSection>
+          <SectionTitle>Navegue por Categorias</SectionTitle>
+          <CategoryGrid>
+            {categories.map(category => (
+              <CategoryCard key={category.id} onClick={() => handleCategoryClick(category.name)}>
+                <p>{category.name}</p>
+              </CategoryCard>
+            ))}
+          </CategoryGrid>
+        </ContentSection>
+      )}
+
+      {featuredProducts.length > 0 && (
+        <ContentSection>
+          <SectionTitle>Nossos Destaques</SectionTitle>
+          <ProductCarousel>
+            <Swiper
+              modules={[Navigation]}
+              spaceBetween={20}
+              slidesPerView={2}
+              navigation
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 3 },
+                1024: { slidesPerView: 4 },
+              }}
+            >
+              {featuredProducts.map(product => (
+                <SwiperSlide key={product.id}>
+                  <ProductCard product={product} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </ProductCarousel>
+        </ContentSection>
+      )}
+    </PageWrapper>
   );
 };
-
-// <<< MUDANÇA 2: Definir o componente InfoText aqui
-const InfoText = styled.p`
-  text-align: center;
-  padding: 40px;
-  color: #666;
-  font-size: 1.1rem;
-`;
 
 export default HomePage;

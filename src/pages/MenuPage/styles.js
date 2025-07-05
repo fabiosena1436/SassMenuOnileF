@@ -15,29 +15,54 @@ export const MenuHeader = styled.div`
 
 export const MenuTitle = styled.h1`
   font-size: 2.5rem;
-  color: #333;
+  color: #1f2937;
 `;
 
-export const StoreClosedWarning = styled.div`
-  background-color: #fffbeB;
-  color: #b45309;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
+export const SearchContainer = styled.div`
   margin-bottom: 2rem;
-  border: 1px solid #fef3c7;
+  position: relative;
+  
+  svg {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+  }
 `;
 
-export const CategorySection = styled.section`
-  margin-bottom: 3rem;
+export const SearchInput = styled.input`
+  width: 100%;
+  padding: 1rem 1rem 1rem 40px;
+  border-radius: 9999px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 1px #4f46e5;
+  }
 `;
 
-export const CategorySectionTitle = styled.h2`
-  font-size: 1.8rem;
-  color: #c53030;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #f3f4f6;
-  margin-bottom: 1.5rem;
+export const CategoryCarouselWrapper = styled.div`
+  margin-bottom: 2.5rem;
+  .swiper-slide {
+    width: auto; // Permite que os botões tenham larguras diferentes
+  }
+`;
+
+export const CategoryButton = styled.button`
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  border: 2px solid ${({ $isActive }) => ($isActive ? '#4f46e5' : '#e5e7eb')};
+  background-color: ${({ $isActive }) => ($isActive ? '#eef2ff' : 'transparent')};
+  color: ${({ $isActive }) => ($isActive ? '#4f46e5' : '#374151')};
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease-in-out;
 `;
 
 export const ProductListContainer = styled.div`
@@ -48,16 +73,14 @@ export const ProductListContainer = styled.div`
 
 export const LoadingText = styled.p`
   text-align: center;
-  font-size: 1.5rem;
   padding: 4rem;
-  color: #718096;
+  font-size: 1.2rem;
+  color: #6b7280;
 `;
 
 export const NoProductsText = styled.p`
   text-align: center;
-  font-size: 1rem;
-  padding: 1.5rem;
-  color: #4a5568;
-  background-color: #f7fafc;
-  border-radius: 8px;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.1rem;
 `;

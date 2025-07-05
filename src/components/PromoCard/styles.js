@@ -1,68 +1,63 @@
+// Arquivo: src/components/ProductCard/styles.js
+
 import styled from 'styled-components';
-import Button from '../Button';
 
 export const CardWrapper = styled.div`
-  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
-  border: 2px solid #a855f7;
+  background-color: white;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-  width: 100%;
   height: 100%;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
 `;
 
-export const CardImage = styled.img`
+export const ProductImage = styled.img`
   width: 100%;
   height: 180px;
   object-fit: cover;
 `;
 
-export const CardContent = styled.div`
-  padding: 4px;
+export const ProductInfo = styled.div`
+  padding: 1rem;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  text-align: center;
-  flex-grow: 1;
+  justify-content: space-between;
 `;
 
-export const PromoTitle = styled.h3`
-  font-size: 1.3em;
+export const ProductName = styled.h4`
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+`;
+
+export const ProductPrice = styled.p`
+  margin: 0;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #5b21b6;
-  margin: 0 0 10px 0;
+  color: #4f46e5;
 `;
 
-export const PromoDescription = styled.p`
-  font-size: 0.95em;
-  color: #4a044e;
-  line-height: 1.5;
-  margin: 0 0 15px 0;
-  flex-grow: 1;
-  strong {
-    font-weight: 700;
-  }
+export const PricePrefix = styled.span`
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6b7280;
+  display: block;
 `;
 
-export const PriceInfo = styled.div`
-  margin-bottom: 20px;
-  font-size: 1.1em;
-  color: #333;
-  span {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #7e22ce;
-    display: block;
-  }
-`;
-
-export const ButtonStyled = styled(Button)`
-  width: 100%;
-  margin-top: auto;
-  background-color: #7e22ce;
-
-  &:hover {
-    background-color: #5b21b6;
-  }
+// A prop OldPrice não está a ser usada no novo ProductCard, mas podemos mantê-la para o futuro
+export const OldPrice = styled.span`
+  text-decoration: line-through;
+  color: #9ca3af;
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
 `;
