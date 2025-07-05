@@ -46,13 +46,22 @@ const PromotionsPage = () => {
       const promotionsRef = collection(db, 'tenants', tenant.id, 'promotions');
       const productsRef = collection(db, 'tenants', tenant.id, 'products');
       
+      // <<< MUDANÇA AQUI: Removemos a ordenação da consulta >>>
+      const productsQuery = query(productsRef, where('isAvailable', '==', true));
+
       const [promoSnap, productsSnap] = await Promise.all([
         getDocs(query(promotionsRef, orderBy('createdAt', 'desc'))),
-        getDocs(query(productsRef, where('isAvailable', '==', true), orderBy('name')))
+        getDocs(productsQuery)
       ]);
       
+      const productsData = productsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // <<< MUDANÇA AQUI: Ordenamos os produtos no código, depois de os recebermos >>>
+      productsData.sort((a, b) => a.name.localeCompare(b.name));
+      
       setPromotions(promoSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setProducts(productsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setProducts(productsData);
+
     } catch (error) {
       toast.error("Erro ao carregar dados.");
     } finally {
