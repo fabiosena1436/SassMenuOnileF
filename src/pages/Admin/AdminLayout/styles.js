@@ -11,7 +11,7 @@ export const AdminWrapper = styled.div`
 
 export const Sidebar = styled.aside`
   width: 260px;
-  background-color: #111827; /* Um preto/azul escuro mais moderno */
+  background-color: #111827;
   color: #9ca3af;
   display: flex;
   flex-direction: column;
@@ -24,7 +24,6 @@ export const Sidebar = styled.aside`
   transition: transform 0.3s ease-in-out;
 
   @media (max-width: 768px) {
-    /* <<< MUDANÇA AQUI: de 'isOpen' para '$isOpen' >>> */
     transform: ${({ $isOpen }) => ($isOpen ? 'translateX(0)' : 'translateX(-100%)')};
   }
 `;
@@ -76,30 +75,10 @@ export const NavSeparator = styled.hr`
 export const ContentArea = styled.main`
   flex-grow: 1;
   margin-left: 260px;
+  transition: margin-left 0.3s ease-in-out;
   
-  .admin-header {
-    background: white;
-    padding: 1rem 2rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-  }
-
-  .header-title {
-    font-size: 1.5rem;
-    margin: 0;
-    color: #111827;
-  }
-
-  .admin-main-content {
-    padding: 2rem;
-  }
-
   @media (max-width: 768px) {
     margin-left: 0;
-    .header-title {
-      margin-left: 50px;
-    }
   }
 `;
 
@@ -136,4 +115,44 @@ export const Overlay = styled.div`
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
   }
+`;
+
+export const NotificationBellWrapper = styled.button`
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 900;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 769px) {
+    top: 20px;
+    right: 2rem;
+  }
+`;
+
+export const NotificationBadge = styled.span`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
 `;
