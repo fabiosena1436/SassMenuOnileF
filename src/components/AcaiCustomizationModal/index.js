@@ -1,157 +1,158 @@
-// Ficheiro completo: src/components/AcaiCustomizationModal/index.js
+// Arquivo: src/components/AcaiCustomizationModal/index.js
 
 import React, { useState, useEffect } from 'react';
-import { db } from '../../services/firebaseConfig';
-import { collection, getDocs, query, orderBy, where } from 'firebase/firestore'; // <-- O 'where' que faltava foi importado
 import { useCart } from '../../contexts/CartContext';
 import { useStore } from '../../contexts/StoreContext';
-import toast from 'react-hot-toast';
+import { db } from '../../services/firebaseConfig';
+import { collection, getDocs } from 'firebase/firestore';
 import Button from '../Button';
 import {
-    ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
-    ModalBody, ProductTitle, SizeSelection, SizeOption,
-    ToppingsSection, ToppingOption, ModalFooter, PriceInfo
+    ModalOverlay, ModalContent, ModalHeader, ModalBody, SectionTitle, OptionsGrid,
+    OptionButton, NotesTextarea, ModalFooter, PriceDisplay, QuantitySelector
 } from './styles';
-import { FaTimes } from 'react-icons/fa';
 
 const AcaiCustomizationModal = ({ isOpen, onClose, productToCustomize }) => {
     const { addToCart } = useCart();
-    const storeInfo = useStore();
-    
-    const [sizes, setSizes] = useState([]);
-    const [toppingCategories, setToppingCategories] = useState([]);
+    const store = useStore();
+
+    const [allToppings, setAllToppings] = useState([]);
     const [selectedSize, setSelectedSize] = useState(null);
     const [selectedToppings, setSelectedToppings] = useState([]);
+    const [quantity, setQuantity] = useState(1);
+    const [notes, setNotes] = useState('');
     const [totalPrice, setTotalPrice] = useState(0);
 
+    // Busca os adicionais (toppings) da loja quando a modal abre
     useEffect(() => {
-        if (isOpen && storeInfo && storeInfo.tenantId) {
-            const fetchData = async () => {
-                try {
-                    const tenantId = storeInfo.tenantId;
-
-                    const sizesRef = collection(db, 'tenants', tenantId, 'sizes');
-                    const sizesSnapshot = await getDocs(query(sizesRef, orderBy('price')));
-                    setSizes(sizesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
-                    const toppingCategoriesRef = collection(db, 'tenants', tenantId, 'toppingCategories');
-                    const toppingCategoriesSnapshot = await getDocs(query(toppingCategoriesRef, orderBy('name')));
-                    
-                    const categoriesData = await Promise.all(
-                        toppingCategoriesSnapshot.docs.map(async (catDoc) => {
-                            const category = { id: catDoc.id, ...catDoc.data() };
-                            const toppingsRef = collection(db, 'tenants', tenantId, 'toppings');
-                            const toppingsQuery = query(toppingsRef, where('category', '==', category.name));
-                            const toppingsSnapshot = await getDocs(toppingsQuery);
-                            const toppingsData = toppingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            return { ...category, toppings: toppingsData };
-                        })
-                    );
-                    setToppingCategories(categoriesData);
-
-                } catch (error) {
-                    console.error("Erro ao carregar opções de customização:", error);
-                    toast.error("Não foi possível carregar as opções.");
-                }
+        if (isOpen && store?.id) {
+            const fetchToppings = async () => {
+                const toppingsRef = collection(db, 'tenants', store.id, 'toppings');
+                const toppingsSnap = await getDocs(toppingsRef);
+                setAllToppings(toppingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             };
-            fetchData();
+            fetchToppings();
         }
-    }, [isOpen, storeInfo]);
+    }, [isOpen, store]);
 
+    // Reseta o estado quando um novo produto é selecionado
     useEffect(() => {
         if (productToCustomize) {
-            setSelectedSize(null);
+            // Se o produto tem tamanhos, seleciona o primeiro por padrão
+            const defaultSize = productToCustomize.availableSizes?.[0] || null;
+            setSelectedSize(defaultSize);
             setSelectedToppings([]);
+            setQuantity(1);
+            setNotes('');
         }
     }, [productToCustomize]);
 
+    // Calcula o preço total sempre que uma opção muda
     useEffect(() => {
-        let newTotal = 0;
-        if (selectedSize) {
-            newTotal += selectedSize.price;
-        }
-        selectedToppings.forEach(topping => {
-            if (topping.price) {
-                newTotal += topping.price;
-            }
-        });
-        setTotalPrice(newTotal);
-    }, [selectedSize, selectedToppings]);
+        if (!productToCustomize) return;
 
-    const handleToggleTopping = (topping) => {
-        setSelectedToppings(prev => {
-            const isSelected = prev.find(t => t.id === topping.id);
-            if (isSelected) {
-                return prev.filter(t => t.id !== topping.id);
-            } else {
-                return [...prev, topping];
-            }
-        });
+        const sizePrice = selectedSize ? selectedSize.price : (productToCustomize.price || 0);
+        const toppingsPrice = selectedToppings.reduce((acc, toppingId) => {
+            const topping = allToppings.find(t => t.id === toppingId);
+            return acc + (topping ? topping.price : 0);
+        }, 0);
+
+        const finalPrice = (sizePrice + toppingsPrice) * quantity;
+        setTotalPrice(finalPrice);
+    }, [selectedSize, selectedToppings, quantity, productToCustomize, allToppings]);
+
+    const handleToppingClick = (toppingId) => {
+        setSelectedToppings(prev =>
+            prev.includes(toppingId)
+                ? prev.filter(id => id !== toppingId)
+                : [...prev, toppingId]
+        );
     };
 
     const handleAddToCart = () => {
-        if (!selectedSize) {
-            toast.error('Por favor, selecione um tamanho.');
-            return;
-        }
-        const cartItem = {
-            ...productToCustomize,
+        if (!productToCustomize) return;
+        
+        // Cria um ID único para este item no carrinho, baseado nas suas opções.
+        // Isto permite ter o mesmo açaí com diferentes adicionais como itens separados.
+        const toppingsString = selectedToppings.sort().join('-');
+        const cartItemId = `${productToCustomize.id}-${selectedSize?.name || 'unico'}-${toppingsString}`;
+
+        const itemToAdd = {
+            cartItemId: cartItemId,
             id: productToCustomize.id,
-            id_cart: `${productToCustomize.id}-${selectedSize.name}-${Date.now()}`,
-            name: `${productToCustomize.name} (${selectedSize.name})`,
-            price: totalPrice,
-            quantity: 1,
-            size: selectedSize.name,
-            toppings: selectedToppings,
+            name: productToCustomize.name,
+            imageUrl: productToCustomize.imageUrl,
+            quantity: quantity,
+            totalPrice: totalPrice / quantity, // Preço unitário
+            size: selectedSize,
+            toppings: selectedToppings.map(id => allToppings.find(t => t.id === id)),
+            notes: notes
         };
-        addToCart(cartItem);
-        onClose();
+
+        addToCart(itemToAdd);
+        onClose(); // Fecha a modal
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !productToCustomize) return null;
 
     return (
         <ModalOverlay onClick={onClose}>
-            <ModalContent onClick={e => e.stopPropagation()}>
+            <ModalContent onClick={(e) => e.stopPropagation()}>
                 <ModalHeader>
-                    <ProductTitle>Monte seu {productToCustomize?.name}</ProductTitle>
-                    <ModalCloseButton onClick={onClose}><FaTimes /></ModalCloseButton>
+                    <h2>{productToCustomize.name}</h2>
+                    <button onClick={onClose}>&times;</button>
                 </ModalHeader>
                 <ModalBody>
-                    <SizeSelection>
-                        <h4>Escolha o tamanho:</h4>
-                        {sizes.map(size => (
-                            <SizeOption
-                                key={size.id}
-                                selected={selectedSize?.id === size.id}
-                                onClick={() => setSelectedSize(size)}
-                            >
-                                <span>{size.name}</span>
-                                <span>+ R$ {size.price.toFixed(2)}</span>
-                            </SizeOption>
-                        ))}
-                    </SizeSelection>
-                    {toppingCategories.map(category => (
-                        <ToppingsSection key={category.id}>
-                            <h4>{category.name}</h4>
-                            {category.toppings.map(topping => (
-                                <ToppingOption key={topping.id}>
-                                    <input
-                                        type="checkbox"
-                                        id={topping.id}
-                                        checked={!!selectedToppings.find(t => t.id === topping.id)}
-                                        onChange={() => handleToggleTopping(topping)}
-                                    />
-                                    <label htmlFor={topping.id}>{topping.name}</label>
-                                    {topping.price > 0 && <span>+ R$ {topping.price.toFixed(2)}</span>}
-                                </ToppingOption>
-                            ))}
-                        </ToppingsSection>
-                    ))}
+                    {productToCustomize.availableSizes && productToCustomize.availableSizes.length > 0 && (
+                        <section>
+                            <SectionTitle>Escolha o Tamanho</SectionTitle>
+                            <OptionsGrid>
+                                {productToCustomize.availableSizes.map(size => (
+                                    <OptionButton
+                                        key={size.name}
+                                        $isSelected={selectedSize?.name === size.name}
+                                        onClick={() => setSelectedSize(size)}
+                                    >
+                                        {size.name} (+ R$ {size.price.toFixed(2)})
+                                    </OptionButton>
+                                ))}
+                            </OptionsGrid>
+                        </section>
+                    )}
+
+                    {allToppings.length > 0 && (
+                        <section>
+                            <SectionTitle>Adicionais</SectionTitle>
+                            <OptionsGrid>
+                                {allToppings.map(topping => (
+                                    <OptionButton
+                                        key={topping.id}
+                                        $isSelected={selectedToppings.includes(topping.id)}
+                                        onClick={() => handleToppingClick(topping.id)}
+                                    >
+                                        {topping.name} (+ R$ {topping.price.toFixed(2)})
+                                    </OptionButton>
+                                ))}
+                            </OptionsGrid>
+                        </section>
+                    )}
+                    <section>
+                        <SectionTitle>Observações</SectionTitle>
+                        <NotesTextarea
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            placeholder="Ex: Sem cebola, ponto da carne, etc."
+                        />
+                    </section>
                 </ModalBody>
                 <ModalFooter>
-                    <PriceInfo>Total: R$ {totalPrice.toFixed(2)}</PriceInfo>
-                    <Button onClick={handleAddToCart}>Adicionar ao Carrinho</Button>
+                    <QuantitySelector>
+                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
+                        <span>{quantity}</span>
+                        <button onClick={() => setQuantity(q => q + 1)}>+</button>
+                    </QuantitySelector>
+                    <Button onClick={handleAddToCart}>
+                        Adicionar (R$ {totalPrice.toFixed(2)})
+                    </Button>
                 </ModalFooter>
             </ModalContent>
         </ModalOverlay>

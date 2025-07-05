@@ -1,4 +1,4 @@
-// Ficheiro completo: src/components/AcaiCustomizationModal/styles.js
+// Arquivo: src/components/AcaiCustomizationModal/styles.js
 
 import styled from 'styled-components';
 
@@ -12,12 +12,12 @@ export const ModalOverlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 `;
 
 export const ModalContent = styled.div`
-  background: #fff;
-  border-radius: 12px;
+  background: white;
+  border-radius: 16px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
@@ -28,95 +28,113 @@ export const ModalContent = styled.div`
 
 export const ModalHeader = styled.div`
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-`;
 
-export const ProductTitle = styled.h3`
-  margin: 0;
-  font-size: 1.5rem;
-  color: #333;
-`;
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
 
-export const ModalCloseButton = styled.button`
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #888;
-  &:hover {
-    color: #000;
+  button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #9ca3af;
+    line-height: 1;
   }
 `;
 
 export const ModalBody = styled.div`
   padding: 1.5rem;
   overflow-y: auto;
-`;
-
-export const SizeSelection = styled.div`
-  margin-bottom: 1.5rem;
-  h4 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-  }
-`;
-
-export const SizeOption = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 2px solid ${props => (props.selected ? '#7c3aed' : '#eee')};
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+export const SectionTitle = styled.h3`
+  font-size: 1.2rem;
+  margin: 0 0 1rem 0;
+  color: #4b5563;
+`;
+
+export const OptionsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+`;
+
+export const OptionButton = styled.button`
+  padding: 0.75rem 1rem;
   border-radius: 8px;
-  margin-bottom: 0.5rem;
+  border: 2px solid ${({ $isSelected }) => ($isSelected ? '#4f46e5' : '#e5e7eb')};
+  background-color: ${({ $isSelected }) => ($isSelected ? '#eef2ff' : 'transparent')};
+  color: ${({ $isSelected }) => ($isSelected ? '#4f46e5' : '#374151')};
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  font-weight: ${props => (props.selected ? 'bold' : 'normal')};
+  text-align: center;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
-    border-color: #7c3aed;
+    border-color: #4f46e5;
   }
 `;
 
-export const ToppingsSection = styled.div`
-  margin-bottom: 1.5rem;
-  h4 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 0.5rem;
-  }
-`;
+export const NotesTextarea = styled.textarea`
+  width: 100%;
+  min-height: 80px;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
 
-export const ToppingOption = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-
-  label {
-    flex-grow: 1;
-    margin-left: 0.5rem;
-  }
-
-  input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+  &:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 1px #4f46e5;
   }
 `;
 
 export const ModalFooter = styled.div`
   padding: 1rem 1.5rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f9f9f9;
+  gap: 1rem;
+  background-color: #f9fafb;
 `;
 
-export const PriceInfo = styled.div`
-  font-size: 1.2rem;
+export const QuantitySelector = styled.div`
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  span {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0 0.5rem;
+  }
+`;
+
+// PriceDisplay não foi usado no index.js que te enviei, mas é bom ter.
+export const PriceDisplay = styled.span`
+  font-size: 1.5rem;
   font-weight: bold;
+  color: #111827;
 `;

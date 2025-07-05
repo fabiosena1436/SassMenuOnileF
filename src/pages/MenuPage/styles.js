@@ -2,35 +2,48 @@
 
 import styled from 'styled-components';
 
-export const MenuContainer = styled.div`
+export const MenuPageWrapper = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
-  
-  h1 {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    color: #333;
-  }
+`;
+
+export const MenuHeader = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+`;
+
+export const MenuTitle = styled.h1`
+  font-size: 2.5rem;
+  color: #333;
+`;
+
+export const StoreClosedWarning = styled.div`
+  background-color: #fffbeB;
+  color: #b45309;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 2rem;
+  border: 1px solid #fef3c7;
 `;
 
 export const CategorySection = styled.section`
   margin-bottom: 3rem;
 `;
 
-export const CategoryTitle = styled.h2`
+export const CategorySectionTitle = styled.h2`
   font-size: 1.8rem;
-  color: #c53030; /* Vermelho escuro para destaque */
+  color: #c53030;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #f7fafc;
+  border-bottom: 2px solid #f3f4f6;
   margin-bottom: 1.5rem;
 `;
 
-export const ProductGrid = styled.div`
+export const ProductListContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
 `;
 
 export const LoadingText = styled.p`
@@ -40,7 +53,7 @@ export const LoadingText = styled.p`
   color: #718096;
 `;
 
-export const InfoText = styled.p`
+export const NoProductsText = styled.p`
   text-align: center;
   font-size: 1rem;
   padding: 1.5rem;
