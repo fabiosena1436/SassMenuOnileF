@@ -1,87 +1,125 @@
-// Arquivo: src/pages/MenuPage/index.js (VERSÃO SaaS)
+// Arquivo: src/pages/MenuPage/index.js
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { useStore } from '../../contexts/StoreContext';
 import { db } from '../../services/firebaseConfig';
-import { useStore } from '../../contexts/StoreContext'; // 1. Importamos o hook da loja
-import ProductCard from '../../components/ProductCard';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 
-// Usando os nomes corretos dos seus componentes de estilo
+import ProductCard from '../../components/ProductCard';
+import AcaiCustomizationModal from '../../components/AcaiCustomizationModal';
 import {
-  MenuPageWrapper,
-  CategorySectionTitle,
-  ProductListContainer,
+  MenuContainer,
+  CategorySection,
+  CategoryTitle,
+  ProductGrid,
   LoadingText,
-  MenuHeader,
-  MenuTitle
+  InfoText
 } from './styles';
 
 const MenuPage = () => {
-  const [menuData, setMenuData] = useState([]);
+  const store = useStore();
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const storeInfo = useStore(); // 2. Obtemos as informações da loja (incluindo o tenantId)
+
+  // Estados do Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleOpenModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchMenuData = async () => {
-      // 3. Esperamos até que o storeInfo (e o tenantId) esteja disponível
-      if (!storeInfo || !storeInfo.tenantId) {
-        return;
-      }
+      if (!store || !store.id) return;
 
+      setLoading(true);
       try {
-        setLoading(true);
-        const tenantId = storeInfo.tenantId;
+        const tenantId = store.id;
 
-        // 4. Buscamos as categorias e produtos da loja correta
+        // Buscar categorias e produtos em paralelo para mais eficiência
         const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
         const productsRef = collection(db, 'tenants', tenantId, 'products');
 
-        const categoriesSnapshot = await getDocs(query(categoriesRef, orderBy('name')));
-        const productsSnapshot = await getDocs(productsRef);
+        const categoriesQuery = query(categoriesRef, orderBy('name'));
+        const productsQuery = query(productsRef, where('isAvailable', '==', true));
 
-        const productsData = productsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        
-        // Agrupamos os produtos por categoria
-        const groupedMenu = categoriesSnapshot.docs.map(categoryDoc => {
-          const category = { ...categoryDoc.data(), id: categoryDoc.id };
-          return {
-            ...category,
-            products: productsData.filter(p => p.category === category.name && p.isAvailable),
-          };
-        }).filter(category => category.products.length > 0);
+        const [categoriesSnapshot, productsSnapshot] = await Promise.all([
+          getDocs(categoriesQuery),
+          getDocs(productsQuery)
+        ]);
 
-        setMenuData(groupedMenu);
+        const categoriesData = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        setCategories(categoriesData);
+        setProducts(productsData);
+
       } catch (error) {
-        console.error("Erro ao buscar dados do cardápio:", error);
+        console.error("Erro ao carregar o cardápio:", error);
+        toast.error("Não foi possível carregar o cardápio.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchMenuData();
-  }, [storeInfo]); // 5. O useEffect reage à mudança do storeInfo
+  }, [store]);
 
   if (loading) {
-    return <MenuPageWrapper><LoadingText>Carregando cardápio...</LoadingText></MenuPageWrapper>;
+    return <LoadingText>Montando o cardápio...</LoadingText>;
   }
 
   return (
-    <MenuPageWrapper>
-      <MenuHeader>
-        <MenuTitle>{storeInfo?.name || 'Nosso Cardápio'}</MenuTitle>
-      </MenuHeader>
+    <>
+      <MenuContainer>
+        <h1>Nosso Cardápio</h1>
+        {store && !store.isStoreOpen && (
+            <InfoText style={{backgroundColor: '#fed7d7', color: '#c53030', borderRadius: '8px'}}>
+                A loja está fechada no momento. Você pode visualizar os produtos, mas não poderá fazer pedidos.
+            </InfoText>
+        )}
 
-      {menuData.map((category) => (
-        <section key={category.id} style={{ width: '100%', padding: '0 20px', boxSizing: 'border-box' }}>
-          <CategorySectionTitle>{category.name}</CategorySectionTitle>
-          <ProductListContainer>
-            {category.products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </ProductListContainer>
-        </section>
-      ))}
-    </MenuPageWrapper>
+        {categories.length > 0 ? (
+          categories.map(category => {
+            // Filtra os produtos que pertencem a esta categoria
+            const productsInCategory = products.filter(p => p.category === category.name);
+
+            // Só renderiza a seção se houver produtos nela
+            if (productsInCategory.length > 0) {
+              return (
+                <CategorySection key={category.id}>
+                  <CategoryTitle>{category.name}</CategoryTitle>
+                  <ProductGrid>
+                    {productsInCategory.map(product => (
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        onProductClick={() => handleOpenModal(product)}
+                      />
+                    ))}
+                  </ProductGrid>
+                </CategorySection>
+              );
+            }
+            return null; // Não renderiza a categoria se estiver vazia
+          })
+        ) : (
+          <InfoText>Nenhum produto encontrado no cardápio desta loja.</InfoText>
+        )}
+      </MenuContainer>
+      
+      {selectedProduct && 
+            <AcaiCustomizationModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                productToCustomize={selectedProduct} 
+            />
+      }
+    </>
   );
 };
 

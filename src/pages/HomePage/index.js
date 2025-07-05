@@ -1,98 +1,141 @@
 // Arquivo: src/pages/HomePage/index.js
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../../services/firebaseConfig';
-import { collection, getDocs, query, where, documentId } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import { useStore } from '../../contexts/StoreContext'; // Alterado de useStoreSettings para useStore
+import { useStore } from '../../contexts/StoreContext';
+import styled from 'styled-components'; // <<< MUDANÇA 1: Importar o 'styled'
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-// ... (o resto das suas importações permanece o mesmo)
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, A11y } from 'swiper/modules';
-import Button from '../../components/Button';
 import ProductCard from '../../components/ProductCard';
 import AcaiCustomizationModal from '../../components/AcaiCustomizationModal';
-import PromoCard from '../../components/PromoCard';
+
 import {
   HomePageWrapper, HeroSection, HeroContent, LogoOverlay, StatusInfo, HeroMenuButton,
   Section, SectionTitle, ContentGrid, LoadingText, StoreClosedWarning, CarouselWrapper
 } from './styles';
 
-
 const HomePage = () => {
   const navigate = useNavigate();
-  const store = useStore(); // <<< MUDANÇA PRINCIPAL AQUI
-  const [promotions, setPromotions] = useState([]);
+  const store = useStore();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loadingContent, setLoadingContent] = useState(true);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  
-  // O resto da sua lógica de HomePage...
-  const handleOpenModal = (product, promo = null) => {
-    setSelectedProduct({ ...product, appliedPromo: promo });
+
+  const handleOpenModal = (product) => {
+    setSelectedProduct(product);
     setIsModalOpen(true);
   };
   
   useEffect(() => {
-    const fetchData = async () => {
-      if (!store || !store.id) return; // Espera a loja carregar
-
+    const fetchFeaturedProducts = async () => {
+      if (!store || !store.id) return;
       setLoadingContent(true);
       try {
-        const tenantId = store.id;
+        const productsRef = collection(db, 'tenants', store.id, 'products');
+        const q = query(productsRef, where("isFeatured", "==", true), where("isAvailable", "==", true));
         
-        // Lógica para buscar promoções e produtos em destaque...
-        // (a sua lógica existente deve funcionar, apenas certifique-se
-        // de que as queries usam o tenantId se necessário)
+        const querySnapshot = await getDocs(q);
+        const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setFeaturedProducts(products);
 
       } catch (error) {
-        console.error("ERRO AO BUSCAR DADOS DA HOME:", error);
-        toast.error("Não foi possível carregar as novidades.");
+        console.error("Erro ao buscar produtos em destaque:", error);
+        toast.error("Não foi possível carregar os destaques da loja.");
       } finally {
         setLoadingContent(false);
       }
     };
-    fetchData();
-  }, [store]); // Depende do 'store' para re-executar
+    
+    fetchFeaturedProducts();
+  }, [store]);
 
   if (!store) {
     return <LoadingText>Carregando loja...</LoadingText>;
   }
-
-  // A partir daqui, em vez de 'settings.logoUrl', use 'store.logoUrl'
-  // em vez de 'settings.isStoreOpen', use 'store.isStoreOpen'
-  // e assim por diante.
-
+  
   return (
       <>
         <HomePageWrapper>
-            <HeroSection bgImage={store.bannerUrl}>
+            <HeroSection $bgImage={store.bannerUrl}>
               <HeroContent>
                 {store.logoUrl ? (
                   <LogoOverlay>
                     <img src={store.logoUrl} alt={store.storeName} />
                   </LogoOverlay>
                 ) : (
-                  <h1 style={{ color: 'white' }}>{store.storeName}</h1>
+                  <h1 style={{ color: 'white', textShadow: '2px 2px 4px #000' }}>{store.storeName}</h1>
                 )}
-                <StatusInfo isOpen={store.isStoreOpen}>
-                  {store.isStoreOpen ? '● Loja Aberta' : '● Loja Fechada'}
+                <StatusInfo $isOpen={store.isStoreOpen}>
+                  {store.isStoreOpen ? '● Aberto agora' : '● Fechado no momento'}
                 </StatusInfo>
                  <HeroMenuButton onClick={() => navigate(`/loja/${store.slug}/cardapio`)}>
-                  Ver Cardápio
+                  Ver Cardápio Completo
                 </HeroMenuButton>
               </HeroContent>
             </HeroSection>
-            {/* O resto da sua página... */}
+            
+            {loadingContent ? (
+              <LoadingText>Carregando destaques...</LoadingText>
+            ) : featuredProducts.length > 0 ? (
+              <Section>
+                <SectionTitle>🔥 Nossos Destaques</SectionTitle>
+                <CarouselWrapper>
+                   <Swiper
+                    modules={[Navigation, Pagination, A11y]}
+                    spaceBetween={30}
+                    slidesPerView={1}
+                    navigation
+                    pagination={{ clickable: true }}
+                    breakpoints={{
+                      640: { slidesPerView: 2 },
+                      1024: { slidesPerView: 4 },
+                    }}
+                  >
+                  {featuredProducts.map(product => (
+                    <SwiperSlide key={product.id}>
+                      <ProductCard 
+                        product={product} 
+                        onProductClick={() => handleOpenModal(product)}
+                      />
+                    </SwiperSlide>
+                  ))}
+                  </Swiper>
+                </CarouselWrapper>
+              </Section>
+            ) : (
+                <Section>
+                  <InfoText>Nenhum produto em destaque no momento.</InfoText>
+                </Section>
+            )}
+
         </HomePageWrapper>
-        <AcaiCustomizationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} productToCustomize={selectedProduct} />
+        {selectedProduct && 
+            <AcaiCustomizationModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                productToCustomize={selectedProduct} 
+            />
+        }
       </>
   );
 };
+
+// <<< MUDANÇA 2: Definir o componente InfoText aqui
+const InfoText = styled.p`
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 1.1rem;
+`;
 
 export default HomePage;

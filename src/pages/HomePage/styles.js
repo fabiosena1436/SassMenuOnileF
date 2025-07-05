@@ -49,6 +49,7 @@ export const LogoOverlay = styled.div`
     object-fit: contain;
   }
   
+  
   @media (max-width: 768px) {
     padding: 15px;
     img {
