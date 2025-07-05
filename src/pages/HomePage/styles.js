@@ -1,104 +1,88 @@
 // Arquivo: src/pages/HomePage/styles.js
 
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
-export const PageWrapper = styled.div`
-  padding-bottom: 2rem;
-  background-color: #f9fafb;
+export const HomePageWrapper = styled.div`
+  background-color: #f8f9fa;
 `;
 
 export const HeroSection = styled.section`
   width: 100%;
-  height: 45vh;
-  min-height: 350px;
-  background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${({ $bgImage }) => $bgImage || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809'});
+  height: 50vh;
+  min-height: 450px;
+  background-image: url(${({ $bgImage }) => $bgImage || 'https://via.placeholder.com/1200x500'});
   background-size: cover;
   background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+// O HeroOverlay foi removido.
+
+export const HeroContent = styled.div`
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-  padding: 1rem;
+  gap: 1rem; // Espaçamento entre os itens
+  background-color: rgba(0, 0, 0, 0.25); // Um fundo semi-transparente para legibilidade
+  padding: 2rem;
+  border-radius: 1.5rem;
 `;
 
 export const StoreLogo = styled.img`
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
-  border: 3px solid white;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   object-fit: cover;
-`;
-
-export const StoreName = styled.h1`
-  font-size: 2.5rem;
-  margin: 0;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  border: 4px solid white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 `;
 
 export const StoreStatus = styled.div`
-  margin-top: 0.75rem;
-  padding: 0.3rem 1rem;
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1.25rem;
   border-radius: 9999px;
-  font-weight: 600;
-  background-color: ${({ $isOpen }) => ($isOpen ? '#16a34a' : '#ef4444')};
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  font-weight: bold;
 `;
 
-export const ContentSection = styled.section`
+export const ViewMenuButton = styled(Link)`
+  background-color: #4f46e5;
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  &:hover {
+    background-color: #4338ca;
+  }
+`;
+
+export const FeaturedSection = styled.section`
   max-width: 1200px;
-  margin: 2.5rem auto;
-  padding: 0 1rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
 `;
 
 export const SectionTitle = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 `;
 
-export const CategoryGrid = styled.div`
+export const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1.5rem;
-`;
-
-export const CategoryCard = styled.div`
-  background-color: white;
-  padding: 1.5rem 1rem;
-  border-radius: 12px;
-  text-align: center;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    color: #4f46e5;
-  }
-
-  p {
-    margin: 0;
-    font-weight: 600;
-    color: #374151;
-  }
-`;
-
-export const ProductCarousel = styled.div`
-  .swiper-button-next, .swiper-button-prev {
-    color: #4f46e5;
-  }
-`;
-
-export const LoadingText = styled.p`
-  text-align: center;
-  padding: 4rem;
-  font-size: 1.2rem;
-  color: #6b7280;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 2rem;
 `;

@@ -1,119 +1,77 @@
 // Arquivo: src/pages/HomePage/index.js
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useStore } from '../../contexts/StoreContext';
 import { db } from '../../services/firebaseConfig';
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 import ProductCard from '../../components/ProductCard';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
+import { FaStar } from 'react-icons/fa';
 
 import {
-  PageWrapper, HeroSection, StoreLogo, StoreName, StoreStatus, ContentSection,
-  SectionTitle, CategoryGrid, CategoryCard, ProductCarousel, LoadingText
+  HomePageWrapper, HeroSection, HeroContent, StoreLogo, StoreStatus, ViewMenuButton,
+  FeaturedSection, SectionTitle, ProductGrid
 } from './styles';
+import { LoadingText } from '../MenuPage/styles'; // Reutilizando
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const store = useStore();
-  const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchFeaturedProducts = useCallback(async () => {
     if (!store?.id) {
       setLoading(false);
       return;
     }
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const tenantId = store.id;
-        // Buscar categorias e produtos em paralelo
-        const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
-        const productsRef = collection(db, 'tenants', tenantId, 'products');
-
-        const categoriesQuery = query(categoriesRef, orderBy('name'));
-        const featuredQuery = query(productsRef, where('isFeatured', '==', true), where('isAvailable', '==', true), limit(10));
-
-        const [categoriesSnap, featuredSnap] = await Promise.all([
-          getDocs(categoriesQuery),
-          getDocs(featuredQuery),
-        ]);
-
-        setCategories(categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setFeaturedProducts(featuredSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      } catch (error) {
-        toast.error("Erro ao carregar os dados da loja.");
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    setLoading(true);
+    try {
+      const productsRef = collection(db, 'tenants', store.id, 'products');
+      const q = query(productsRef, where("isFeatured", "==", true), where("isAvailable", "==", true));
+      const querySnapshot = await getDocs(q);
+      setFeaturedProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    } catch (error) {
+      toast.error("Não foi possível carregar os destaques.");
+    } finally {
+      setLoading(false);
+    }
   }, [store]);
 
-  const handleCategoryClick = (categoryName) => {
-    navigate(`cardapio?category=${encodeURIComponent(categoryName)}`);
-  };
+  useEffect(() => {
+    fetchFeaturedProducts();
+  }, [fetchFeaturedProducts]);
 
-  if (loading) {
+  if (loading || !store) {
     return <LoadingText>A carregar a loja...</LoadingText>;
   }
 
   return (
-    <PageWrapper>
-      <HeroSection $bgImage={store?.bannerUrl}>
-        {store?.logoUrl && <StoreLogo src={store.logoUrl} alt={`Logo de ${store.storeName}`} />}
-        <StoreName>{store?.storeName || 'Nome da Loja'}</StoreName>
-        <StoreStatus $isOpen={store?.isStoreOpen}>
-          {store?.isStoreOpen ? 'Aberto Agora' : 'Fechado no momento'}
-        </StoreStatus>
+    <HomePageWrapper>
+      <HeroSection $bgImage={store.bannerUrl}>
+        {/* O Overlay foi removido */}
+        <HeroContent>
+          <StoreLogo src={store.logoUrl} alt={`Logo de ${store.storeName}`} />
+          <StoreStatus>Loja Aberta</StoreStatus>
+          <ViewMenuButton to="cardapio">Ver Cardápio</ViewMenuButton>
+        </HeroContent>
       </HeroSection>
 
-      {categories.length > 0 && (
-        <ContentSection>
-          <SectionTitle>Navegue por Categorias</SectionTitle>
-          <CategoryGrid>
-            {categories.map(category => (
-              <CategoryCard key={category.id} onClick={() => handleCategoryClick(category.name)}>
-                <p>{category.name}</p>
-              </CategoryCard>
+      <FeaturedSection>
+        <SectionTitle>
+          <FaStar /> Nossos Destaques
+        </SectionTitle>
+        {featuredProducts.length > 0 ? (
+          <ProductGrid>
+            {featuredProducts.map(product => (
+              <ProductCard key={product.id} product={product} />
             ))}
-          </CategoryGrid>
-        </ContentSection>
-      )}
-
-      {featuredProducts.length > 0 && (
-        <ContentSection>
-          <SectionTitle>Nossos Destaques</SectionTitle>
-          <ProductCarousel>
-            <Swiper
-              modules={[Navigation]}
-              spaceBetween={20}
-              slidesPerView={2}
-              navigation
-              breakpoints={{
-                640: { slidesPerView: 2 },
-                768: { slidesPerView: 3 },
-                1024: { slidesPerView: 4 },
-              }}
-            >
-              {featuredProducts.map(product => (
-                <SwiperSlide key={product.id}>
-                  <ProductCard product={product} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </ProductCarousel>
-        </ContentSection>
-      )}
-    </PageWrapper>
+          </ProductGrid>
+        ) : (
+          <p style={{textAlign: 'center', color: '#6b7280'}}>Nenhum produto em destaque no momento.</p>
+        )}
+      </FeaturedSection>
+    </HomePageWrapper>
   );
 };
 

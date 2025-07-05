@@ -3,31 +3,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../contexts/StoreContext';
+import { CardWrapper, ProductImage, ProductInfo, ProductName, ProductPrice, PricePrefix, OldPrice } from './styles';
 
-import {
-  CardWrapper,
-  ProductImage,
-  ProductInfo,
-  ProductName,
-  ProductPrice,
-  PricePrefix,
-  OldPrice
-} from './styles';
-
-// Removemos a prop onProductClick
 const ProductCard = ({ product, promotionalPrice, originalPrice }) => {
   const navigate = useNavigate();
   const store = useStore();
 
   const handleCardClick = () => {
-    // A única ação agora é navegar para a página de detalhes do produto
     if (store?.slug && product?.id) {
       navigate(`/loja/${store.slug}/produto/${product.id}`);
     }
   };
 
   const getDisplayPrice = () => {
-    // ... (a lógica de getDisplayPrice continua a mesma)
+    // Se um preço promocional for passado, ele tem prioridade
     if (typeof promotionalPrice === 'number') {
       return (
         <>
@@ -41,6 +30,7 @@ const ProductCard = ({ product, promotionalPrice, originalPrice }) => {
       );
     }
     
+    // Lógica para produtos com tamanhos
     if (product.hasCustomizableSizes && product.availableSizes?.length > 0) {
       const minPrice = Math.min(...product.availableSizes.map(size => size.price));
       return (
@@ -51,7 +41,7 @@ const ProductCard = ({ product, promotionalPrice, originalPrice }) => {
       );
     }
     
-    return `R$ ${product.price.toFixed(2).replace('.', ',')}`;
+    return `R$ ${(product.price || 0).toFixed(2).replace('.', ',')}`;
   };
 
   return (

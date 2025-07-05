@@ -1,4 +1,3 @@
-// src/components/ProductCard/styles.js
 import styled from 'styled-components';
 
 export const CardWrapper = styled.div`
@@ -10,6 +9,7 @@ export const CardWrapper = styled.div`
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  height: 100%;
 
   &:hover {
     transform: translateY(-5px);
@@ -36,24 +36,23 @@ export const ProductName = styled.h3`
   font-size: 1.1em;
   font-weight: 600;
   color: #333;
+  flex-grow: 1; /* Garante que o nome ocupe o espaço necessário */
 `;
 
-// --- ALTERADO --- Ajustamos o estilo para alinhar os preços
 export const ProductPrice = styled.p`
   margin: 0;
   font-size: 1.25em;
   font-weight: bold;
   color: #7c3aed;
-  margin-top: auto;
+  margin-top: auto; /* Empurra o preço para baixo */
   display: flex;
-  flex-direction: column; /* Coloca o "A partir de" em cima */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   line-height: 1.2;
-  gap: 4px; /* Espaço entre os preços, se houver dois */
+  gap: 4px;
 `;
 
-// --- NOVO --- Estilo para o texto "A partir de" (inalterado)
 export const PricePrefix = styled.span`
   font-size: 0.7em;
   font-weight: 500;
@@ -61,10 +60,9 @@ export const PricePrefix = styled.span`
   text-transform: uppercase;
 `;
 
-// --- NOVO --- Estilo para o preço antigo, riscado
 export const OldPrice = styled.s`
   font-size: 0.8em;
   font-weight: 500;
-  color: #9ca3af; /* Cor cinza para o preço antigo */
+  color: #9ca3af;
   text-decoration: line-through;
 `;
