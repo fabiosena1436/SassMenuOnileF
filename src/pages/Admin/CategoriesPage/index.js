@@ -23,15 +23,20 @@ import {
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { tenantId } = useAuth();
+  const { tenant, loading: authLoading } = useAuth(); // <<< MUDANÇA 1: Obtemos o objeto 'tenant' e o 'authLoading'
 
-  // Estado para o formulário de nova categoria
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Função para buscar as categorias do lojista logado
   const fetchCategories = useCallback(async () => {
-    if (!tenantId) return;
+    // <<< MUDANÇA 2: Obtemos o ID de dentro do objeto 'tenant'
+    const tenantId = tenant?.id;
+
+    if (!tenantId) {
+      // Se não houver ID do lojista, não fazemos nada. O useEffect abaixo irá parar o loading.
+      return;
+    }
+    
     setLoading(true);
     try {
       const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
@@ -44,15 +49,30 @@ const CategoriesPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [tenantId]);
+  }, [tenant]); // A dependência agora é o objeto 'tenant'
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    // <<< MUDANÇA 3: A lógica de carregamento está mais robusta
+    if (authLoading) {
+      // Se a autenticação ainda está a carregar, esperamos.
+      setLoading(true);
+    } else if (tenant) {
+      // Se já temos o lojista, buscamos as categorias.
+      fetchCategories();
+    } else {
+      // Se a autenticação terminou e não há lojista, paramos de carregar.
+      setLoading(false);
+    }
+  }, [authLoading, tenant, fetchCategories]);
 
-  // Função para lidar com o envio do formulário
+
   const handleAddCategory = async (e) => {
     e.preventDefault();
+    const tenantId = tenant?.id;
+    if (!tenantId) {
+      toast.error("Erro: ID da loja não encontrado. Faça login novamente.");
+      return;
+    }
     if (!newCategoryName.trim()) {
       toast.error("O nome da categoria não pode estar vazio.");
       return;
@@ -62,11 +82,10 @@ const CategoriesPage = () => {
       const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
       await addDoc(categoriesRef, {
         name: newCategoryName.trim(),
-        // Adicione aqui outros campos se necessário no futuro
       });
       toast.success(`Categoria "${newCategoryName.trim()}" adicionada!`);
-      setNewCategoryName(''); // Limpa o campo
-      fetchCategories(); // Atualiza a lista
+      setNewCategoryName('');
+      fetchCategories();
     } catch (error) {
       console.error("Erro ao adicionar categoria:", error);
       toast.error("Falha ao adicionar a categoria.");
@@ -75,8 +94,10 @@ const CategoriesPage = () => {
     }
   };
 
-  // Função para apagar uma categoria
   const handleDeleteCategory = async (categoryId, categoryName) => {
+    const tenantId = tenant?.id;
+    if (!tenantId) return;
+
     if (!window.confirm(`Tem a certeza que quer apagar a categoria "${categoryName}"?`)) {
       return;
     }
@@ -84,7 +105,7 @@ const CategoriesPage = () => {
       const categoryDocRef = doc(db, 'tenants', tenantId, 'categories', categoryId);
       await deleteDoc(categoryDocRef);
       toast.success(`Categoria "${categoryName}" apagada.`);
-      fetchCategories(); // Atualiza a lista
+      fetchCategories();
     } catch (error) {
       console.error("Erro ao apagar categoria:", error);
       toast.error("Falha ao apagar a categoria.");
@@ -93,6 +114,10 @@ const CategoriesPage = () => {
 
   if (loading) {
     return <PageWrapper><LoadingText>A carregar categorias...</LoadingText></PageWrapper>;
+  }
+
+  if (!tenant) {
+      return <PageWrapper><InfoText>Não foi possível carregar os dados da sua loja. Por favor, tente fazer login novamente.</InfoText></PageWrapper>;
   }
 
   return (
@@ -107,7 +132,7 @@ const CategoriesPage = () => {
             type="text"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
-            placeholder="Ex: Pizzas Tradicionais"
+            placeholder="Ex: Bebidas"
             disabled={isSubmitting}
           />
         </FormGroup>
@@ -123,8 +148,9 @@ const CategoriesPage = () => {
               <CategoryInfo>{category.name}</CategoryInfo>
               <ActionButtons>
                 <Button 
-                  variant="danger" 
+                  $variant="danger" 
                   onClick={() => handleDeleteCategory(category.id, category.name)}
+                  style={{padding: '8px 12px', fontSize: '0.9em'}}
                 >
                   Apagar
                 </Button>
