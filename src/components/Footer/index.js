@@ -1,61 +1,66 @@
-// src/components/Footer/index.js
+// Arquivo: src/components/Footer/index.js
 
 import React from 'react';
-import { FooterContainer, FooterContent, SocialLinks, Address } from './styles'; // Verifique se os estilos estão sendo importados do arquivo styles.js
-import { useStoreSettings } from '../../contexts/StoreSettingsContext'; // Importando nosso hook
+import { FaWhatsapp, FaInstagram, FaMapMarkerAlt } from 'react-icons/fa';
+import { useStore } from '../../contexts/StoreContext';
 
-// Importando ícones
-import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
+import {
+  FooterContainer,
+  FooterContent,
+  InfoSection,
+  SocialLinks,
+  SocialLink,
+  Copyright,
+  InfoItem
+} from './styles';
 
 const Footer = () => {
-  // Usando o hook para pegar as configurações e o status de carregamento
-  const { settings, loading } = useStoreSettings();
+  const store = useStore();
 
-  // Se estiver carregando, podemos opcionalmente não mostrar nada ou um placeholder
-  if (loading) {
-    return null; // ou um <FooterContainer> com um "Carregando..."
+  if (!store) {
+    return null;
   }
+
+  const { storeName, whatsapp, instagram, address } = store;
 
   return (
     <FooterContainer>
       <FooterContent>
-        <p>© {new Date().getFullYear()} Vibe Açaí. Todos os direitos reservados.</p>
-        
-        {/* --- NOSSAS NOVAS ADIÇÕES --- */}
-        <SocialLinks>
-          {/* Renderiza o link do Instagram apenas se ele existir nas configurações */}
-          {settings.instagram && (
-            <a 
-              href={`https://instagram.com/${settings.instagram}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-            >
-              <FaInstagram size={24} />
-            </a>
+        <InfoSection>
+          <h3>{storeName}</h3>
+          {address && (
+            <InfoItem>
+              <FaMapMarkerAlt />
+              <span>{address}</span>
+            </InfoItem>
           )}
-          {/* Renderiza o link do WhatsApp apenas se ele existir */}
-          {settings.whatsapp && (
-            <a 
-              href={`https://wa.me/${settings.whatsapp}`}
-              target="_blank" 
+        </InfoSection>
+        <SocialLinks>
+          {whatsapp && (
+            <SocialLink
+              href={`https://wa.me/${whatsapp}`}
+              target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
             >
-              <FaWhatsapp size={24} />
-            </a>
+              <FaWhatsapp />
+            </SocialLink>
+          )}
+          {instagram && (
+            <SocialLink
+              href={`https://instagram.com/${instagram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+            >
+              <FaInstagram />
+            </SocialLink>
           )}
         </SocialLinks>
-
-        {/* Renderiza o endereço apenas se ele existir */}
-        {settings.address && (
-          <Address>
-            <p>{settings.address}</p>
-          </Address>
-        )}
-        {/* --- FIM DAS NOVAS ADIÇÕES --- */}
-
       </FooterContent>
+      <Copyright>
+        &copy; {new Date().getFullYear()} {storeName}. Todos os direitos reservados.
+      </Copyright>
     </FooterContainer>
   );
 };

@@ -5,17 +5,17 @@ import { useParams, Outlet, Navigate } from 'react-router-dom';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { StoreContext } from '../../contexts/StoreContext';
-import Navbar from '../Navbar'; // Supondo que você tenha um Navbar genérico
-import Footer from '../Footer'; // Supondo que você tenha um Footer genérico
+import Navbar from '../Navbar';
+import Footer from '../Footer';
 
 const StoreLayout = () => {
-  const { storeSlug } = useParams(); // Pega o ":storeSlug" da URL
-  const [storeInfo, setStoreInfo] = useState(null);
+  const { storeSlug } = useParams();
+  const [storeData, setStoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchStoreInfo = async () => {
+    const fetchStoreData = async () => {
       if (!storeSlug) {
         setLoading(false);
         setError(true);
@@ -34,15 +34,9 @@ const StoreLayout = () => {
           console.error(`Nenhuma loja encontrada com o slug: ${storeSlug}`);
           setError(true);
         } else {
-          const storeData = querySnapshot.docs[0].data();
-          const tenantId = querySnapshot.docs[0].id;
-          
-          setStoreInfo({
-            tenantId: tenantId,
-            name: storeData.storeName,
-            // Adicione outras configurações da loja que você queira usar globalmente
-            // Ex: storeData.logoUrl, storeData.themeColor, etc.
-          });
+          // Obtemos o ID do documento e todos os dados do lojista
+          const tenantDoc = querySnapshot.docs[0];
+          setStoreData({ id: tenantDoc.id, ...tenantDoc.data() });
         }
       } catch (e) {
         console.error("Erro ao buscar informações da loja:", e);
@@ -52,25 +46,23 @@ const StoreLayout = () => {
       }
     };
 
-    fetchStoreInfo();
-  }, [storeSlug]); // O useEffect roda sempre que o slug na URL mudar
+    fetchStoreData();
+  }, [storeSlug]);
 
   if (loading) {
     return <div>Carregando loja...</div>;
   }
 
   if (error) {
-    // Você pode criar uma página de erro mais elaborada
-    return <div>Loja não encontrada.</div>;
+    // Redireciona para uma página de erro ou para a página inicial
+    return <Navigate to="/" replace />;
   }
 
-  // Se tudo deu certo, nós renderizamos o provedor do contexto
-  // com as informações da loja, e dentro dele, as páginas filhas (Outlet).
+  // Usamos o StoreContext.Provider para passar todos os dados da loja para os componentes filhos
   return (
-    <StoreContext.Provider value={storeInfo}>
-      {/* Aqui você pode colocar o layout comum da sua loja, como a Navbar e o Footer */}
+    <StoreContext.Provider value={storeData}>
       <Navbar />
-      <main>
+      <main style={{ paddingTop: '70px', minHeight: 'calc(100vh - 140px)' }}>
         <Outlet /> 
       </main>
       <Footer />

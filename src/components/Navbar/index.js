@@ -1,85 +1,76 @@
-import React, { useState, useEffect } from 'react';
+// Arquivo: src/components/Navbar/index.js
+
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { FiShoppingCart, FiUser, FiHome, FiList } from 'react-icons/fi';
 import { useCart } from '../../contexts/CartContext';
-import { useStoreSettings } from '../../contexts/StoreSettingsContext';
-import { FaShoppingCart } from 'react-icons/fa'; // Importando o ícone
+import { useStore } from '../../contexts/StoreContext';
 
 import {
-  NavWrapper,
-  NavLogoLink,
-  LogoImage,
-  NavLinksContainer,
-  NavLink,
-  CartItemCount,
-  MobileIcon,
-  MobileMenuWrapper,
-  MobileMenuOverlay,
-  MobileActionsContainer, // <-- Importa o novo container
-  MobileCartLink          // <-- Importa o novo link de carrinho
+  NavbarContainer,
+  Logo,
+  NavLinks,
+  NavLinkItem,
+  CartIcon,
+  CartCount,
+  AdminLink
 } from './styles';
 
 const Navbar = () => {
-  // ATENÇÃO: Verifiquei seu CartContext.js, ele exporta 'cartItems', não 'cart'. Use o nome correto.
-  const { cartItems } = useCart();
-  const { settings } = useStoreSettings();
-  const totalItemsInCart = (cartItems || []).reduce((total, item) => total + item.quantity, 0);
+  //                                           👇 MUDANÇA AQUI
+  const { cart = [] } = useCart() || {}; // Garante que 'cart' seja sempre um array
+  const store = useStore();
+  const { pathname } = useLocation();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const closeMenu = () => setIsMenuOpen(false);
+  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isMenuOpen]);
+  if (!store) {
+    return null;
+  }
+
+  const homeLink = `/loja/${store.slug}`;
+  const menuLink = `/loja/${store.slug}/cardapio`;
+  const cartLink = `/loja/${store.slug}/cart`;
+
+  const isActive = (path) => pathname === path;
 
   return (
-    <>
-      <NavWrapper>
-        <NavLogoLink to="/" onClick={closeMenu}>
-          {settings.logoUrl ? <LogoImage src={settings.logoUrl} alt="Vibe Açaí" /> : 'Vibe Açaí'}
-        </NavLogoLink>
-
-        {/* Menu de Desktop (permanece o mesmo) */}
-        <NavLinksContainer>
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/menu">Cardápio</NavLink>
-          <NavLink to="/cart">
-            <FaShoppingCart /> Carrinho
-            {totalItemsInCart > 0 && (<CartItemCount>{totalItemsInCart}</CartItemCount>)}
-          </NavLink>
-        </NavLinksContainer>
-        
-        {/* MUDANÇA PRINCIPAL AQUI: Ações no Mobile */}
-        <MobileActionsContainer>
-          {/* O carrinho agora aparece aqui no mobile, se não estiver vazio */}
-          {totalItemsInCart > 0 && (
-            <MobileCartLink to="/cart">
-              <FaShoppingCart />
-              <CartItemCount>{totalItemsInCart}</CartItemCount>
-            </MobileCartLink>
+    <NavbarContainer>
+      <Link to={homeLink}>
+        <Logo>
+          {store.logoUrl ? (
+            <img src={store.logoUrl} alt={store.storeName} />
+          ) : (
+            <span>{store.storeName}</span>
           )}
-          {/* O ícone do menu hambúrguer continua aqui */}
-          <MobileIcon onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? '✕' : '☰'}
-          </MobileIcon>
-        </MobileActionsContainer>
-      </NavWrapper>
+        </Logo>
+      </Link>
 
-      {/* Overlay e Menu Mobile */}
-      <MobileMenuOverlay isOpen={isMenuOpen} onClick={closeMenu} />
-      <MobileMenuWrapper isOpen={isMenuOpen}>
-        <NavLink to="/" onClick={closeMenu}>Home</NavLink>
-        <NavLink to="/menu" onClick={closeMenu}>Cardápio</NavLink>
-        
-        {/* O link do carrinho foi REMOVIDO daqui de dentro */}
+      <NavLinks>
+        <NavLinkItem active={isActive(homeLink)}>
+          <Link to={homeLink}>
+            <FiHome />
+            <span>Início</span>
+          </Link>
+        </NavLinkItem>
+        <NavLinkItem active={isActive(menuLink)}>
+          <Link to={menuLink}>
+            <FiList />
+            <span>Cardápio</span>
+          </Link>
+        </NavLinkItem>
+      </NavLinks>
 
-      </MobileMenuWrapper>
-    </>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <AdminLink to="/admin">
+          <FiUser />
+        </AdminLink>
+        <CartIcon to={cartLink}>
+          <FiShoppingCart />
+          {totalItems > 0 && <CartCount>{totalItems}</CartCount>}
+        </CartIcon>
+      </div>
+    </NavbarContainer>
   );
 };
 
