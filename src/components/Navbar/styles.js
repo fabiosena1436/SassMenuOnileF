@@ -1,5 +1,3 @@
-// Arquivo: src/components/Navbar/styles.js
-
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
@@ -37,7 +35,7 @@ export const NavLinks = styled.div`
   gap: 30px;
 
   @media (max-width: 768px) {
-    display: none; // Esconde os links no desktop em telas menores
+    display: none;
   }
 `;
 
@@ -47,9 +45,11 @@ export const NavLinkItem = styled.div`
     align-items: center;
     gap: 8px;
     text-decoration: none;
-    color: ${({ active }) => (active ? '#e53e3e' : '#4a5568')};
-    font-weight: ${({ active }) => (active ? '600' : '500')};
     transition: color 0.2s;
+    
+    /* AQUI ESTÁ A CORREÇÃO */
+    color: ${({ $active }) => ($active ? '#e53e3e' : '#4a5568')};
+    font-weight: ${({ $active }) => ($active ? '600' : '500')};
 
     &:hover {
       color: #e53e3e;
