@@ -1,3 +1,5 @@
+// Arquivo: src/components/ProductCard/styles.js
+
 import styled from 'styled-components';
 
 export const CardWrapper = styled.div`
@@ -24,44 +26,43 @@ export const ProductImage = styled.img`
 `;
 
 export const ProductInfo = styled.div`
-  padding: 16px;
+  padding: 1rem;
   text-align: center;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 `;
 
-export const ProductName = styled.h3`
-  margin: 0 0 8px 0;
-  font-size: 1.1em;
+export const ProductName = styled.h4`
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
   font-weight: 600;
-  color: #333;
-  flex-grow: 1; /* Garante que o nome ocupe o espaço necessário */
+  color: #1f2937;
+  flex-grow: 1;
 `;
 
 export const ProductPrice = styled.p`
   margin: 0;
-  font-size: 1.25em;
-  font-weight: bold;
-  color: #7c3aed;
-  margin-top: auto; /* Empurra o preço para baixo */
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #4f46e5;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  line-height: 1.2;
+  line-height: 1.3;
   gap: 4px;
 `;
 
 export const PricePrefix = styled.span`
-  font-size: 0.7em;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #6b7280;
-  text-transform: uppercase;
 `;
 
 export const OldPrice = styled.s`
-  font-size: 0.8em;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #9ca3af;
   text-decoration: line-through;

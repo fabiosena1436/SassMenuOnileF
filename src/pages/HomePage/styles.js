@@ -4,85 +4,102 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 export const HomePageWrapper = styled.div`
-  background-color: #f8f9fa;
+  padding-bottom: 50px;
 `;
 
-export const HeroSection = styled.section`
+export const HeroSection = styled.div`
   width: 100%;
   height: 50vh;
-  min-height: 450px;
-  background-image: url(${({ $bgImage }) => $bgImage || 'https://via.placeholder.com/1200x500'});
+  min-height: 400px;
+  background-image: ${({ $bgImage }) => $bgImage ? `url(${$bgImage})` : 'linear-gradient(45deg, #7c3aed, #5b21b6)'};
   background-size: cover;
   background-position: center;
-  position: relative;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  padding: 20px;
 `;
 
-// O HeroOverlay foi removido.
-
 export const HeroContent = styled.div`
-  position: relative;
-  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem; // Espaçamento entre os itens
-  background-color: rgba(0, 0, 0, 0.25); // Um fundo semi-transparente para legibilidade
+  gap: 1rem;
+  background-color: rgba(0, 0, 0, 0.25);
   padding: 2rem;
   border-radius: 1.5rem;
 `;
 
 export const StoreLogo = styled.img`
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
+  border-radius: 50%;
   border: 4px solid white;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 `;
 
-export const StoreStatus = styled.div`
-  background-color: #10b981;
+export const StatusInfo = styled.div` // Mantendo este nome se for usado em outro lugar
+  background-color: ${({ $isOpen }) => $isOpen ? '#16a34a' : '#ef4444'};
   color: white;
-  padding: 0.5rem 1.25rem;
-  border-radius: 9999px;
+  padding: 8px 20px;
+  border-radius: 20px;
   font-weight: bold;
 `;
 
+export const StoreStatus = styled(StatusInfo)``; // Alias para consistência
+
 export const ViewMenuButton = styled(Link)`
-  background-color: #4f46e5;
+  background-color: #5b21b6;
   color: white;
-  padding: 0.75rem 2rem;
-  border-radius: 8px;
-  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 20px;
   font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
   transition: background-color 0.2s;
+
   &:hover {
-    background-color: #4338ca;
+    background-color: #4c1d95;
   }
 `;
 
-export const FeaturedSection = styled.section`
+export const Section = styled.section`
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 3rem 1rem;
+  margin: 50px auto;
+  padding: 0 20px;
 `;
 
 export const SectionTitle = styled.h2`
+  font-size: 2.2em;
+  color: #5b21b6;
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #111827;
+  margin-bottom: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 `;
 
-export const ProductGrid = styled.div`
+export const ContentGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 2rem;
+  gap: 30px;
+`;
+
+export const CarouselWrapper = styled.div`
+  .swiper-pagination-bullet-active {
+    background: #5b21b6;
+  }
+  .swiper-button-next, .swiper-button-prev {
+    color: #5b21b6;
+  }
+`;
+
+export const LoadingText = styled.p`
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.2rem;
+  color: #6b7280;
 `;

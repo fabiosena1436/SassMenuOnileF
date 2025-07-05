@@ -3,44 +3,80 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useStore } from '../../contexts/StoreContext';
 import { db } from '../../services/firebaseConfig';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, documentId } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 import ProductCard from '../../components/ProductCard';
-import { FaStar } from 'react-icons/fa';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 import {
   HomePageWrapper, HeroSection, HeroContent, StoreLogo, StoreStatus, ViewMenuButton,
-  FeaturedSection, SectionTitle, ProductGrid
+  Section, SectionTitle, ContentGrid, LoadingText, CarouselWrapper
 } from './styles';
-import { LoadingText } from '../MenuPage/styles'; // Reutilizando
+import { FaStar } from 'react-icons/fa';
 
 const HomePage = () => {
   const store = useStore();
+  const [promotions, setPromotions] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchFeaturedProducts = useCallback(async () => {
-    if (!store?.id) {
-      setLoading(false);
-      return;
-    }
+  const fetchData = useCallback(async () => {
+    if (!store?.id) return;
     setLoading(true);
     try {
-      const productsRef = collection(db, 'tenants', store.id, 'products');
-      const q = query(productsRef, where("isFeatured", "==", true), where("isAvailable", "==", true));
-      const querySnapshot = await getDocs(q);
-      setFeaturedProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const tenantId = store.id;
+      const productsRef = collection(db, 'tenants', tenantId, 'products');
+
+      // 1. Buscar as promoções ativas
+      const promotionsRef = collection(db, 'tenants', tenantId, 'promotions');
+      const promoQuery = query(promotionsRef, where("isActive", "==", true));
+      const promoSnapshot = await getDocs(promoQuery);
+      const activePromos = promoSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // 2. Buscar os detalhes dos produtos que estão em promoção
+      const productIdsInPromos = activePromos
+        .map(p => p.productId)
+        .filter(Boolean);
+      
+      let productsForPromos = [];
+      if (productIdsInPromos.length > 0) {
+        const productsPromoQuery = query(productsRef, where(documentId(), 'in', productIdsInPromos));
+        const productsSnapshot = await getDocs(productsPromoQuery);
+        productsForPromos = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+      
+      // 3. Juntar os dados da promoção com os dados do produto
+      const finalPromotions = activePromos
+        .map(promo => {
+          const productDetails = productsForPromos.find(p => p.id === promo.productId);
+          return (productDetails && productDetails.isAvailable) ? { ...promo, product: productDetails } : null;
+        })
+        .filter(Boolean);
+      setPromotions(finalPromotions);
+      
+      // 4. Buscar os produtos em destaque (que não estão em promoção)
+      const featuredQuery = query(productsRef, where("isFeatured", "==", true), where("isAvailable", "==", true));
+      const featuredSnapshot = await getDocs(featuredQuery);
+      const featuredData = featuredSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      setFeaturedProducts(featuredData.filter(p => !productIdsInPromos.includes(p.id)));
+
     } catch (error) {
-      toast.error("Não foi possível carregar os destaques.");
+      toast.error("Erro ao carregar os dados da loja.");
+      console.error(error);
     } finally {
       setLoading(false);
     }
   }, [store]);
-
+  
   useEffect(() => {
-    fetchFeaturedProducts();
-  }, [fetchFeaturedProducts]);
+    fetchData();
+  }, [fetchData]);
 
   if (loading || !store) {
     return <LoadingText>A carregar a loja...</LoadingText>;
@@ -49,28 +85,55 @@ const HomePage = () => {
   return (
     <HomePageWrapper>
       <HeroSection $bgImage={store.bannerUrl}>
-        {/* O Overlay foi removido */}
         <HeroContent>
           <StoreLogo src={store.logoUrl} alt={`Logo de ${store.storeName}`} />
-          <StoreStatus>Loja Aberta</StoreStatus>
-          <ViewMenuButton to="cardapio">Ver Cardápio</ViewMenuButton>
+          <StoreStatus $isOpen={store.isStoreOpen}>
+            {store.isStoreOpen ? 'Loja Aberta' : 'Loja Fechada'}
+          </StoreStatus>
+          <ViewMenuButton to={`/loja/${store.slug}/cardapio`}>Ver Cardápio</ViewMenuButton>
         </HeroContent>
       </HeroSection>
 
-      <FeaturedSection>
-        <SectionTitle>
-          <FaStar /> Nossos Destaques
-        </SectionTitle>
-        {featuredProducts.length > 0 ? (
-          <ProductGrid>
+      {promotions.length > 0 && (
+        <Section>
+          <SectionTitle>🔥 Promoções Imperdíveis!</SectionTitle>
+          <CarouselWrapper>
+            <Swiper
+              modules={[Pagination, Navigation]}
+              spaceBetween={20}
+              slidesPerView={1.5}
+              navigation
+              pagination={{ clickable: true }}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 3 },
+                1024: { slidesPerView: 4 },
+              }}
+            >
+              {promotions.map(promo => (
+                <SwiperSlide key={promo.id}>
+                  <ProductCard
+                    product={promo.product}
+                    promotionalPrice={promo.promotionalPrice}
+                    originalPrice={promo.originalPrice}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </CarouselWrapper>
+        </Section>
+      )}
+
+      {featuredProducts.length > 0 && (
+        <Section>
+          <SectionTitle>⭐ Nossos Destaques</SectionTitle>
+          <ContentGrid>
             {featuredProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </ProductGrid>
-        ) : (
-          <p style={{textAlign: 'center', color: '#6b7280'}}>Nenhum produto em destaque no momento.</p>
-        )}
-      </FeaturedSection>
+          </ContentGrid>
+        </Section>
+      )}
     </HomePageWrapper>
   );
 };

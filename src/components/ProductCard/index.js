@@ -3,7 +3,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../contexts/StoreContext';
-import { CardWrapper, ProductImage, ProductInfo, ProductName, ProductPrice, PricePrefix, OldPrice } from './styles';
+
+import {
+  CardWrapper,
+  ProductImage,
+  ProductInfo,
+  ProductName,
+  ProductPrice,
+  PricePrefix,
+  OldPrice
+} from './styles';
 
 const ProductCard = ({ product, promotionalPrice, originalPrice }) => {
   const navigate = useNavigate();
@@ -15,40 +24,44 @@ const ProductCard = ({ product, promotionalPrice, originalPrice }) => {
     }
   };
 
+  const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+
   const getDisplayPrice = () => {
-    // Se um preço promocional for passado, ele tem prioridade
+    // Se um preço promocional for fornecido, ele tem prioridade
     if (typeof promotionalPrice === 'number') {
       return (
         <>
+          {/* Mostra o preço original riscado, se ele existir */}
           {typeof originalPrice === 'number' && (
             <OldPrice>
-              R$ {originalPrice.toFixed(2).replace('.', ',')}
+              {formatCurrency(originalPrice)}
             </OldPrice>
           )}
-          <span>R$ {promotionalPrice.toFixed(2).replace('.', ',')}</span>
+          <span>{formatCurrency(promotionalPrice)}</span>
         </>
       );
     }
     
-    // Lógica para produtos com tamanhos
+    // Lógica para produtos com tamanhos diferentes
     if (product.hasCustomizableSizes && product.availableSizes?.length > 0) {
       const minPrice = Math.min(...product.availableSizes.map(size => size.price));
       return (
         <>
           <PricePrefix>A partir de</PricePrefix>
-          R$ {minPrice.toFixed(2).replace('.', ',')}
+          {formatCurrency(minPrice)}
         </>
       );
     }
     
-    return `R$ ${(product.price || 0).toFixed(2).replace('.', ',')}`;
+    // Retorna o preço padrão se não houver promoção ou tamanhos
+    return formatCurrency(product.price || 0);
   };
 
   return (
     <CardWrapper onClick={handleCardClick}>
       <ProductImage src={product.imageUrl || 'https://via.placeholder.com/300'} alt={product.name} />
       <ProductInfo>
-        <ProductName>{product.name}</ProductName>
+        <ProductName>{product.name || 'Produto sem nome'}</ProductName>
         <ProductPrice>{getDisplayPrice()}</ProductPrice>
       </ProductInfo>
     </CardWrapper>
