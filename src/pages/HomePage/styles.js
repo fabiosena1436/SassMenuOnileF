@@ -109,3 +109,29 @@ export const LoadingText = styled.p`
   font-size: 1.2rem;
   color: #6b7280;
 `;
+
+export const StoreClosedWarning = styled.div`
+  background-color: #fffbe6; /* Amarelo bem claro */
+  color: #92400e; /* Um tom de castanho/laranja escuro */
+  border: 1px solid #fde68a; /* Borda amarela clara */
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: -20px auto 40px auto; /* Margem negativa para "subir" um pouco e se sobrepor */
+  max-width: 1160px; /* Mantém a mesma largura do conteúdo */
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  position: relative;
+  z-index: 5;
+
+  h3 {
+    margin-top: 0;
+    font-size: 1.4em;
+    color: #b45309;
+  }
+
+  p {
+    margin: 5px 0 0 0;
+    white-space: pre-wrap; /* Respeita as quebras de linha do textarea */
+  }
+`;

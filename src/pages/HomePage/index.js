@@ -8,16 +8,14 @@ import toast from 'react-hot-toast';
 
 import ProductCard from '../../components/ProductCard';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation } from 'swiper/modules'; // Módulos para navegação e paginação
-
-// Importação ESSENCIAL dos estilos do Swiper
+import { Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
 import {
   HomePageWrapper, HeroSection, HeroContent, StoreLogo, StoreStatus, ViewMenuButton,
-  Section, SectionTitle, ContentGrid, LoadingText, CarouselWrapper
+  Section, SectionTitle, ContentGrid, LoadingText, CarouselWrapper, StoreClosedWarning
 } from './styles';
 import { FaStar } from 'react-icons/fa';
 
@@ -27,7 +25,6 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // A lógica para buscar os dados (fetchData) permanece a mesma da resposta anterior...
   const fetchData = useCallback(async () => {
     if (!store?.id) return;
     setLoading(true);
@@ -82,27 +79,37 @@ const HomePage = () => {
         </HeroContent>
       </HeroSection>
 
-      {/* <<< O CARROSSEL DE PROMOÇÕES ESTÁ AQUI >>> */}
+      {!store.isStoreOpen && (
+        <StoreClosedWarning>
+          <h3>Ops! Estamos Fechados</h3>
+          <p>Nosso delivery não está funcionando no momento.</p>
+          {store.openingHoursText && (
+            <p style={{ marginTop: '10px', whiteSpace: 'pre-wrap' }}>
+              <strong>Nosso horário é:</strong><br/>
+              {store.openingHoursText}
+            </p>
+          )}
+        </StoreClosedWarning>
+      )}
+
       {promotions.length > 0 && (
         <Section>
           <SectionTitle>🔥 Promoções Imperdíveis!</SectionTitle>
           <CarouselWrapper>
             <Swiper
-              modules={[Pagination, Navigation]} // Ativa os módulos
+              modules={[Pagination, Navigation]}
               spaceBetween={20}
-              slidesPerView={'auto'} // Deixa o Swiper calcular quantos slides cabem
-              navigation={true} // Ativa as setas de navegação
-              pagination={{ clickable: true }} // Ativa os pontos de paginação
+              slidesPerView={1.5}
+              navigation
+              pagination={{ clickable: true }}
               breakpoints={{
-                // Em telas maiores, mostra mais slides
                 640: { slidesPerView: 2 },
                 768: { slidesPerView: 3 },
                 1024: { slidesPerView: 4 },
               }}
-              className="promotions-carousel"
             >
               {promotions.map(promo => (
-                <SwiperSlide key={promo.id} style={{ width: '280px' }}>
+                <SwiperSlide key={promo.id}>
                   <ProductCard
                     product={promo.product}
                     promotionalPrice={promo.promotionalPrice}
