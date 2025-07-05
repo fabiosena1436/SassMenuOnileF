@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 export const PageWrapper = styled.div`
-  padding-bottom: 100px; // Deixa espaço para a barra de ações no fundo
+  padding-bottom: 100px;
 `;
 
 export const LoadingText = styled.p`
@@ -182,6 +182,11 @@ export const QuantityControl = styled.div`
     background-color: #f9fafb;
     font-size: 1.5rem;
     cursor: pointer;
+    
+    &:disabled {
+        background-color: #e5e7eb;
+        cursor: not-allowed;
+    }
   }
   span {
     font-size: 1.2rem;

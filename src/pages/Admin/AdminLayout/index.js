@@ -1,13 +1,13 @@
 // Arquivo: src/pages/Admin/AdminLayout/index.js
 
 import React, { useState } from 'react';
-import { Outlet, useLocation, NavLink } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { FaBars } from 'react-icons/fa';
+import Button from '../../../components/Button';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../services/firebaseConfig';
 import toast from 'react-hot-toast';
-import { FaBars } from 'react-icons/fa';
-import Button from '../../../components/Button';
 
 import {
   AdminWrapper,
@@ -27,20 +27,22 @@ const AdminLayout = () => {
   const location = useLocation();
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+
   const handleLinkClick = () => {
+    // Fecha a sidebar em telemóveis ao clicar num link
     if (window.innerWidth <= 768) {
       setSidebarOpen(false);
     }
   };
-
+  
   const handleLogout = async () => {
     await signOut(auth);
     toast.success('Sessão terminada.');
-    // O redirecionamento será tratado pelo ProtectedRoute
+    // O ProtectedRoute irá redirecionar para a página de login
   };
 
   const getPageTitle = () => {
-    const path = location.pathname.split('/admin/')[1];
+    const path = location.pathname.split('/admin/')[1] || 'dashboard';
     switch(path) {
       case 'products': return 'Gerir Produtos';
       case 'categories': return 'Gerir Categorias';
@@ -60,20 +62,20 @@ const AdminLayout = () => {
 
       {isSidebarOpen && <Overlay onClick={toggleSidebar} />}
       
+      {/* <<< MUDANÇA AQUI: de 'isOpen' para '$isOpen' >>> */}
       <Sidebar $isOpen={isSidebarOpen}>
         <div>
           <SidebarTitle>{tenant?.storeName || 'Carregando...'}</SidebarTitle>
-          <div style={{ padding: '0 20px 10px', fontSize: '12px', color: '#ccc' }}>
+          <div style={{ padding: '0 20px 20px', fontSize: '13px', color: '#9ca3af', textAlign: 'center' }}>
             Plano Atual: <strong>{tenant?.plan || '...'}</strong>
           </div>
-          <NavSeparator />
           <NavList>
             <StyledNavLink to="/admin/dashboard" end onClick={handleLinkClick}>Visão Geral</StyledNavLink>
             <StyledNavLink to="/admin/products" onClick={handleLinkClick}>Produtos</StyledNavLink>
             <StyledNavLink to="/admin/categories" onClick={handleLinkClick}>Categorias</StyledNavLink>
             <StyledNavLink to="/admin/toppings" onClick={handleLinkClick}>Adicionais</StyledNavLink>
             
-            {/* LÓGICA DO PLANO: Mostra o link apenas se o plano for 'pro' */}
+            {/* Lógica do plano para mostrar/esconder o link de Promoções */}
             {tenant?.plan === 'pro' && (
               <StyledNavLink to="/admin/promotions" onClick={handleLinkClick}>Promoções</StyledNavLink>
             )}

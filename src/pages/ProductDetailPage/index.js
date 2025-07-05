@@ -5,11 +5,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../../contexts/StoreContext';
 import { useCart } from '../../contexts/CartContext';
 import { db } from '../../services/firebaseConfig';
-import { doc, getDoc, collection, getDocs, query } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import Button from '../../components/Button';
 
-// Importe seus estilos
 import {
   PageWrapper, LoadingText, ProductBanner, ProductContent, ProductName, ProductDescription,
   CustomizationSection, SectionTitle, OptionGroup, OptionLabel, ToppingGrid, ToppingItemLabel,
@@ -26,13 +25,11 @@ const ProductDetailPage = () => {
   const [toppings, setToppings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados de customização
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedToppings, setSelectedToppings] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
   
-  // Busca os dados do produto e dos adicionais
   const fetchData = useCallback(async () => {
     if (!store?.id || !productId) return;
     setLoading(true);
@@ -40,8 +37,8 @@ const ProductDetailPage = () => {
       const productRef = doc(db, 'tenants', store.id, 'products', productId);
       const productSnap = await getDoc(productRef);
 
-      if (!productSnap.exists()) {
-        toast.error("Produto não encontrado.");
+      if (!productSnap.exists() || !productSnap.data().isAvailable) {
+        toast.error("Produto não encontrado ou indisponível.");
         navigate(`/loja/${store.slug}/cardapio`);
         return;
       }
@@ -49,7 +46,6 @@ const ProductDetailPage = () => {
       const productData = { id: productSnap.id, ...productSnap.data() };
       setProduct(productData);
 
-      // Se for um açaí, define o tamanho padrão
       if (productData.hasCustomizableSizes && productData.availableSizes?.length > 0) {
         setSelectedSize(productData.availableSizes[0]);
       } else {
@@ -71,22 +67,15 @@ const ProductDetailPage = () => {
     fetchData();
   }, [fetchData]);
 
-  // Calcula o preço total sempre que uma opção muda
   useEffect(() => {
     if (!product) return;
-    
     let basePrice = product.price || 0;
     if (product.hasCustomizableSizes && selectedSize) {
       basePrice = selectedSize.price;
     }
-    
-    const toppingsPrice = selectedToppings.reduce((total, topping) => {
-      return total + (topping.price || 0);
-    }, 0);
-
+    const toppingsPrice = selectedToppings.reduce((total, topping) => total + (topping.price || 0), 0);
     setTotalPrice((basePrice + toppingsPrice) * quantity);
   }, [product, selectedSize, selectedToppings, quantity]);
-
 
   const handleToppingChange = (topping) => {
     setSelectedToppings(prev =>
@@ -97,6 +86,12 @@ const ProductDetailPage = () => {
   };
   
   const handleAddToCart = () => {
+    // <<< VERIFICAÇÃO ADICIONADA AQUI >>>
+    if (!store.isStoreOpen) {
+      toast.error("A loja está fechada e não aceita pedidos no momento.");
+      return;
+    }
+
     if (product.hasCustomizableSizes && !selectedSize) {
       toast.error("Por favor, selecione um tamanho.");
       return;
@@ -115,6 +110,7 @@ const ProductDetailPage = () => {
       imageUrl: product.imageUrl,
     });
     
+    toast.success(`${product.name} adicionado ao carrinho!`);
     navigate(`/loja/${store.slug}/cardapio`);
   };
 
@@ -164,13 +160,18 @@ const ProductDetailPage = () => {
 
       <ActionBar>
         <QuantityControl>
-          <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
+          <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!store.isStoreOpen}>-</button>
           <span>{quantity}</span>
-          <button onClick={() => setQuantity(q => q + 1)}>+</button>
+          <button onClick={() => setQuantity(q => q + 1)} disabled={!store.isStoreOpen}>+</button>
         </QuantityControl>
         
-        <Button onClick={handleAddToCart}>
-          Adicionar <TotalPrice>R$ {totalPrice.toFixed(2)}</TotalPrice>
+        {/* <<< BOTÃO DINÂMICO AQUI >>> */}
+        <Button onClick={handleAddToCart} disabled={!store.isStoreOpen}>
+          {store.isStoreOpen ? (
+            <>Adicionar <TotalPrice>R$ {totalPrice.toFixed(2)}</TotalPrice></>
+          ) : (
+            'Loja Fechada'
+          )}
         </Button>
       </ActionBar>
     </PageWrapper>

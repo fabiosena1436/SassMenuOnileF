@@ -85,7 +85,7 @@ const HomePage = () => {
           <p>Nosso delivery não está funcionando no momento.</p>
           {store.openingHoursText && (
             <p style={{ marginTop: '10px', whiteSpace: 'pre-wrap' }}>
-              <strong>Nosso horário é:</strong><br/>
+              <strong>Nosso horário de atendimento é das:</strong><br/>
               {store.openingHoursText}
             </p>
           )}

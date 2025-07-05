@@ -6,12 +6,13 @@ import { NavLink } from 'react-router-dom';
 export const AdminWrapper = styled.div`
   display: flex;
   min-height: 100vh;
+  background-color: #f3f4f6;
 `;
 
 export const Sidebar = styled.aside`
   width: 260px;
-  background-color: #1f2937;
-  color: #d1d5db;
+  background-color: #111827; /* Um preto/azul escuro mais moderno */
+  color: #9ca3af;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -23,6 +24,7 @@ export const Sidebar = styled.aside`
   transition: transform 0.3s ease-in-out;
 
   @media (max-width: 768px) {
+    /* <<< MUDANÇA AQUI: de 'isOpen' para '$isOpen' >>> */
     transform: ${({ $isOpen }) => ($isOpen ? 'translateX(0)' : 'translateX(-100%)')};
   }
 `;
@@ -30,15 +32,14 @@ export const Sidebar = styled.aside`
 export const SidebarTitle = styled.h1`
   font-size: 1.5rem;
   font-weight: bold;
-  color: #ffffff;
-  padding: 1.5rem;
+  color: white;
   text-align: center;
-  background-color: #111827;
+  padding: 1.5rem 1rem;
 `;
 
 export const NavList = styled.nav`
   list-style: none;
-  padding: 1rem 0;
+  padding: 0;
   flex-grow: 1;
 `;
 
@@ -72,10 +73,9 @@ export const NavSeparator = styled.hr`
   margin: 1rem 1.5rem;
 `;
 
-export const ContentArea = styled.div`
+export const ContentArea = styled.main`
   flex-grow: 1;
-  background-color: #f3f4f6;
-  margin-left: 260px; /* Largura da sidebar no desktop */
+  margin-left: 260px;
   
   .admin-header {
     background: white;
@@ -98,7 +98,7 @@ export const ContentArea = styled.div`
   @media (max-width: 768px) {
     margin-left: 0;
     .header-title {
-      margin-left: 60px; /* Espaço para o botão de menu */
+      margin-left: 50px;
     }
   }
 `;
@@ -106,10 +106,12 @@ export const ContentArea = styled.div`
 export const MenuButton = styled.button`
   display: none;
   @media (max-width: 768px) {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: fixed;
-    top: 10px;
-    left: 10px;
+    top: 15px;
+    left: 15px;
     background: #1f2937;
     color: white;
     border: none;
@@ -118,8 +120,7 @@ export const MenuButton = styled.button`
     border-radius: 50%;
     cursor: pointer;
     z-index: 1002;
-    font-size: 20px;
-    line-height: 1;
+    font-size: 1rem;
   }
 `;
 
