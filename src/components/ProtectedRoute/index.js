@@ -1,36 +1,26 @@
-// Ficheiro completo: src/components/ProtectedRoute/index.js
+// Arquivo: src/components/ProtectedRoute/index.js
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { LoadingText } from '../../pages/MenuPage/styles'; // Podemos reutilizar este estilo
 
-// O componente agora aceita a propriedade "requiredPlan"
-const ProtectedRoute = ({ children, requiredPlan }) => {
-  const { isAuthenticated, loading, tenant } = useAuth();
-  const location = useLocation(); // Hook para saber a página atual
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
-  // Enquanto as informações do utilizador estão a ser carregadas, exibimos uma mensagem.
+  // Se o estado de autenticação ainda está a ser verificado, mostra uma mensagem de carregamento.
   if (loading) {
-    return <div>Carregando sessão...</div>;
+    return <LoadingText>A verificar autenticação...</LoadingText>;
   }
 
-  // Se, após o carregamento, o utilizador não estiver autenticado ou não tiver uma loja (tenant),
-  // ele é enviado de volta para a página de login.
-  if (!isAuthenticated || !tenant) {
-    return <Navigate to="/admin/login" replace />;
+  // Se a verificação terminou e NÃO há utilizador, redireciona-o para a página de login.
+  // Guardamos a página que ele tentou aceder (location) para o redirecionar de volta após o login.
+  if (!user) {
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  // A NOVA LÓGICA DE VERIFICAÇÃO DE PLANO!
-  // Se esta rota específica exige um plano (requiredPlan foi passado)...
-  if (requiredPlan) {
-    // ...e o plano do nosso utilizador ('tenant.plan') for DIFERENTE do plano exigido...
-    if (tenant.plan !== requiredPlan) {
-      // ...então, redirecionamos o utilizador para a página de assinatura para que ele possa fazer o upgrade.
-      return <Navigate to="/admin/assinatura" replace state={{ from: location }} />;
-    }
-  }
-
-  // Se o utilizador passou por todas as verificações, ele tem permissão para ver a página.
+  // Se a verificação terminou e HÁ um utilizador logado, permite o acesso à página solicitada.
   return children;
 };
 
