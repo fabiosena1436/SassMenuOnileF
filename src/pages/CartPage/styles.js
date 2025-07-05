@@ -2,65 +2,37 @@
 
 import styled from 'styled-components';
 
-export const CartPageContainer = styled.div`
-  max-width: 1200px;
+export const CartPageWrapper = styled.div`
+  max-width: 800px;
   margin: 2rem auto;
-  padding: 1rem;
-  h1 {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-`;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 
-export const EmptyCart = styled.div`
-  text-align: center;
-  padding: 4rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  h2 { margin-bottom: 1rem; }
-  p { margin-bottom: 2rem; color: #6b7280; }
-`;
-
-export const CartGrid = styled.div`
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  align-items: flex-start;
-
-  @media (max-width: 992px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const CartItemsList = styled.div``;
-
-export const CartHeader = styled.div`
-  display: grid;
-  grid-template-columns: 3fr 1fr 1fr 0.5fr;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-  border-bottom: 2px solid #e5e7eb;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  font-size: 0.9rem;
   @media (max-width: 768px) {
-    display: none;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 100vh;
   }
+`;
+
+export const Title = styled.h1`
+  text-align: center;
+  color: #4f46e5;
+  margin-bottom: 2rem;
 `;
 
 export const CartItem = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto auto auto;
-  gap: 1.5rem;
+  display: flex;
   align-items: center;
+  gap: 1.5rem;
   padding: 1rem 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
 
-  @media (max-width: 768px) {
-    grid-template-columns: auto 1fr;
-    grid-template-rows: auto auto auto;
+  &:last-of-type {
+    border-bottom: none;
   }
 `;
 
@@ -69,98 +41,116 @@ export const ItemImage = styled.img`
   height: 80px;
   object-fit: cover;
   border-radius: 8px;
-  grid-row: span 1;
-  @media (max-width: 768px) {
-    grid-row: span 3;
-  }
 `;
 
-export const ItemDetails = styled.div``;
+export const ItemDetails = styled.div`
+  flex-grow: 1;
+`;
 
-export const ItemName = styled.h3`
+export const ItemName = styled.h4`
+  margin: 0 0 0.25rem;
   font-size: 1.1rem;
   font-weight: 600;
+`;
+
+export const ItemPrice = styled.p`
   margin: 0;
-`;
-
-export const ItemOptions = styled.p`
-  font-size: 0.85rem;
   color: #6b7280;
-  margin: 4px 0 0;
 `;
 
-export const ItemQuantity = styled.div`
+export const ItemSubtotal = styled.p`
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #111827;
+  min-width: 80px;
+  text-align: right;
+`;
+
+export const QuantityControl = styled.div`
   display: flex;
   align-items: center;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  gap: 0.5rem;
   
   button {
-    background: none;
-    border: none;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     font-size: 1.2rem;
-    color: #9ca3af;
-    &:hover { color: #111827; }
+    cursor: pointer;
+    &:hover {
+      background-color: #e5e7eb;
+    }
   }
 
   span {
-    padding: 0 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 1.1rem;
+    min-width: 20px;
+    text-align: center;
   }
 `;
 
-export const ItemPrice = styled.div`
-  font-weight: 600;
-  font-size: 1.1rem;
-`;
-
-export const ItemActions = styled.div`
-  button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #9ca3af;
-    font-size: 1.2rem;
-    &:hover { color: #ef4444; }
+export const RemoveButton = styled.button`
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 1.2rem;
+  cursor: pointer;
+  &:hover {
+    color: #b91c1c;
   }
 `;
 
-export const CartSummary = styled.aside`
-  background-color: #f9fafb;
-  padding: 1.5rem;
-  border-radius: 8px;
-  position: sticky;
-  top: 90px;
-  h2 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 1rem;
-  }
-  button {
-      width: 100%;
-  }
+export const TotalsSection = styled.div`
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e5e7eb;
 `;
 
-export const SummaryTotal = styled.div`
+export const SummaryLine = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: #4b5563;
+
+  strong {
+    color: #111827;
+    font-weight: 600;
+  }
 `;
 
-export const BackButton = styled.button`
-    background: none;
-    border: none;
+export const GrandTotalLine = styled(SummaryLine)`
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  
+  strong {
     color: #4f46e5;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 1rem;
-    padding: 0.5rem;
-    &:hover {
-        text-decoration: underline;
-    }
+  }
+`;
+
+export const ActionsWrapper = styled.div`
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const TopButtonsContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+export const EmptyCartMessage = styled.div`
+  text-align: center;
+  padding: 3rem;
+  p {
+    margin-bottom: 1.5rem;
+    color: #6b7280;
+  }
 `;
