@@ -1,216 +1,110 @@
+// Arquivo: src/pages/Admin/PromotionsPage/styles.js
+
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
-  h1 { 
-    font-size: 2em; 
-    color: #333; 
-    margin-bottom: 30px; 
-  }
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
 `;
 
-export const SectionTitle = styled.h2`
-  font-size: 1.5em; 
-  color: #555; 
-  margin-top: 0; 
-  margin-bottom: 20px; 
-  border-bottom: 1px solid #ddd; 
-  padding-bottom: 10px; 
-  
-  &:not(:first-child){
-    margin-top: 40px;
-  }
+export const Header = styled.header`
+  margin-bottom: 2rem;
 `;
 
-export const AddForm = styled.form`
-  background-color: #f9f9f9; 
-  padding: 20px; 
-  border-radius: 8px; 
-  margin-top: 10px; 
-  margin-bottom: 40px; 
-  display: grid; 
-  gap: 15px 20px; 
-  border: 1px solid #eee;
-  grid-template-columns: 1fr;
+export const Title = styled.h1`
+  font-size: 2.5rem;
+  color: #1f2937;
+`;
 
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
+export const FormContainer = styled.form`
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 2.5rem;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
   }
 `;
 
 export const FormGroup = styled.div`
-  display: flex; 
-  flex-direction: column; 
+  margin-bottom: 1rem;
   
-  label { 
-    margin-bottom: 5px; 
-    font-weight: 600; 
-    color: #444; 
-  } 
-  
-  input, 
-  select, 
-  textarea { 
-    padding: 10px; 
-    border: 1px solid #ccc; 
-    border-radius: 6px; 
-    font-size: 1em; 
-    background-color: white; 
-    width: 100%;
-  }
-  
-  &.full-width {
-    grid-column: 1 / -1;
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
   }
 `;
 
-export const FormActions = styled.div`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  grid-column: 1 / -1;
-  margin-top: 10px;
-`;
-
-export const LoadingText = styled.p`
-  text-align: center; 
-  color: #555; 
-  font-style: italic; 
-  margin-top: 20px;
-`;
-
-export const PromotionList = styled.ul`
-  list-style: none; 
-  padding: 0;
-`;
-
-
-export const ProductImage = styled.img`
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #f0f0f0;
-  flex-shrink: 0;
-`;
-
-export const PromoContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex-grow: 1;
-`;
-
-
-export const PromotionListItem = styled.li`
-  background-color: #fff; 
-  padding: 15px; 
-  border-radius: 8px; 
-  margin-bottom: 15px; 
-  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-  display: flex; 
-  align-items: center; 
-  gap: 20px;
-
-  .promo-info { 
-    flex-grow: 1; 
-  }
-  
-  .promo-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-start; 
-    margin-bottom: 8px; 
-    gap: 15px; 
-  }
-  
-  .promo-title { 
-    font-size: 1.2em; 
-    font-weight: bold; 
-    color: #7c3aed; 
-    margin: 0; 
-  }
-  
-  .promo-status { 
-    font-size: 0.8em; 
-    padding: 3px 6px; 
-    border-radius: 4px; 
-    font-weight: bold; 
-    flex-shrink: 0;
-    
-    &.active { 
-      background-color: #dcfce7; 
-      color: #166534; 
-    }
-    
-    &.inactive { 
-      background-color: #fee2e2; 
-      color: #991b1b; 
-    }
-  }
-  
-  .promo-description { 
-    font-size: 0.95em; 
-    color: #333; 
-    margin: 0 0 10px 0; 
-    word-break: break-word; 
-    
-    strong { 
-      color: #5b21b6; 
-    }
-  }
-  
-  .promo-actions { 
-    display: flex; 
-    gap: 10px; 
-    flex-shrink: 0;
-    
-    button { 
-      font-size: 0.9em; 
-      padding: 6px 12px; 
-    }
-  }
-  
-  @media (max-width: 768px) {
-    align-items: flex-start;
-    
-    ${ProductImage} {
-      width: 60px;
-      height: 60px;
-    }
-    
-    .promo-actions {
-      flex-wrap: wrap;
-    }
-  }
-`;
-
-export const ToppingsGrid = styled.div`
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-  gap: 10px; 
-  background-color: #fff; 
-  border: 1px solid #ddd; 
-  padding: 15px; 
+export const Input = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
+  font-size: 1rem;
 `;
 
-export const ToppingCheckboxLabel = styled.label`
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  font-size: 0.9em; 
-  cursor: pointer; 
-  
-  input { 
-    width: 16px; 
-    height: 16px; 
+export const Select = styled.select`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: white;
+`;
+
+export const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-weight: 500;
+`;
+
+export const ActionButtons = styled.div`
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+`;
+
+export const PromotionList = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+`;
+
+export const PromotionCard = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+`;
+
+export const CardContent = styled.div`
+  h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+  }
+  p {
+    margin: 0.25rem 0;
+    color: #4b5563;
+  }
+  span {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: ${({ status }) => status === 'Ativa' ? '#16a34a' : '#ef4444'};
   }
 `;
 
-export const InfoText = styled.p`
-  background-color: #f0f4f8; 
-  border-left: 4px solid #7c3aed;
-  padding: 15px; 
-  border-radius: 4px; 
-  color: #333;
-`;
+export const CardActions = styled.div``;
+
+export const LoadingText = styled.p`/* ... */`;
+export const InfoText = styled.p`/* ... */`;
