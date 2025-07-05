@@ -8,7 +8,9 @@ import toast from 'react-hot-toast';
 
 import ProductCard from '../../components/ProductCard';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation } from 'swiper/modules';
+import { Pagination, Navigation } from 'swiper/modules'; // Módulos para navegação e paginação
+
+// Importação ESSENCIAL dos estilos do Swiper
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
@@ -25,47 +27,33 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // A lógica para buscar os dados (fetchData) permanece a mesma da resposta anterior...
   const fetchData = useCallback(async () => {
     if (!store?.id) return;
     setLoading(true);
     try {
       const tenantId = store.id;
       const productsRef = collection(db, 'tenants', tenantId, 'products');
-
-      // 1. Buscar as promoções ativas
       const promotionsRef = collection(db, 'tenants', tenantId, 'promotions');
       const promoQuery = query(promotionsRef, where("isActive", "==", true));
       const promoSnapshot = await getDocs(promoQuery);
       const activePromos = promoSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      // 2. Buscar os detalhes dos produtos que estão em promoção
-      const productIdsInPromos = activePromos
-        .map(p => p.productId)
-        .filter(Boolean);
-      
+      const productIdsInPromos = activePromos.map(p => p.productId).filter(Boolean);
       let productsForPromos = [];
       if (productIdsInPromos.length > 0) {
         const productsPromoQuery = query(productsRef, where(documentId(), 'in', productIdsInPromos));
         const productsSnapshot = await getDocs(productsPromoQuery);
         productsForPromos = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       }
-      
-      // 3. Juntar os dados da promoção com os dados do produto
-      const finalPromotions = activePromos
-        .map(promo => {
-          const productDetails = productsForPromos.find(p => p.id === promo.productId);
-          return (productDetails && productDetails.isAvailable) ? { ...promo, product: productDetails } : null;
-        })
-        .filter(Boolean);
+      const finalPromotions = activePromos.map(promo => {
+        const productDetails = productsForPromos.find(p => p.id === promo.productId);
+        return (productDetails && productDetails.isAvailable) ? { ...promo, product: productDetails } : null;
+      }).filter(Boolean);
       setPromotions(finalPromotions);
-      
-      // 4. Buscar os produtos em destaque (que não estão em promoção)
       const featuredQuery = query(productsRef, where("isFeatured", "==", true), where("isAvailable", "==", true));
       const featuredSnapshot = await getDocs(featuredQuery);
       const featuredData = featuredSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
       setFeaturedProducts(featuredData.filter(p => !productIdsInPromos.includes(p.id)));
-
     } catch (error) {
       toast.error("Erro ao carregar os dados da loja.");
       console.error(error);
@@ -94,24 +82,27 @@ const HomePage = () => {
         </HeroContent>
       </HeroSection>
 
+      {/* <<< O CARROSSEL DE PROMOÇÕES ESTÁ AQUI >>> */}
       {promotions.length > 0 && (
         <Section>
           <SectionTitle>🔥 Promoções Imperdíveis!</SectionTitle>
           <CarouselWrapper>
             <Swiper
-              modules={[Pagination, Navigation]}
+              modules={[Pagination, Navigation]} // Ativa os módulos
               spaceBetween={20}
-              slidesPerView={1.5}
-              navigation
-              pagination={{ clickable: true }}
+              slidesPerView={'auto'} // Deixa o Swiper calcular quantos slides cabem
+              navigation={true} // Ativa as setas de navegação
+              pagination={{ clickable: true }} // Ativa os pontos de paginação
               breakpoints={{
+                // Em telas maiores, mostra mais slides
                 640: { slidesPerView: 2 },
                 768: { slidesPerView: 3 },
                 1024: { slidesPerView: 4 },
               }}
+              className="promotions-carousel"
             >
               {promotions.map(promo => (
-                <SwiperSlide key={promo.id}>
+                <SwiperSlide key={promo.id} style={{ width: '280px' }}>
                   <ProductCard
                     product={promo.product}
                     promotionalPrice={promo.promotionalPrice}

@@ -15,7 +15,6 @@ export const HeroSection = styled.div`
   background-size: cover;
   background-position: center;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 20px;
@@ -40,15 +39,13 @@ export const StoreLogo = styled.img`
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 `;
 
-export const StatusInfo = styled.div` // Mantendo este nome se for usado em outro lugar
-  background-color: ${({ $isOpen }) => $isOpen ? '#16a34a' : '#ef4444'};
+export const StoreStatus = styled.div`
+  background-color: ${({ $isOpen }) => ($isOpen ? '#16a34a' : '#ef4444')};
   color: white;
   padding: 8px 20px;
   border-radius: 20px;
   font-weight: bold;
 `;
-
-export const StoreStatus = styled(StatusInfo)``; // Alias para consistência
 
 export const ViewMenuButton = styled(Link)`
   background-color: #5b21b6;
@@ -58,11 +55,6 @@ export const ViewMenuButton = styled(Link)`
   font-weight: bold;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #4c1d95;
-  }
 `;
 
 export const Section = styled.section`
@@ -89,11 +81,25 @@ export const ContentGrid = styled.div`
 `;
 
 export const CarouselWrapper = styled.div`
-  .swiper-pagination-bullet-active {
-    background: #5b21b6;
+  .swiper-slide {
+    height: auto; // Garante que os cards não fiquem com alturas diferentes
   }
-  .swiper-button-next, .swiper-button-prev {
-    color: #5b21b6;
+
+  .swiper-pagination-bullet-active {
+    background: #5b21b6 !important;
+  }
+  
+  .swiper-button-next,
+  .swiper-button-prev {
+    color: #5b21b6 !important;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    
+    &:after {
+      font-size: 1.5rem !important;
+    }
   }
 `;
 
