@@ -3,14 +3,17 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-// Layouts
+// Layouts e Componentes
 import AdminLayout from '../pages/Admin/AdminLayout';
 import StoreLayout from '../components/StoreLayout';
-
-// Componente de Proteção
 import ProtectedRoute from '../components/ProtectedRoute';
+import SuperAdminRoute from '../components/SuperAdminRoute';
 
-// Páginas Públicas
+// Páginas Públicas Principais
+import LandingPage from '../pages/LandingPage';
+import RegistrationPage from '../pages/RegistrationPage';
+
+// Páginas da Loja (Cardápio, etc.)
 import HomePage from '../pages/HomePage';
 import MenuPage from '../pages/MenuPage';
 import CartPage from '../pages/CartPage';
@@ -26,19 +29,21 @@ import SettingsPage from '../pages/Admin/SettingsPage';
 import ToppingsPage from '../pages/Admin/ToppingsPage';
 import PromotionsPage from '../pages/Admin/PromotionsPage';
 import SubscriptionPage from '../pages/Admin/SubscriptionPage';
-import PrintableReceiptPage from '../pages/Admin/PrintableReceiptPage';
 
-// Rota Super Admin
-import SuperAdminRoute from '../components/SuperAdminRoute';
+// Página Super Admin
 import SuperAdminDashboardPage from '../pages/SuperAdmin/SuperAdminDashboardPage';
 
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/loja/vibe-acai-teste" replace />} />
+      {/* ROTA PRINCIPAL: A "vitrine" do teu SaaS */}
+      <Route path="/" element={<LandingPage />} />
 
-      {/* ROTAS PÚBLICAS DA LOJA */}
+      {/* ROTA DE REGISTO: Para novos lojistas se inscreverem */}
+      <Route path="/register" element={<RegistrationPage />} />
+
+      {/* ROTAS PÚBLICAS DA LOJA: O cardápio de cada cliente */}
       <Route path="/loja/:storeSlug" element={<StoreLayout />}>
         <Route index element={<HomePage />} />
         <Route path="cardapio" element={<MenuPage />} />
@@ -47,9 +52,8 @@ const AppRoutes = () => {
         <Route path="checkout" element={<CheckoutPage />} />
       </Route>
 
-      {/* ROTAS DE ADMINISTRAÇÃO */}
+      {/* ROTAS DE ADMINISTRAÇÃO: O painel de cada lojista */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
-      <Route path="/admin/print/order/:orderId" element={<PrintableReceiptPage />} />
 
       <Route 
         path="/admin" 
@@ -60,7 +64,6 @@ const AppRoutes = () => {
         }
       >
         <Route index element={<DashboardOverviewPage />} />
-        {/* <<< MUDANÇA NOS CAMINHOS AQUI >>> */}
         <Route path="products" element={<ProductsPage />} />
         <Route path="categories" element={<CategoriesPage />} />
         <Route path="toppings" element={<ToppingsPage />} />
@@ -69,7 +72,7 @@ const AppRoutes = () => {
         <Route path="assinatura" element={<SubscriptionPage />} />
       </Route>
 
-      {/* ROTA SUPER ADMIN */}
+      {/* ROTA SUPER ADMIN: O teu painel de controlo geral */}
       <Route
         path="/super-admin"
         element={

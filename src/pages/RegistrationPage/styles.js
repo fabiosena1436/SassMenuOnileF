@@ -1,44 +1,66 @@
-// Ficheiro: src/pages/RegistrationPage/styles.js
+// Arquivo: src/pages/RegistrationPage/styles.js
 
 import styled from 'styled-components';
 
-export const RegistrationPageWrapper = styled.div`
+export const RegistrationContainer = styled.div`
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  background-color: #f4f4f4;
-`;
-
-export const RegistrationForm = styled.form`
-  background: white;
-  padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
+  background-color: #f7fafc;
+  padding: 2rem;
 `;
 
 export const Title = styled.h1`
+  font-size: 2.5rem;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
   text-align: center;
-  margin-bottom: 2rem;
-  color: #333;
+`;
+
+export const Form = styled.form`
+  width: 100%;
+  max-width: 450px;
+  background: white;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  margin-top: 2rem;
+`;
+
+export const FormGroup = styled.div`
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+  }
 `;
 
 export const Input = styled.input`
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-  box-sizing: border-box;
-  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 1px #4f46e5;
+  }
 `;
 
 export const ErrorMessage = styled.p`
-  color: #d93025;
-  font-size: 14px;
+  color: #e53e3e;
+  background-color: #fed7d7;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
   text-align: center;
-  margin-top: -0.5rem;
-  margin-bottom: 1rem;
+  font-weight: 500;
 `;

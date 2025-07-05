@@ -1,108 +1,109 @@
-// Ficheiro: src/pages/RegistrationPage/index.js
+// Arquivo: src/pages/RegistrationPage/index.js
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../services/firebaseConfig';
-import { useAuth } from '../../contexts/AuthContext';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../../services/firebaseConfig';
 import { slugify } from '../../utils/slugify';
+import toast from 'react-hot-toast';
 import Button from '../../components/Button';
 import {
-  RegistrationPageWrapper,
-  RegistrationForm,
+  RegistrationContainer, // Nome correto
   Title,
+  Form,                 // Nome correto
+  FormGroup,
   Input,
-  ErrorMessage,
+  ErrorMessage
 } from './styles';
 
 const RegistrationPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [storeName, setStoreName] = useState('');
+  const [formData, setFormData] = useState({
+    storeName: '',
+    email: '',
+    password: '',
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  const handleRegistration = async (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
-    if (!email || !password || !storeName) {
-      setError('Por favor, preencha todos os campos.');
+    if (!formData.storeName || !formData.email || !formData.password) {
+      setError("Todos os campos são obrigatórios.");
       return;
     }
-    
     setLoading(true);
-    const auth = getAuth();
+    setError('');
 
     try {
-      // Passo 1: Criar o utilizador no Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const newUser = userCredential.user;
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
 
-      // Passo 2: Criar o documento 'tenant' no Firestore
-      const storeSlug = slugify(storeName);
-      await addDoc(collection(db, 'tenants'), {
-        ownerId: newUser.uid,
-        storeName: storeName,
-        slug: storeSlug,
-        plan: 'basic', // ou 'free_trial'
-        status: 'active',
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, {
+        email: user.email,
+        uid: user.uid,
+        role: 'lojista',
         createdAt: serverTimestamp(),
       });
 
-      // Passo 3: Fazer login com o novo utilizador para criar a sessão
-      await login(email, password);
-      
-      // Passo 4: Redirecionar para o painel de administração
+      const storeSlug = slugify(formData.storeName);
+      const tenantDocRef = doc(db, 'tenants', user.uid);
+      await setDoc(tenantDocRef, {
+        ownerId: user.uid,
+        storeName: formData.storeName,
+        slug: storeSlug,
+        plan: 'premium',
+        isStoreOpen: true,
+        deliveryFee: 5.00,
+        createdAt: serverTimestamp(),
+      });
+
+      toast.success('Loja criada com sucesso! Bem-vindo(a)!');
       navigate('/admin');
 
     } catch (err) {
-      console.error("Erro no registo:", err.code);
+      console.error("Erro no registo:", err.code, err.message);
       if (err.code === 'auth/email-already-in-use') {
-        setError('Este email já está a ser utilizado.');
+        setError("Este email já está a ser utilizado.");
       } else if (err.code === 'auth/weak-password') {
-        setError('A sua senha deve ter pelo menos 6 caracteres.');
+        setError("A sua password deve ter pelo menos 6 caracteres.");
       } else {
-        setError('Ocorreu um erro ao criar a sua conta.');
+        setError("Ocorreu um erro ao criar a sua conta. Tente novamente.");
       }
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <RegistrationPageWrapper>
-      <RegistrationForm onSubmit={handleRegistration}>
-        <Title>Crie a sua Loja</Title>
-        <Input
-          type="text"
-          placeholder="Nome da sua loja"
-          value={storeName}
-          onChange={(e) => setStoreName(e.target.value)}
-        />
-        <Input
-          type="email"
-          placeholder="Seu melhor email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-        />
-        <Input
-          type="password"
-          placeholder="Crie uma senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-        />
+    <RegistrationContainer>
+      <Title>Crie o seu Cardápio Online</Title>
+      <p style={{textAlign: 'center', marginBottom: '2rem'}}>Comece a vender em minutos.</p>
+      <Form onSubmit={handleSubmit}>
+        <FormGroup>
+          <label htmlFor="storeName">Nome da sua Loja</label>
+          <Input type="text" name="storeName" id="storeName" onChange={handleChange} required />
+        </FormGroup>
+        <FormGroup>
+          <label htmlFor="email">O seu Email de Acesso</label>
+          <Input type="email" name="email" id="email" onChange={handleChange} required />
+        </FormGroup>
+        <FormGroup>
+          <label htmlFor="password">Crie uma Password</label>
+          <Input type="password" name="password" id="password" onChange={handleChange} required />
+        </FormGroup>
         {error && <ErrorMessage>{error}</ErrorMessage>}
-        <Button type="submit" disabled={loading} style={{ width: '100%' }}>
+        <Button type="submit" disabled={loading} style={{width: '100%', marginTop: '1rem'}}>
           {loading ? 'A criar...' : 'Criar a Minha Loja'}
         </Button>
-      </RegistrationForm>
-    </RegistrationPageWrapper>
+      </Form>
+    </RegistrationContainer>
   );
 };
 
