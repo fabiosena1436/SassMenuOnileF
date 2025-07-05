@@ -3,214 +3,161 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { db } from '../../../services/firebaseConfig';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import Button from '../../../components/Button';
 import {
-  PageWrapper,
-  Header,
-  Title,
-  FormContainer,
-  FormGroup,
-  Select,
-  Input,
-  CheckboxLabel,
-  ActionButtons,
-  PromotionList,
-  PromotionCard,
-  CardContent,
-  CardActions,
-  LoadingText,
-  InfoText,
+  PageWrapper, Header, Title, FormContainer, FormGrid, FormGroup, Input, Select,
+  ActionButtons, PromotionList, PromotionListItem, PromoImage, PromoInfo,
+  PromoStatus, PromoActions, LoadingText, InfoText
 } from './styles';
 
 const PromotionsPage = () => {
-  const { tenant, loading: authLoading } = useAuth(); // <<< OBTEMOS O ESTADO DE CARREGAMENTO
+  const { tenant, loading: authLoading } = useAuth();
   const [promotions, setPromotions] = useState([]);
   const [products, setProducts] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
+  const [loading, setLoading] = useState(true);
+  
+  const [editingPromo, setEditingPromo] = useState(null);
+  const initialFormData = { name: '', type: 'product_discount', productId: '', originalPrice: '', promotionalPrice: '', isActive: true };
+  const [formData, setFormData] = useState(initialFormData);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    type: 'product_discount',
-    productId: '',
-    originalPrice: '',
-    promotionalPrice: '',
-    isActive: true,
-  });
-
-  const fetchPromotionsAndProducts = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!tenant?.id) return;
-    setLoadingData(true);
+    setLoading(true);
     try {
       const promotionsRef = collection(db, 'tenants', tenant.id, 'promotions');
       const productsRef = collection(db, 'tenants', tenant.id, 'products');
       
-      // <<< MUDANÇA AQUI: Removemos a ordenação da consulta >>>
-      const productsQuery = query(productsRef, where('isAvailable', '==', true));
-
       const [promoSnap, productsSnap] = await Promise.all([
         getDocs(query(promotionsRef, orderBy('createdAt', 'desc'))),
-        getDocs(productsQuery)
+        getDocs(query(productsRef, where('isAvailable', '==', true), orderBy('name')))
       ]);
       
-      const productsData = productsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-      // <<< MUDANÇA AQUI: Ordenamos os produtos no código, depois de os recebermos >>>
-      productsData.sort((a, b) => a.name.localeCompare(b.name));
-      
       setPromotions(promoSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setProducts(productsData);
-
-    } catch (error) {
-      toast.error("Erro ao carregar dados.");
-    } finally {
-      setLoadingData(false);
-    }
+      setProducts(productsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (error) { toast.error("Erro ao carregar dados. Verifique o console para mais detalhes sobre índices do Firestore."); console.error(error) }
+    finally { setLoading(false); }
   }, [tenant]);
 
-  // <<< LÓGICA DE CARREGAMENTO CORRIGIDA >>>
   useEffect(() => {
-    // Se a autenticação ainda está a decorrer, esperamos.
-    if (authLoading) {
-      setLoadingData(true);
-    } 
-    // Se a autenticação terminou e temos um lojista, buscamos os dados.
-    else if (tenant) {
-      fetchPromotionsAndProducts();
-    } 
-    // Se a autenticação terminou e não há lojista, paramos de carregar.
-    else {
-      setLoadingData(false);
+    if (!authLoading && tenant) {
+      fetchData();
     }
-  }, [authLoading, tenant, fetchPromotionsAndProducts]);
-
-
+  }, [authLoading, tenant, fetchData]);
+  
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    const val = type === 'checkbox' ? checked : value;
+    setFormData(prev => ({ ...prev, [name]: val }));
+
+    if (name === 'productId') {
+      const product = products.find(p => p.id === val);
+      setFormData(prev => ({ ...prev, originalPrice: product ? product.price.toString() : '' }));
+    }
   };
   
-  useEffect(() => {
-    if (formData.type === 'product_discount' && formData.productId) {
-      const selectedProduct = products.find(p => p.id === formData.productId);
-      if (selectedProduct) {
-        setFormData(prev => ({ ...prev, originalPrice: selectedProduct.price.toString() }));
-      }
-    } else {
-      setFormData(prev => ({...prev, originalPrice: ''}));
-    }
-  }, [formData.productId, formData.type, products]);
-
+  const resetForm = () => {
+    setEditingPromo(null);
+    setFormData(initialFormData);
+  };
+  
+  const handleEditClick = (promo) => {
+    setEditingPromo(promo);
+    const priceAsString = promo.promotionalPrice?.toString() || '';
+    setFormData({ ...promo, promotionalPrice: priceAsString });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!tenant?.id || !formData.name) {
-      toast.error("O nome da promoção é obrigatório.");
-      return;
-    }
-
+    if (!tenant?.id || !formData.name || !formData.productId || !formData.promotionalPrice) return toast.error("Todos os campos são obrigatórios.");
+    
     const dataToSave = {
       ...formData,
-      originalPrice: parseFloat(formData.originalPrice) || 0,
-      promotionalPrice: parseFloat(formData.promotionalPrice) || 0,
-      createdAt: serverTimestamp(),
+      originalPrice: parseFloat(formData.originalPrice),
+      promotionalPrice: parseFloat(formData.promotionalPrice),
+      createdAt: editingPromo ? formData.createdAt : serverTimestamp(),
     };
 
     try {
-      await addDoc(collection(db, 'tenants', tenant.id, 'promotions'), dataToSave);
-      toast.success("Promoção criada com sucesso!");
-      setFormData({ name: '', type: 'product_discount', productId: '', originalPrice: '', promotionalPrice: '', isActive: true });
-      fetchPromotionsAndProducts();
-    } catch (error) {
-      toast.error("Erro ao criar a promoção.");
-    }
+      if (editingPromo) {
+        await updateDoc(doc(db, 'tenants', tenant.id, 'promotions', editingPromo.id), dataToSave);
+        toast.success('Promoção atualizada!');
+      } else {
+        await addDoc(collection(db, 'tenants', tenant.id, 'promotions'), dataToSave);
+        toast.success('Promoção criada!');
+      }
+      resetForm();
+      fetchData();
+    } catch (error) { toast.error('Erro ao salvar promoção.'); }
   };
-
+  
   const handleDelete = async (promoId) => {
-    if (!window.confirm("Tem a certeza que quer apagar esta promoção?")) return;
+    if (!window.confirm("Apagar esta promoção?")) return;
     try {
       await deleteDoc(doc(db, 'tenants', tenant.id, 'promotions', promoId));
       toast.success("Promoção apagada.");
-      fetchPromotionsAndProducts();
-    } catch (error) {
-      toast.error("Erro ao apagar a promoção.");
-    }
+      fetchData();
+    } catch (error) { toast.error("Erro ao apagar."); }
+  };
+  
+  const handleToggleActive = async (promo) => {
+    try {
+      await updateDoc(doc(db, 'tenants', tenant.id, 'promotions', promo.id), { isActive: !promo.isActive });
+      toast.success(`Promoção ${!promo.isActive ? 'ativada' : 'desativada'}.`);
+      fetchData();
+    } catch (error) { toast.error("Erro ao alterar o status."); }
   };
 
-  if (authLoading) {
-      return <PageWrapper><LoadingText>A carregar painel...</LoadingText></PageWrapper>
-  }
+  if (loading) return <PageWrapper><LoadingText>A carregar...</LoadingText></PageWrapper>;
 
   return (
     <PageWrapper>
-      <Header>
-        <Title>Gestão de Promoções</Title>
-      </Header>
-
+      <Header><Title>Gerenciamento de Promoções</Title></Header>
+      
       <FormContainer onSubmit={handleSubmit}>
-        <h3>Criar Nova Promoção</h3>
-        <FormGroup>
-          <label>Nome da Promoção</label>
-          <Input name="name" value={formData.name} onChange={handleInputChange} placeholder="Ex: Combo do Dia" required />
-        </FormGroup>
-        <FormGroup>
-          <label>Tipo de Promoção</label>
-          <Select name="type" value={formData.type} onChange={handleInputChange}>
-            <option value="product_discount">Desconto em Produto (De/Por)</option>
-          </Select>
-        </FormGroup>
-
-        {formData.type === 'product_discount' && (
-          <>
-            <FormGroup>
-              <label>Selecione o Produto</label>
-              <Select name="productId" value={formData.productId} onChange={handleInputChange} required>
-                <option value="">-- Escolha um produto --</option>
-                {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </Select>
-            </FormGroup>
-            <FormGroup>
-              <label>Preço Original (De)</label>
-              <Input name="originalPrice" value={formData.originalPrice} onChange={handleInputChange} type="number" step="0.01" placeholder="Preço normal do produto" disabled />
-            </FormGroup>
-            <FormGroup>
-              <label>Preço Promocional (Por)</label>
-              <Input name="promotionalPrice" value={formData.promotionalPrice} onChange={handleInputChange} type="number" step="0.01" required />
-            </FormGroup>
-          </>
-        )}
-        
-        <CheckboxLabel>
-          <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleInputChange} />
-          Ativar promoção imediatamente
-        </CheckboxLabel>
-        
+        <h3>{editingPromo ? 'A Editar Promoção' : 'Criar Nova Promoção'}</h3>
+        <FormGrid>
+          <FormGroup><label>Título da Promoção</label><Input name="name" value={formData.name} onChange={handleInputChange} required /></FormGroup>
+          <FormGroup><label>Tipo de Promoção</label><Select name="type" value={formData.type} onChange={handleInputChange}><option value="product_discount">Desconto em Produto</option></Select></FormGroup>
+          <FormGroup>
+            <label>Produto em Promoção</label>
+            <Select name="productId" value={formData.productId} onChange={handleInputChange} required>
+              <option value="">-- Escolha um produto --</option>
+              {/* <<< CORREÇÃO AQUI: Trocado 'categories' por 'products' >>> */}
+              {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </Select>
+          </FormGroup>
+          <FormGroup><label>Preço Promocional (R$)</label><Input name="promotionalPrice" value={formData.promotionalPrice} onChange={handleInputChange} type="number" step="0.01" required /></FormGroup>
+        </FormGrid>
         <ActionButtons>
-          <Button type="submit">Criar Promoção</Button>
+          {editingPromo && <Button type="button" $variant="secondary" onClick={resetForm}>Cancelar</Button>}
+          <Button type="submit">{editingPromo ? 'Salvar Alterações' : 'Adicionar Promoção'}</Button>
         </ActionButtons>
       </FormContainer>
 
-      {loadingData ? <LoadingText>A carregar promoções...</LoadingText> : (
-        <PromotionList>
-          {promotions.length > 0 ? promotions.map(promo => {
-            const product = products.find(p => p.id === promo.productId);
-            return (
-              <PromotionCard key={promo.id}>
-                <CardContent status={promo.isActive ? 'Ativa' : 'Inativa'}>
-                  <h4>{promo.name}</h4>
-                  {product && <p>Produto: {product.name}</p>}
-                  {promo.type === 'product_discount' && <p>De: R$ {promo.originalPrice.toFixed(2)} | Por: R$ {promo.promotionalPrice.toFixed(2)}</p>}
-                  <span>Status: {promo.isActive ? 'Ativa' : 'Inativa'}</span>
-                </CardContent>
-                <CardActions>
-                  <Button $variant="danger" onClick={() => handleDelete(promo.id)}>Apagar</Button>
-                </CardActions>
-              </PromotionCard>
-            )
-          }) : <InfoText>Nenhuma promoção criada ainda.</InfoText>}
-        </PromotionList>
-      )}
-
+      <h3>Promoções Cadastradas</h3>
+      <PromotionList>
+        {promotions.length > 0 ? promotions.map(promo => {
+          const product = products.find(p => p.id === promo.productId);
+          return (
+            <PromotionListItem key={promo.id}>
+              <PromoImage src={product?.imageUrl || 'https://via.placeholder.com/80'} alt={promo.name} />
+              <PromoInfo>
+                <h4>{promo.name}</h4>
+                <p>Desconto: {product?.name || 'Produto indisponível'} de R$ {promo.originalPrice?.toFixed(2)} por R$ {promo.promotionalPrice?.toFixed(2)}</p>
+              </PromoInfo>
+              <PromoStatus $isActive={promo.isActive}>{promo.isActive ? 'Ativa' : 'Inativa'}</PromoStatus>
+              <PromoActions>
+                <Button onClick={() => handleEditClick(promo)}>Editar</Button>
+                <Button onClick={() => handleToggleActive(promo)} $variant="secondary">{promo.isActive ? 'Desativar' : 'Ativar'}</Button>
+                <Button onClick={() => handleDelete(promo.id)} $variant="danger">Excluir</Button>
+              </PromoActions>
+            </PromotionListItem>
+          );
+        }) : <InfoText>Nenhuma promoção cadastrada.</InfoText>}
+      </PromotionList>
     </PageWrapper>
   );
 };

@@ -1,6 +1,7 @@
 // Arquivo: src/pages/Admin/ProductsPage/index.js
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../../services/firebaseConfig';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -8,44 +9,32 @@ import Button from '../../../components/Button';
 import toast from 'react-hot-toast';
 
 import {
-  PageWrapper,
-  SectionTitle,
-  AddForm,
-  FormGroup,
-  FormActions,
-  ProductList,
-  LoadingText,
-  InfoText
+  PageWrapper, Header, Title, FormContainer, FormGrid, FormGroup, Input, Textarea, Select,
+  FormActions, ProductListSection, ProductListItem, ProductImage, ProductInfo,
+  ProductDetails, Price, Tag, ActionButtons, LoadingText, InfoText
 } from './styles';
-import ProductListItem from '../../../components/ProductListItem';
 
 const ProductsPage = () => {
+  const { tenant, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { tenant, loading: authLoading } = useAuth();
 
-  const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const initialFormData = {
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    imageUrl: '',
-    isAvailable: true,
-    isFeatured: false,
+    name: '', description: '', price: '', category: '', imageUrl: '',
+    isAvailable: true, isFeatured: false,
   };
   const [formData, setFormData] = useState(initialFormData);
 
-  const fetchProductsAndCategories = useCallback(async () => {
-    const tenantId = tenant?.id;
-    if (!tenantId) return;
-
+  const fetchData = useCallback(async () => {
+    if (!tenant?.id) return;
     setLoading(true);
     try {
-      const productsRef = collection(db, 'tenants', tenantId, 'products');
-      const categoriesRef = collection(db, 'tenants', tenantId, 'categories');
+      const productsRef = collection(db, 'tenants', tenant.id, 'products');
+      const categoriesRef = collection(db, 'tenants', tenant.id, 'categories');
       
       const [productsSnap, categoriesSnap] = await Promise.all([
         getDocs(query(productsRef, orderBy('name'))),
@@ -54,157 +43,136 @@ const ProductsPage = () => {
 
       setProducts(productsSnap.docs.map(d => ({ ...d.data(), id: d.id })));
       setCategories(categoriesSnap.docs.map(d => ({ ...d.data(), id: d.id })));
-    } catch (error) {
-      toast.error("Erro ao carregar dados.");
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error("Erro ao carregar dados."); }
+    finally { setLoading(false); }
   }, [tenant]);
 
   useEffect(() => {
-    if (authLoading) {
-      setLoading(true);
-    } else if (tenant) {
-      fetchProductsAndCategories();
-    } else {
-      setLoading(false);
+    if (!authLoading && tenant) {
+      fetchData();
+    } else if (!authLoading && !tenant) {
+        setLoading(false);
     }
-  }, [authLoading, tenant, fetchProductsAndCategories]);
+  }, [authLoading, tenant, fetchData]);
 
-  const resetFormAndClose = () => {
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const resetForm = () => {
     setEditingProduct(null);
     setFormData(initialFormData);
-    setIsFormVisible(false);
   };
   
   const handleEditClick = (product) => {
     setEditingProduct(product);
     setFormData({ ...initialFormData, ...product, price: product.price.toString() });
-    setIsFormVisible(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
-  const handleAddNewClick = () => {
-      setEditingProduct(null);
-      setFormData(initialFormData);
-      setIsFormVisible(true);
-  }
-
-  const handleDelete = async (productId) => {
-    if (!window.confirm("Tem a certeza que quer apagar este produto?")) return;
-    const tenantId = tenant?.id;
-    if (!tenantId) return;
-    try {
-      await deleteDoc(doc(db, 'tenants', tenantId, 'products', productId));
-      toast.success('Produto apagado!');
-      fetchProductsAndCategories();
-    } catch (error) {
-      toast.error('Erro ao apagar o produto.');
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const tenantId = tenant?.id;
-    if (!tenantId) {
-      toast.error("Não foi possível identificar a sua loja.");
-      return;
+    if (!tenant?.id || !formData.name || !formData.price || !formData.category) {
+      return toast.error("Nome, Preço e Categoria são obrigatórios.");
     }
-    
-    if (!formData.name || !formData.price || !formData.category) {
-      toast.error("Nome, Preço e Categoria são obrigatórios.");
-      return;
-    }
-
     const dataToSave = { ...formData, price: parseFloat(formData.price) };
 
     try {
       if (editingProduct) {
-        const productRef = doc(db, 'tenants', tenantId, 'products', editingProduct.id);
-        await updateDoc(productRef, dataToSave);
-        toast.success('Produto atualizado com sucesso!');
+        await updateDoc(doc(db, 'tenants', tenant.id, 'products', editingProduct.id), dataToSave);
+        toast.success('Produto atualizado!');
       } else {
-        await addDoc(collection(db, 'tenants', tenantId, 'products'), dataToSave);
-        toast.success('Produto adicionado com sucesso!');
+        await addDoc(collection(db, 'tenants', tenant.id, 'products'), dataToSave);
+        toast.success('Produto adicionado!');
       }
-      resetFormAndClose();
-      fetchProductsAndCategories();
-    } catch (error) {
-      console.error("Erro ao salvar produto:", error);
-      toast.error('Erro ao salvar o produto.');
-    }
+      resetForm();
+      await fetchData();
+    } catch (error) { toast.error('Erro ao salvar o produto.'); }
   };
   
+  const handleDelete = async (productId) => {
+    if (!window.confirm("Apagar este produto? Esta ação não pode ser desfeita.")) return;
+    try {
+      await deleteDoc(doc(db, 'tenants', tenant.id, 'products', productId));
+      toast.success('Produto apagado!');
+      fetchData();
+    } catch (error) { toast.error('Erro ao apagar.'); }
+  };
+  
+  // <<< FUNÇÃO PARA ATIVAR/DESATIVAR E DESTACAR/REMOVER DESTAQUE >>>
+  const handleToggleBoolean = async (productId, field, currentValue) => {
+    // Atualiza a interface imediatamente para uma melhor experiência (Optimistic UI Update)
+    setProducts(prevProducts =>
+      prevProducts.map(p =>
+        p.id === productId ? { ...p, [field]: !currentValue } : p
+      )
+    );
+
+    try {
+      const docRef = doc(db, 'tenants', tenant.id, 'products', productId);
+      await updateDoc(docRef, { [field]: !currentValue });
+      toast.success('Estado do produto atualizado!');
+    } catch (error) {
+      toast.error(`Erro ao atualizar. A reverter a alteração.`);
+      // Se der erro, reverte a alteração na interface
+      setProducts(prevProducts =>
+        prevProducts.map(p =>
+          p.id === productId ? { ...p, [field]: currentValue } : p
+        )
+      );
+    }
+  };
+
   if (loading) {
     return <PageWrapper><LoadingText>A carregar...</LoadingText></PageWrapper>;
   }
 
-  if (!tenant) {
-      return <PageWrapper><InfoText>Não foi possível carregar os dados da sua loja.</InfoText></PageWrapper>;
-  }
-  
   return (
     <PageWrapper>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <SectionTitle>Gerir Produtos</SectionTitle>
-        <Button onClick={isFormVisible ? () => setIsFormVisible(false) : handleAddNewClick}>
-          {isFormVisible ? 'Fechar Formulário' : 'Adicionar Produto'}
-        </Button>
-      </div>
+      <Header>
+        <Title>Gerenciamento de Produtos</Title>
+        <Button onClick={() => navigate(`/loja/${tenant.slug}`)} $variant="secondary">Voltar para o Site</Button>
+      </Header>
+      
+      <FormContainer onSubmit={handleSubmit}>
+        <h3>{editingProduct ? 'A Editar Produto' : 'Adicionar Novo Produto'}</h3>
+        <FormGrid>
+          <FormGroup><label>Nome Produto</label><Input name="name" value={formData.name} onChange={handleInputChange} required /></FormGroup>
+          <FormGroup><label>Preço (Ex: 12.50)</label><Input name="price" value={formData.price} onChange={handleInputChange} type="number" step="0.01" required /></FormGroup>
+          <FormGroup><label>Categoria</label><Select name="category" value={formData.category} onChange={handleInputChange} required><option value="">Selecione uma categoria</option>{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</Select></FormGroup>
+          <FormGroup><label>URL da Imagem</label><Input name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} /></FormGroup>
+          <FormGroup className="full-width"><label>Descrição (Opcional)</label><Textarea name="description" value={formData.description} onChange={handleInputChange} /></FormGroup>
+        </FormGrid>
+        <FormActions>
+          {editingProduct && <Button type="button" $variant="secondary" onClick={resetForm}>Cancelar Edição</Button>}
+          <Button type="submit">{editingProduct ? 'Salvar Alterações' : 'Adicionar Produto'}</Button>
+        </FormActions>
+      </FormContainer>
 
-      {isFormVisible && (
-        <AddForm onSubmit={handleSubmit}>
-          <FormGroup>
-            <label>Nome do Produto</label>
-            <input type="text" name="name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
-          </FormGroup>
-          <FormGroup>
-            <label>Preço (R$)</label>
-            <input type="number" name="price" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} step="0.01" required />
-          </FormGroup>
-          <FormGroup className="form-group-description">
-            <label>Descrição</label>
-            <textarea name="description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          </FormGroup>
-          <FormGroup>
-            <label>Categoria</label>
-            <select name="category" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} required>
-              <option value="">-- Selecione --</option>
-              {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
-            </select>
-          </FormGroup>
-          <FormGroup>
-            <label>URL da Imagem</label>
-            <input type="text" name="imageUrl" value={formData.imageUrl} onChange={(e) => setFormData({...formData, imageUrl: e.target.value})} />
-          </FormGroup>
-          <FormGroup>
-            <label><input type="checkbox" name="isAvailable" checked={formData.isAvailable} onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})} /> Disponível</label>
-          </FormGroup>
-          <FormGroup>
-            <label><input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})} /> Destaque</label>
-          </FormGroup> {/* <<< CORREÇÃO AQUI: removido o '-' extra */}
-          <FormActions>
-            <Button type="submit" $variant="primary">{editingProduct ? 'Salvar Alterações' : 'Adicionar Produto'}</Button>
-            <Button type="button" $variant="secondary" onClick={() => setIsFormVisible(false)}>Cancelar</Button>
-          </FormActions>
-        </AddForm>
-      )}
-
-      <SectionTitle>Lista de Produtos</SectionTitle>
-      {products.length > 0 ? (
-        <ProductList>
-          {products.map(product => (
-            <ProductListItem 
-                key={product.id} 
-                product={product} 
-                onEdit={() => handleEditClick(product)}
-                onDelete={() => handleDelete(product.id)}
-            />
-          ))}
-        </ProductList>
-      ) : (
-        <InfoText>Ainda não há produtos cadastrados.</InfoText>
-      )}
+      <ProductListSection>
+        <h3>Produtos Cadastrados</h3>
+        {products.map(product => (
+          <ProductListItem key={product.id} $isAvailable={product.isAvailable}>
+            <ProductImage src={product.imageUrl || 'https://via.placeholder.com/100'} alt={product.name} />
+            <ProductInfo>
+              <h4>{product.name}</h4>
+              <p>{product.description}</p>
+              <ProductDetails>
+                <Price>R$ {(product.price || 0).toFixed(2)}</Price>
+                <Tag>{product.category}</Tag>
+                {product.isAvailable && <Tag style={{background: '#dcfce7', color: '#166534'}}>Disponível</Tag>}
+              </ProductDetails>
+            </ProductInfo>
+            <ActionButtons>
+              <Button onClick={() => handleToggleBoolean(product.id, 'isFeatured', product.isFeatured)} $variant={product.isFeatured ? 'primary' : 'secondary'}>{product.isFeatured ? 'Remover Destaque' : 'Destacar'}</Button>
+              <Button onClick={() => handleToggleBoolean(product.id, 'isAvailable', product.isAvailable)} $variant="secondary">{product.isAvailable ? 'Desativar' : 'Ativar'}</Button>
+              <Button onClick={() => handleEditClick(product)}>Editar</Button>
+              <Button onClick={() => handleDelete(product.id)} $variant="danger">Excluir</Button>
+            </ActionButtons>
+          </ProductListItem>
+        ))}
+      </ProductListSection>
     </PageWrapper>
   );
 };

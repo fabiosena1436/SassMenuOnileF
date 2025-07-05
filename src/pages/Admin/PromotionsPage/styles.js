@@ -4,24 +4,25 @@ import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
   padding: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
 `;
 
 export const Header = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
 `;
 
 export const Title = styled.h1`
-  font-size: 2.5rem;
-  color: #1f2937;
+  font-size: 2rem;
+  color: #1a202c;
 `;
 
 export const FormContainer = styled.form`
-  background-color: #fff;
+  background-color: #ffffff;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 2.5rem;
 
   h3 {
@@ -31,80 +32,111 @@ export const FormContainer = styled.form`
   }
 `;
 
+export const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 export const FormGroup = styled.div`
-  margin-bottom: 1rem;
-  
+  display: flex;
+  flex-direction: column;
+
   label {
-    display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
+    color: #4a5568;
   }
 `;
 
 export const Input = styled.input`
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e0;
   border-radius: 6px;
   font-size: 1rem;
 `;
 
 export const Select = styled.select`
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e0;
   border-radius: 6px;
   font-size: 1rem;
   background-color: white;
 `;
 
-export const CheckboxLabel = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  font-weight: 500;
-`;
-
 export const ActionButtons = styled.div`
-  margin-top: 1.5rem;
   display: flex;
   justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
 `;
 
 export const PromotionList = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
 `;
 
-export const PromotionCard = styled.div`
+export const PromotionListItem = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 1.5rem;
   background-color: #fff;
-  padding: 1rem 1.5rem;
+  padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+  position: relative;
+  border-left: 5px solid ${({ $isActive }) => ($isActive ? '#22c55e' : '#a1a1aa')};
 `;
 
-export const CardContent = styled.div`
+export const PromoImage = styled.img`
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+`;
+
+export const PromoInfo = styled.div`
+  flex-grow: 1;
   h4 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
+    margin: 0 0 0.25rem;
   }
   p {
-    margin: 0.25rem 0;
-    color: #4b5563;
-  }
-  span {
+    margin: 0;
     font-size: 0.9rem;
-    font-weight: bold;
-    color: ${({ status }) => status === 'Ativa' ? '#16a34a' : '#ef4444'};
+    color: #6b7280;
   }
 `;
 
-export const CardActions = styled.div``;
+export const PromoStatus = styled.span`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: ${({ $isActive }) => ($isActive ? '#16a34a' : '#6b7280')};
+`;
 
-export const LoadingText = styled.p`/* ... */`;
-export const InfoText = styled.p`/* ... */`;
+export const PromoActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+export const LoadingText = styled.p`
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+  color: #6b7280;
+`;
+
+export const InfoText = styled.p`
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+`;
