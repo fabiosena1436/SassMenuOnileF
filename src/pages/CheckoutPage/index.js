@@ -1,293 +1,179 @@
-import React, { useState, useEffect } from 'react';
-import { useCart } from '../../contexts/CartContext';
-import { useStoreSettings } from '../../contexts/StoreSettingsContext';
-import Button from '../../components/Button';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { db } from '../../services/firebaseConfig';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+// Arquivo: src/pages/CheckoutPage/index.js
 
-// Importando todos os componentes estilizados do arquivo de estilos
+import React, { useState } from 'react';
+import { useCart } from '../../contexts/CartContext';
+import { useStore } from '../../contexts/StoreContext';
+import { useNavigate } from 'react-router-dom';
+import { db } from '../../services/firebaseConfig';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import toast from 'react-hot-toast';
+import Button from '../../components/Button';
 import {
-  CheckoutPageWrapper,
-  Title,
+  CheckoutWrapper,
   FormSection,
-  FormGroup,
-  PaymentOptionsContainer,
-  PaymentOptionLabel,
-  ConditionalInputWrapper,
-  PixKeyDisplay,
   OrderSummary,
-  LoadingText
+  FormGroup,
+  Input,
+  SummaryTitle,
+  SummaryList,
+  SummaryItem,
+  TotalRow
 } from './styles';
 
 const CheckoutPage = () => {
-  const { cartItems, clearCart } = useCart();
-  const { settings, loading: loadingSettings } = useStoreSettings();
+  const { cart, cartTotal, clearCart } = useCart();
+  const store = useStore();
   const navigate = useNavigate();
 
-  const [customerName, setCustomerName] = useState('');
-  // --- ALTERADO --- Substituímos o estado 'address' por três estados separados
-  const [street, setStreet] = useState('');
-  const [number, setNumber] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [phone, setPhone] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('pix');
-  const [trocoPara, setTrocoPara] = useState('');
-  const [precisaTroco, setPrecisaTroco] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customerData, setCustomerData] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    number: '',
+    neighborhood: '',
+    paymentMethod: 'pix',
+  });
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!loadingSettings) {
-      if (!settings.isStoreOpen) {
-        toast.error("A loja está fechada no momento.");
-        navigate('/menu');
-      } else if (cartItems.length === 0) {
-        toast.error("Seu carrinho está vazio!");
-        navigate('/menu');
-      }
-    }
-  }, [settings.isStoreOpen, cartItems, loadingSettings, navigate]);
+  const deliveryFee = store?.deliveryFee || 0;
+  const finalTotal = cartTotal + deliveryFee;
 
-  const itemsSubtotal = cartItems.reduce((total, item) => total + (item.price || 0) * (item.quantity || 1), 0);
-  const deliveryFee = settings.deliveryFee || 0;
-  const grandTotal = itemsSubtotal + deliveryFee;
-
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-    if (e.target.value !== 'dinheiro') {
-      setPrecisaTroco(false);
-      setTrocoPara('');
-    }
+  const handleChange = (e) => {
+    setCustomerData({ ...customerData, [e.target.name]: e.target.value });
   };
 
-  const formatOrderForWhatsApp = (orderDetails) => {
-    let message = `🎉 *Novo Pedido Vibe Açaí!* 🎉\n\n`;
-    message += `*Cliente:* ${orderDetails.customerName}\n*Telefone:* ${orderDetails.phone}\n*Endereço:* ${orderDetails.address}\n\n*Itens do Pedido:*\n`;
-    orderDetails.items.forEach(item => {
-      message += `  - ${item.quantity}x ${item.name}`;
-      if (item.selectedToppings && item.selectedToppings.length > 0) {
-        message += ` (Adicionais: ${item.selectedToppings.map(t => t.name).join(', ')})`;
+  const formatOrderForWhatsApp = () => {
+    let message = `*Novo Pedido - ${store.storeName}*\n\n`;
+    message += "*Cliente:*\n";
+    message += `${customerData.name}\n`;
+    message += `Telefone: ${customerData.phone}\n`;
+    message += `Endereço: ${customerData.address}, ${customerData.number}, ${customerData.neighborhood}\n\n`;
+    message += "*Itens do Pedido:*\n";
+    cart.forEach(item => {
+      message += `- ${item.quantity}x ${item.name}`;
+      if (item.size) message += ` (${item.size.name})`;
+      message += ` - R$ ${(item.totalPrice * item.quantity).toFixed(2)}\n`;
+      if (item.toppings && item.toppings.length > 0) {
+        message += `  Adicionais: ${item.toppings.map(t => t.name).join(', ')}\n`;
       }
-      message += ` - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}\n`;
     });
-    message += `\n*Subtotal dos Itens:* R$ ${orderDetails.itemsSubtotal.toFixed(2).replace('.', ',')}\n`;
-    if (orderDetails.deliveryFee > 0) {
-      message += `*Taxa de Entrega:* R$ ${orderDetails.deliveryFee.toFixed(2).replace('.', ',')}\n`;
-    }
-    message += `*Total do Pedido:* R$ ${orderDetails.grandTotal.toFixed(2).replace('.', ',')}\n\n*Forma de Pagamento:* ${orderDetails.paymentMethodFormatted}\n`;
-    if (orderDetails.paymentMethod === 'pix' && settings.pixKey) {
-      message += `(Chave PIX para pagamento: ${settings.pixKey})\n`;
-    }
-    message += `\nObrigado pela preferência! 😊`;
+    message += `\n*Subtotal:* R$ ${cartTotal.toFixed(2)}\n`;
+    message += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2)}\n`;
+    message += `*TOTAL:* *R$ ${finalTotal.toFixed(2)}*\n\n`;
+    message += `*Forma de Pagamento:* ${customerData.paymentMethod}`;
+
     return encodeURIComponent(message);
   };
 
-  const handleSubmitOrder = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    // --- ALTERADO --- Validação para os novos campos de endereço
-    if (!customerName || !street || !number || !neighborhood || !phone) {
-      toast.error('Por favor, preencha todos os seus dados.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (!paymentMethod) {
-      toast.error('Por favor, selecione uma forma de pagamento.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (paymentMethod === 'dinheiro' && precisaTroco && !trocoPara) {
-      toast.error('Por favor, informe para quanto precisa de troco.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (paymentMethod === 'pix' && !settings.pixKey) {
-      toast.error('A forma de pagamento PIX não está disponível no momento.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (!settings.whatsapp) {
-      toast.error('Não foi possível enviar o pedido. O número da loja não está configurado.');
-      console.error("Erro: Número de WhatsApp não encontrado nas configurações.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    let paymentMethodFormatted = '';
-    if (paymentMethod === 'dinheiro') {
-      paymentMethodFormatted = `Dinheiro${precisaTroco ? ` (Troco para R$ ${parseFloat(trocoPara || 0).toFixed(2).replace('.', ',')})` : ` (Não precisa de troco)`}`;
-    } else if (paymentMethod === 'cartao') {
-      paymentMethodFormatted = 'Cartão (Maquininha na entrega)';
-    } else if (paymentMethod === 'pix') {
-      paymentMethodFormatted = 'PIX';
-    }
-
-    // --- NOVO --- Juntamos os campos de endereço em uma única string
-    const fullAddress = `Rua ${street}, N° ${number}, Bairro: ${neighborhood}`;
-
-    const orderDetailsForFirestore = {
-      customerName,
-      // --- ALTERADO --- Usamos o endereço completo
-      address: fullAddress,
-      phone,
-      paymentMethod,
-      paymentMethodFormatted,
-      precisaTroco,
-      trocoPara: precisaTroco ? parseFloat(trocoPara || 0).toFixed(2).replace('.', ',') : '',
-      items: cartItems.map(item => ({
-        id: item.id,
-        id_cart: item.id_cart || null,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        selectedSize: item.selectedSize || null,
-        selectedToppings: (item.selectedToppings && item.selectedToppings.length > 0) ? item.selectedToppings.map(t => ({ name: t.name, price: t.price })) : [],
-      })),
-      itemsSubtotal,
-      deliveryFee,
-      grandTotal,
-      status: "Pendente",
-      createdAt: serverTimestamp()
-    };
+    setLoading(true);
 
     try {
-      await addDoc(collection(db, "orders"), orderDetailsForFirestore);
-      const whatsappMessage = formatOrderForWhatsApp(orderDetailsForFirestore);
-      const whatsappLink = `https://wa.me/${settings.whatsapp}?text=${whatsappMessage}`;
+      // 1. Guardar o pedido no banco de dados do Firestore
+      const ordersCollectionRef = collection(db, 'orders');
+      await addDoc(ordersCollectionRef, {
+        tenantId: store.id,
+        customer: customerData,
+        items: cart,
+        subtotal: cartTotal,
+        deliveryFee: deliveryFee,
+        total: finalTotal,
+        status: 'pending', // Status inicial do pedido
+        createdAt: serverTimestamp(),
+      });
+
+      // 2. Montar a mensagem e redirecionar para o WhatsApp
+      const message = formatOrderForWhatsApp();
+      const whatsappUrl = `https://wa.me/${store.whatsapp}?text=${message}`;
       
-      window.open(whatsappLink, '_blank');
+      toast.success('Pedido enviado! A redirecionar para o WhatsApp...');
+      
+      // Limpa o carrinho após o sucesso
       clearCart();
-      toast.success('Pedido enviado e registrado com sucesso!');
-      navigate('/');
+
+      // Redireciona para o WhatsApp
+      window.location.href = whatsappUrl;
+
     } catch (error) {
-      console.error("Erro ao finalizar pedido:", error);
-      toast.error("Houve um erro ao processar seu pedido.");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Erro ao finalizar o pedido: ", error);
+      toast.error("Não foi possível enviar o seu pedido. Tente novamente.");
+      setLoading(false);
     }
   };
 
-  if (loadingSettings || (cartItems.length === 0 && !loadingSettings)) {
-    return <LoadingText>Carregando...</LoadingText>;
+  if (!store) {
+    return <div>A carregar informações da loja...</div>;
   }
 
   return (
-    <CheckoutPageWrapper>
-      <Title>Finalizar Pedido</Title>
-      <form onSubmit={handleSubmitOrder}>
-        <FormSection>
-          <h2>Seus Dados</h2>
-          <FormGroup>
-            <label htmlFor="customerName">Nome Completo:</label>
-            <input type="text" id="customerName" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required />
-          </FormGroup>
-          
-          {/* --- ALTERADO --- Substituímos o campo único de endereço por três campos */}
-          <FormGroup>
-            <label htmlFor="street">Rua:</label>
-            <input type="text" id="street" value={street} onChange={(e) => setStreet(e.target.value)} required />
-          </FormGroup>
-          <FormGroup>
-            <label htmlFor="number">Número:</label>
-            <input type="text" id="number" value={number} onChange={(e) => setNumber(e.target.value)} required />
-          </FormGroup>
-          <FormGroup>
-            <label htmlFor="neighborhood">Bairro:</label>
-            <input type="text" id="neighborhood" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} required />
-          </FormGroup>
-          
-          <FormGroup>
-            <label htmlFor="phone">Telefone (com DDD):</label>
-            <input type="tel" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(XX) XXXXX-XXXX" required />
-          </FormGroup>
-        </FormSection>
+    <CheckoutWrapper>
+      <FormSection onSubmit={handleSubmit}>
+        <h2>Seus Dados para Entrega</h2>
+        <FormGroup>
+          <label>Nome Completo</label>
+          <Input name="name" onChange={handleChange} required />
+        </FormGroup>
+        <FormGroup>
+          <label>Telefone com DDD</label>
+          <Input name="phone" type="tel" onChange={handleChange} placeholder="(XX) XXXXX-XXXX" required />
+        </FormGroup>
+        <FormGroup>
+          <label>Rua / Avenida</label>
+          <Input name="address" onChange={handleChange} required />
+        </FormGroup>
+        <FormGroup>
+          <label>Número</label>
+          <Input name="number" onChange={handleChange} required />
+        </FormGroup>
+        <FormGroup>
+          <label>Bairro</label>
+          <Input name="neighborhood" onChange={handleChange} required />
+        </FormGroup>
 
-        <FormSection>
-          <h2>Resumo do Pedido</h2>
-          <OrderSummary>
-            <ul>
-              {cartItems.map(item => (
-                <li key={item.id_cart || item.id}>
-                  <span>{item.name} (x{item.quantity})</span>
-                  <strong>R$ {((item.price || 0) * (item.quantity || 1)).toFixed(2).replace('.', ',')}</strong>
-                </li>
-              ))}
-            </ul>
-            <div className="summary-line">
-              <span>Subtotal dos Itens:</span>
-              <strong>R$ {itemsSubtotal.toFixed(2).replace('.', ',')}</strong>
-            </div>
-            {deliveryFee > 0 && (
-              <div className="summary-line">
-                <span>Taxa de Entrega:</span>
-                <strong>R$ {deliveryFee.toFixed(2).replace('.', ',')}</strong>
-              </div>
-            )}
-            <div className="grand-total">
-              <span>Total Geral:</span>
-              <strong>R$ {grandTotal.toFixed(2).replace('.', ',')}</strong>
-            </div>
-          </OrderSummary>
-        </FormSection>
+        <h2>Forma de Pagamento</h2>
+        <FormGroup>
+          <select name="paymentMethod" value={customerData.paymentMethod} onChange={handleChange}>
+            <option value="pix">PIX</option>
+            <option value="dinheiro">Dinheiro</option>
+            <option value="cartao">Cartão na Entrega</option>
+          </select>
+        </FormGroup>
+        {customerData.paymentMethod === 'pix' && store.pixKey && (
+          <div style={{border: '2px dashed #6d28d9', padding: '1rem', borderRadius: '8px', backgroundColor: '#f5f3ff'}}>
+             <p>Realize o pagamento para a chave PIX abaixo e envie o comprovativo no WhatsApp:</p>
+             <strong>{store.pixKey}</strong>
+          </div>
+        )}
+      </FormSection>
 
-        <FormSection>
-          <h2>Forma de Pagamento</h2>
-          <PaymentOptionsContainer>
-            <PaymentOptionLabel className={paymentMethod === 'dinheiro' ? 'selected' : ''}>
-              <input type="radio" name="paymentMethod" value="dinheiro" checked={paymentMethod === 'dinheiro'} onChange={handlePaymentMethodChange} />
-              Dinheiro
-            </PaymentOptionLabel>
-            {paymentMethod === 'dinheiro' && (
-              <ConditionalInputWrapper>
-                <FormGroup style={{ marginBottom: '10px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <input type="checkbox" checked={precisaTroco} onChange={(e) => setPrecisaTroco(e.target.checked)} style={{ width: 'auto' }} />
-                    Precisa de troco?
-                  </label>
-                </FormGroup>
-                {precisaTroco && (
-                  <FormGroup>
-                    <label htmlFor="trocoPara">Troco para quanto?</label>
-                    <input type="number" id="trocoPara" value={trocoPara} onChange={(e) => setTrocoPara(e.target.value)} placeholder="Ex: 50" min="0" step="0.01" />
-                  </FormGroup>
-                )}
-              </ConditionalInputWrapper>
-            )}
-            <PaymentOptionLabel className={paymentMethod === 'cartao' ? 'selected' : ''}>
-              <input type="radio" name="paymentMethod" value="cartao" checked={paymentMethod === 'cartao'} onChange={handlePaymentMethodChange} />
-              Cartão (Crédito/Débito na entrega)
-            </PaymentOptionLabel>
-            <PaymentOptionLabel className={paymentMethod === 'pix' ? 'selected' : ''}>
-              <input type="radio" name="paymentMethod" value="pix" checked={paymentMethod === 'pix'} onChange={handlePaymentMethodChange} />
-              PIX
-            </PaymentOptionLabel>
-            {paymentMethod === 'pix' && (
-              <PixKeyDisplay>
-                {loadingSettings ? (
-                  <p>Carregando...</p>
-                ) : settings.pixKey ? (
-                  <>
-                    <p>Realize o pagamento para a chave PIX abaixo e envie o comprovante no WhatsApp:</p>
-                    <p><strong>{settings.pixKey}</strong></p>
-                  </>
-                ) : (
-                  <p>Pagamento PIX indisponível no momento.</p>
-                )}
-              </PixKeyDisplay>
-            )}
-          </PaymentOptionsContainer>
-        </FormSection>
-
-        <div style={{ textAlign: 'center', marginTop: '30px' }}>
-          <Button type="submit" disabled={isSubmitting || !settings.isStoreOpen}>
-            {isSubmitting ? 'Enviando...' : (settings.isStoreOpen ? 'Enviar Pedido para WhatsApp' : 'Loja Fechada')}
-          </Button>
-        </div>
-      </form>
-    </CheckoutPageWrapper>
+      <OrderSummary>
+        <SummaryTitle>Resumo do Pedido</SummaryTitle>
+        <SummaryList>
+          {cart.map(item => (
+            <SummaryItem key={item.cartItemId}>
+              <span>{item.quantity}x {item.name}</span>
+              <span>R$ {(item.totalPrice * item.quantity).toFixed(2)}</span>
+            </SummaryItem>
+          ))}
+          <SummaryItem>
+            <span>Taxa de Entrega</span>
+            <span>R$ {deliveryFee.toFixed(2)}</span>
+          </SummaryItem>
+        </SummaryList>
+        <TotalRow>
+          <strong>Total</strong>
+          <strong>R$ {finalTotal.toFixed(2)}</strong>
+        </TotalRow>
+        <Button type="submit" form="checkout-form" disabled={loading} style={{width: '100%', marginTop: '1rem'}}>
+          {loading ? 'A enviar...' : 'Enviar Pedido para WhatsApp'}
+        </Button>
+      </OrderSummary>
+    </CheckoutWrapper>
   );
 };
+
+// Adiciona um `id` ao formulário para o botão conseguir "encontrá-lo"
+const FormWithId = (props) => <form id="checkout-form" {...props} />;
 
 export default CheckoutPage;

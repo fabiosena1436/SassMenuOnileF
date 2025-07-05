@@ -1,9 +1,12 @@
-// Ficheiro: src/pages/Admin/SubscriptionPage/index.js
+// Arquivo: src/pages/Admin/SubscriptionPage/index.js
 
 import React, { useState } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { useAuth } from '../../../contexts/AuthContext'; // 1. Importar o useAuth
 import Button from '../../../components/Button';
 import { FaCheckCircle } from 'react-icons/fa';
+import toast from 'react-hot-toast';
+
 import {
   PageWrapper,
   SectionTitle,
@@ -17,32 +20,27 @@ import {
 
 const SubscriptionPage = () => {
   const [loading, setLoading] = useState(false);
+  const { tenant } = useAuth(); // 2. Obter os dados do lojista (incluindo o plano)
 
-  // Função que chama a nossa Firebase Function
   const handleSubscribe = async (planId) => {
     setLoading(true);
     try {
       const functions = getFunctions();
       const createSubscription = httpsCallable(functions, 'createSubscription');
-      
-      console.log(`A chamar a função 'createSubscription' com o plano: ${planId}`);
-
-      const result = await createSubscription({ planId: planId });
-      
-      // A função retorna um objeto com a URL de checkout
+      const result = await createSubscription({ planId });
       const { checkoutUrl } = result.data;
-
-      console.log(`Recebida a URL de checkout: ${checkoutUrl}`);
-
-      // Redireciona o utilizador para a página de pagamento do Mercado Pago
       window.location.href = checkoutUrl;
-
     } catch (error) {
       console.error("Erro ao criar a assinatura:", error);
-      alert("Ocorreu um erro ao iniciar a sua assinatura. Por favor, tente novamente.");
+      toast.error("Ocorreu um erro ao iniciar a sua assinatura.");
       setLoading(false);
     }
   };
+
+  // Se os dados do lojista ainda não carregaram, mostra uma mensagem
+  if (!tenant) {
+    return <PageWrapper><LoadingText>A carregar informações do seu plano...</LoadingText></PageWrapper>;
+  }
 
   return (
     <PageWrapper>
@@ -52,18 +50,26 @@ const SubscriptionPage = () => {
         <LoadingText>A preparar o seu checkout seguro...</LoadingText>
       ) : (
         <PlansContainer>
-          <PlanCard>
+          {/* Cartão do Plano Básico */}
+          <PlanCard highlight={tenant.plan === 'pro'}>
             <PlanTitle>Básico</PlanTitle>
             <PlanPrice>Grátis</PlanPrice>
             <PlanFeatures>
-              <li><FaCheckCircle color="#ccc" /> Cardápio Online</li>
-              <li><FaCheckCircle color="#ccc" /> Até 10 produtos</li>
-              <li><FaCheckCircle color="#ccc" /> Suporte por Email</li>
+              <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Cardápio Online</li>
+              <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Até 10 produtos</li>
+              <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Suporte por Email</li>
             </PlanFeatures>
-            <Button disabled>Plano Atual</Button>
+            
+            {/* 3. Lógica do botão */}
+            {tenant.plan === 'basic' ? (
+                <Button disabled>Plano Atual</Button>
+            ) : (
+                <Button $variant="secondary">Fazer Downgrade</Button> // Funcionalidade futura
+            )}
           </PlanCard>
 
-          <PlanCard highlight>
+          {/* Cartão do Plano Pro */}
+          <PlanCard highlight={tenant.plan === 'basic'}>
             <PlanTitle>Pro</PlanTitle>
             <PlanPrice>R$ 29,90<span>/mês</span></PlanPrice>
             <PlanFeatures>
@@ -72,10 +78,15 @@ const SubscriptionPage = () => {
               <li><FaCheckCircle color="green" /> Gestão de Promoções</li>
               <li><FaCheckCircle color="green" /> Suporte Prioritário</li>
             </PlanFeatures>
-            {/* O clique neste botão chama a nossa função com o ID do plano */}
-            <Button onClick={() => handleSubscribe('plano_pro_mensal')}>
-              Fazer Upgrade
-            </Button>
+
+            {/* 4. Lógica do botão */}
+            {tenant.plan === 'pro' ? (
+                <Button disabled>Plano Atual</Button>
+            ) : (
+                <Button onClick={() => handleSubscribe('plano_pro_mensal')}>
+                    Fazer Upgrade
+                </Button>
+            )}
           </PlanCard>
         </PlansContainer>
       )}
