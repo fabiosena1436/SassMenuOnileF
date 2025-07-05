@@ -58,7 +58,7 @@ const RegistrationPage = () => {
         ownerId: user.uid,
         storeName: formData.storeName,
         slug: storeSlug,
-        plan: 'premium',
+        plan: 'basic',
         isStoreOpen: true,
         deliveryFee: 5.00,
         createdAt: serverTimestamp(),
