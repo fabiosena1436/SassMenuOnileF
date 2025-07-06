@@ -1,5 +1,4 @@
-// Arquivo: src/pages/Admin/SettingsPage/styles.js
-
+// src/pages/Admin/SettingsPage/styles.js
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
@@ -9,29 +8,29 @@ export const PageWrapper = styled.div`
 
   h1 { 
     font-size: 2em; 
-    color: #333; 
+    color: ${({ theme }) => theme.colors.textDark}; 
     margin-bottom: 30px; 
   }
 `;
 
 export const SectionTitle = styled.h2`
   font-size: 1.5em; 
-  color: #555; 
+  color: ${({ theme }) => theme.colors.textMedium}; 
   margin-top: 40px; 
   margin-bottom: 20px; 
-  border-bottom: 1px solid #ddd; 
+  border-bottom: 1px solid ${({ theme }) => theme.colors.borderMedium}; 
   padding-bottom: 10px; 
 `;
 
 export const Form = styled.form`
-  background-color: #f9f9f9; 
+  background-color: ${({ theme }) => theme.colors.background}; 
   padding: 20px; 
-  border-radius: 8px; 
+  border-radius: ${({ theme }) => theme.borderRadius.lg}; 
   margin-top: 10px; 
   display: flex; 
   flex-direction: column; 
   gap: 15px; 
-  border: 1px solid #eee;
+  border: 1px solid ${({ theme }) => theme.colors.borderLight};
   height: 100%; 
 `;
 
@@ -43,16 +42,16 @@ export const FormGroup = styled.div`
   label { 
     margin-bottom: 8px; 
     font-weight: 600; 
-    color: #444; 
+    color: ${({ theme }) => theme.colors.textDark}; 
   } 
   
   input, 
   textarea { 
     padding: 10px; 
-    border: 1px solid #ccc; 
-    border-radius: 6px; 
+    border: 1px solid ${({ theme }) => theme.colors.border}; 
+    border-radius: ${({ theme }) => theme.borderRadius.md}; 
     font-size: 1em; 
-    background-color: white; 
+    background-color: ${({ theme }) => theme.colors.white}; 
   }
   
   textarea { 
@@ -63,21 +62,21 @@ export const FormGroup = styled.div`
   p { 
     font-size: 0.9em; 
     margin-top: 5px; 
-    color: #666; 
+    color: ${({ theme }) => theme.colors.textLight}; 
   }
   
   img {
     max-width: 150px; 
     height: auto;
     margin-top: 10px; 
-    border-radius: 8px; 
-    border: 1px solid #ddd;
+    border-radius: ${({ theme }) => theme.borderRadius.lg}; 
+    border: 1px solid ${({ theme }) => theme.colors.borderMedium};
   }
 `;
 
 export const LoadingText = styled.p`
   text-align: center; 
-  color: #555; 
+  color: ${({ theme }) => theme.colors.textMedium}; 
   font-style: italic; 
   margin-top: 20px;
 `;
@@ -87,17 +86,17 @@ export const StatusDisplay = styled.div`
   font-size: 1.1em; 
   font-weight: bold;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
   text-align: center;
-  background-color: ${({ $isOpen }) => ($isOpen ? '#dcfce7' : '#fee2e2')};
-  color: ${({ $isOpen }) => ($isOpen ? '#166534' : '#991b1b')};
+  background-color: ${({ $isOpen, theme }) => ($isOpen ? theme.colors.successLight : theme.colors.dangerLight)};
+  color: ${({ $isOpen, theme }) => ($isOpen ? theme.colors.successDarker : theme.colors.dangerDark)};
 `;
 
 export const SettingsBlock = styled.div`
   padding: 20px; 
-  background-color: #f9f9f9;
-  border-radius: 8px; 
-  border: 1px solid #eee;
+  background-color: ${({ theme }) => theme.colors.background};
+  border-radius: ${({ theme }) => theme.borderRadius.lg}; 
+  border: 1px solid ${({ theme }) => theme.colors.borderLight};
 `;
 
 export const SettingsGrid = styled.div`

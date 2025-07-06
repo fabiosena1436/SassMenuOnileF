@@ -1,5 +1,4 @@
-// Arquivo: src/components/AcaiCustomizationModal/styles.js
-
+// src/components/AcaiCustomizationModal/styles.js
 import styled from 'styled-components';
 
 export const ModalOverlay = styled.div`
@@ -8,7 +7,7 @@ export const ModalOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: ${({ theme }) => theme.colors.overlay};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,8 +15,8 @@ export const ModalOverlay = styled.div`
 `;
 
 export const ModalContent = styled.div`
-  background: white;
-  border-radius: 16px;
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.xxl};
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
@@ -28,7 +27,7 @@ export const ModalContent = styled.div`
 
 export const ModalHeader = styled.div`
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,7 +42,7 @@ export const ModalHeader = styled.div`
     border: none;
     font-size: 2rem;
     cursor: pointer;
-    color: #9ca3af;
+    color: ${({ theme }) => theme.colors.textSubtle};
     line-height: 1;
   }
 `;
@@ -59,7 +58,7 @@ export const ModalBody = styled.div`
 export const SectionTitle = styled.h3`
   font-size: 1.2rem;
   margin: 0 0 1rem 0;
-  color: #4b5563;
+  color: ${({ theme }) => theme.colors.textMedium};
 `;
 
 export const OptionsGrid = styled.div`
@@ -70,17 +69,17 @@ export const OptionsGrid = styled.div`
 
 export const OptionButton = styled.button`
   padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 2px solid ${({ $isSelected }) => ($isSelected ? '#4f46e5' : '#e5e7eb')};
-  background-color: ${({ $isSelected }) => ($isSelected ? '#eef2ff' : 'transparent')};
-  color: ${({ $isSelected }) => ($isSelected ? '#4f46e5' : '#374151')};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  border: 2px solid ${({ $isSelected, theme }) => ($isSelected ? theme.colors.adminPrimary : theme.colors.borderLight)};
+  background-color: ${({ $isSelected, theme }) => ($isSelected ? theme.colors.primaryLightest : 'transparent')};
+  color: ${({ $isSelected, theme }) => ($isSelected ? theme.colors.adminPrimary : theme.colors.textDark)};
   font-weight: 600;
   cursor: pointer;
   text-align: center;
-  transition: all 0.2s ease-in-out;
+  transition: ${({ theme }) => theme.transitions.default};
 
   &:hover {
-    border-color: #4f46e5;
+    border-color: ${({ theme }) => theme.colors.adminPrimary};
   }
 `;
 
@@ -88,33 +87,33 @@ export const NotesTextarea = styled.textarea`
   width: 100%;
   min-height: 80px;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
   font-size: 1rem;
   resize: vertical;
 
   &:focus {
     outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 1px #4f46e5;
+    border-color: ${({ theme }) => theme.colors.adminPrimary};
+    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.adminPrimary};
   }
 `;
 
 export const ModalFooter = styled.div`
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid ${({ theme }) => theme.colors.borderLight};
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  background-color: #f9fafb;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 export const QuantitySelector = styled.div`
   display: flex;
   align-items: center;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
 
   button {
     background: none;
@@ -132,9 +131,8 @@ export const QuantitySelector = styled.div`
   }
 `;
 
-// PriceDisplay não foi usado no index.js que te enviei, mas é bom ter.
 export const PriceDisplay = styled.span`
   font-size: 1.5rem;
   font-weight: bold;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.adminSidebarBg};
 `;

@@ -1,5 +1,4 @@
 // src/pages/AdminLoginPage/styles.js
-
 import styled from 'styled-components';
 
 export const LoginPageWrapper = styled.div`
@@ -9,13 +8,13 @@ export const LoginPageWrapper = styled.div`
   justify-content: center;
   min-height: 100vh; 
   padding: 20px;
-  background-color: #e9d5ff; 
+  background-color: ${({ theme }) => theme.colors.primaryLighter}; 
 `;
 
 export const LoginForm = styled.form`
-  background-color: #fff;
+  background-color: ${({ theme }) => theme.colors.white};
   padding: 40px;
-  border-radius: 12px;
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 400px;
@@ -25,7 +24,7 @@ export const LoginForm = styled.form`
 `;
 
 export const Title = styled.h1`
-  color: #7c3aed;
+  color: ${({ theme }) => theme.colors.primary};
   text-align: center;
   margin-bottom: 10px;
 `;
@@ -35,27 +34,27 @@ export const FormGroup = styled.div`
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #555;
+    color: ${({ theme }) => theme.colors.textMedium};
   }
   
   input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid ${({ theme }) => theme.colors.borderMedium};
+    border-radius: ${({ theme }) => theme.borderRadius.md};
     font-size: 1em;
     box-sizing: border-box;
     
     &:focus {
-      border-color: #7c3aed;
+      border-color: ${({ theme }) => theme.colors.primary};
       outline: none;
-      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+      box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary}33; /* Cor primária com 20% de opacidade */
     }
   }
 `;
 
 export const ErrorMessage = styled.p`
-  color: #ef4444;
+  color: ${({ theme }) => theme.colors.danger};
   font-size: 0.9em;
   text-align: center;
   margin-top: -10px;
@@ -65,13 +64,13 @@ export const ErrorMessage = styled.p`
 export const Input = styled.input`
   width: 100%;
   padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
   font-size: 16px;
   box-sizing: border-box;
 
   &:focus {
-    border-color: #007bff;
+    border-color: ${({ theme }) => theme.colors.highlight};
     outline: none;
   }
 `;

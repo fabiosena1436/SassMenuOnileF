@@ -1,14 +1,13 @@
-// Arquivo: src/pages/CheckoutPage/styles.js
-
+// src/pages/CheckoutPage/styles.js
 import styled from 'styled-components';
 
 export const CheckoutWrapper = styled.div`
   max-width: 700px;
   margin: 2rem auto;
   padding: 2.5rem;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  background-color: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
 
   @media (max-width: 768px) {
     margin: 0;
@@ -21,7 +20,7 @@ export const CheckoutWrapper = styled.div`
 
 export const Title = styled.h1`
   text-align: center;
-  color: #4f46e5;
+  color: ${({ theme }) => theme.colors.adminPrimary};
   margin-bottom: 2.5rem;
 `;
 
@@ -34,7 +33,7 @@ export const SectionTitle = styled.h2`
   font-weight: 600;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
 `;
 
 export const FormGroup = styled.div`
@@ -45,20 +44,20 @@ export const FormGroup = styled.div`
     margin-bottom: 0.5rem;
     font-weight: 500;
     font-size: 0.9rem;
-    color: #4b5563;
+    color: ${({ theme }) => theme.colors.textMedium};
   }
 `;
 
 export const Input = styled.input`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   font-size: 1rem;
   &:focus {
     outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 1px #4f46e5;
+    border-color: ${({ theme }) => theme.colors.adminPrimary};
+    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.adminPrimary};
   }
 `;
 
@@ -66,11 +65,11 @@ export const PaymentOption = styled.label`
   display: flex;
   align-items: center;
   padding: 1rem;
-  border: 2px solid ${({ $isSelected }) => ($isSelected ? '#4f46e5' : '#e5e7eb')};
-  border-radius: 8px;
+  border: 2px solid ${({ $isSelected, theme }) => ($isSelected ? theme.colors.adminPrimary : theme.colors.borderLight)};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
   margin-bottom: 0.75rem;
   cursor: pointer;
-  background-color: ${({ $isSelected }) => ($isSelected ? '#eef2ff' : 'transparent')};
+  background-color: ${({ $isSelected, theme }) => ($isSelected ? theme.colors.primaryLightest : 'transparent')};
 
   input[type="radio"] {
     margin-right: 0.75rem;
@@ -81,5 +80,5 @@ export const ConditionalField = styled.div`
   padding: 1rem;
   margin-left: 1.5rem;
   margin-bottom: 0.75rem;
-  border-left: 3px solid #e5e7eb;
+  border-left: 3px solid ${({ theme }) => theme.colors.borderLight};
 `;

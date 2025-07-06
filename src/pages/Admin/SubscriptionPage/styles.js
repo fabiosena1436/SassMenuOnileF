@@ -1,5 +1,4 @@
-// Ficheiro: src/pages/Admin/SubscriptionPage/styles.js
-
+// src/pages/Admin/SubscriptionPage/styles.js
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
@@ -8,7 +7,7 @@ export const PageWrapper = styled.div`
 
 export const SectionTitle = styled.h2`
   font-size: 1.8rem;
-  color: #333;
+  color: ${({ theme }) => theme.colors.textDark};
   margin-bottom: 2rem;
 `;
 
@@ -20,14 +19,14 @@ export const PlansContainer = styled.div`
 `;
 
 export const PlanCard = styled.div`
-  background: white;
-  border-radius: 8px;
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   width: 100%;
   max-width: 300px;
   text-align: center;
-  border-top: 5px solid ${props => props.highlight ? '#007bff' : '#ccc'};
+  border-top: 5px solid ${({ highlight, theme }) => (highlight ? theme.colors.highlight : theme.colors.border)};
   display: flex;
   flex-direction: column;
 `;
@@ -40,13 +39,13 @@ export const PlanTitle = styled.h3`
 export const PlanPrice = styled.p`
   font-size: 2.5rem;
   font-weight: bold;
-  color: #333;
+  color: ${({ theme }) => theme.colors.textDark};
   margin: 0.5rem 0;
 
   span {
     font-size: 1rem;
     font-weight: normal;
-    color: #666;
+    color: ${({ theme }) => theme.colors.textLight};
   }
 `;
 
@@ -68,6 +67,6 @@ export const PlanFeatures = styled.ul`
 export const LoadingText = styled.p`
   text-align: center;
   font-size: 1.2rem;
-  color: #666;
+  color: ${({ theme }) => theme.colors.textLight};
   padding: 3rem;
 `;
