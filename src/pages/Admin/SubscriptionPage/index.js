@@ -57,7 +57,7 @@ const SubscriptionPage = () => {
             <PlanFeatures>
               <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Cardápio Online</li>
               <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Até 10 produtos</li>
-              <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Suporte por Email</li>
+              
             </PlanFeatures>
             
             {/* 3. Lógica do botão */}

@@ -20,6 +20,8 @@ export const theme = {
     danger: '#ef4444',
     dangerLight: '#fee2e2', // Fundo para status fechado
     dangerDark: '#991b1b',
+    landingGradientStart: '#6d28d9', // Cor inicial do gradiente da LandingPage
+    landingGradientEnd: '#4c1d95',
 
     // Cores de Feedback e Destaques
     info: '#4299e1', // Azul para focus em inputs
