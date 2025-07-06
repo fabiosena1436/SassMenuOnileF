@@ -1,29 +1,72 @@
-// Arquivo: src/pages/Admin/SubscriptionPage/index.js
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { useAuth } from '../../../contexts/AuthContext'; // 1. Importar o useAuth
+import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/Button';
 import { FaCheckCircle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 import {
   PageWrapper,
+  Header,
   SectionTitle,
+  Subtitle,
+  SubscriptionStatus,
   PlansContainer,
   PlanCard,
   PlanTitle,
+  PlanDescription,
   PlanPrice,
   PlanFeatures,
+  FeatureItem,
+  FeaturedBadge,
   LoadingText
 } from './styles';
 
+// 1. DADOS CENTRALIZADOS: Toda a informação dos planos vive aqui.
+const PLANS = [
+  {
+    id: 'basic',
+    name: 'Básico',
+    price: 'Grátis',
+    priceDetails: 'para sempre',
+    description: 'Ideal para começar e validar o seu negócio online.',
+    features: [
+      'Cardápio Online Responsivo',
+      'Até 10 produtos cadastrados',
+      'Pedidos via WhatsApp',
+      'Painel de Gestão Simplificado'
+    ],
+    isFeatured: false,
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 'R$ 29,90',
+    priceDetails: '/mês',
+    description: 'A solução completa para profissionalizar e escalar as suas vendas.',
+    features: [
+      'Tudo do plano Básico',
+      'Produtos Ilimitados',
+      'Gestão de Promoções',
+      'Relatórios de Vendas',
+      'Suporte Prioritário'
+    ],
+    isFeatured: true,
+  }
+];
+
 const SubscriptionPage = () => {
   const [loading, setLoading] = useState(false);
-  const { tenant } = useAuth(); // 2. Obter os dados do lojista (incluindo o plano)
+  const { tenant } = useAuth();
+
+  // Memoiza o plano atual para evitar recálculos desnecessários
+  const currentPlan = useMemo(() => {
+    return PLANS.find(p => p.id === tenant?.plan);
+  }, [tenant]);
 
   const handleSubscribe = async (planId) => {
     setLoading(true);
+    toast.loading('A preparar o seu checkout seguro...');
     try {
       const functions = getFunctions();
       const createSubscription = httpsCallable(functions, 'createSubscription');
@@ -32,62 +75,65 @@ const SubscriptionPage = () => {
       window.location.href = checkoutUrl;
     } catch (error) {
       console.error("Erro ao criar a assinatura:", error);
+      toast.dismiss();
       toast.error("Ocorreu um erro ao iniciar a sua assinatura.");
       setLoading(false);
     }
   };
 
-  // Se os dados do lojista ainda não carregaram, mostra uma mensagem
-  if (!tenant) {
+  if (!tenant || !currentPlan) {
     return <PageWrapper><LoadingText>A carregar informações do seu plano...</LoadingText></PageWrapper>;
   }
 
   return (
     <PageWrapper>
-      <SectionTitle>Escolha o seu Plano</SectionTitle>
+      <Header>
+        <SectionTitle>Assinatura e Planos</SectionTitle>
+        <Subtitle>Faça o upgrade para desbloquear todo o potencial da sua loja.</Subtitle>
+      </Header>
+      
+      {/* 2. STATUS DA ASSINATURA */}
+      <SubscriptionStatus>
+        Você está no plano <strong>{currentPlan.name}</strong>. Sua assinatura está ativa.
+      </SubscriptionStatus>
 
       {loading ? (
-        <LoadingText>A preparar o seu checkout seguro...</LoadingText>
+        <LoadingText>A redirecionar para o checkout...</LoadingText>
       ) : (
         <PlansContainer>
-          {/* Cartão do Plano Básico */}
-          <PlanCard highlight={tenant.plan === 'pro'}>
-            <PlanTitle>Básico</PlanTitle>
-            <PlanPrice>Grátis</PlanPrice>
-            <PlanFeatures>
-              <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Cardápio Online</li>
-              <li><FaCheckCircle color={tenant.plan === 'basic' || tenant.plan === 'pro' ? 'green' : '#ccc'} /> Até 10 produtos</li>
+          {PLANS.map((plan) => (
+            <PlanCard key={plan.id} $isFeatured={plan.isFeatured}>
+              {plan.isFeatured && <FeaturedBadge>Recomendado</FeaturedBadge>}
+              <PlanTitle>{plan.name}</PlanTitle>
+              <PlanDescription>{plan.description}</PlanDescription>
+              <PlanPrice>{plan.price}<span>{plan.priceDetails}</span></PlanPrice>
               
-            </PlanFeatures>
-            
-            {/* 3. Lógica do botão */}
-            {tenant.plan === 'basic' ? (
-                <Button disabled>Plano Atual</Button>
-            ) : (
-                <Button $variant="secondary">Fazer Downgrade</Button> // Funcionalidade futura
-            )}
-          </PlanCard>
+              <PlanFeatures>
+                {plan.features.map((feature) => (
+                  <FeatureItem key={feature}>
+                    <FaCheckCircle /> {feature}
+                  </FeatureItem>
+                ))}
+              </PlanFeatures>
 
-          {/* Cartão do Plano Pro */}
-          <PlanCard highlight={tenant.plan === 'basic'}>
-            <PlanTitle>Pro</PlanTitle>
-            <PlanPrice>R$ 29,90<span>/mês</span></PlanPrice>
-            <PlanFeatures>
-              <li><FaCheckCircle color="green" /> Cardápio Online</li>
-              <li><FaCheckCircle color="green" /> Produtos Ilimitados</li>
-              <li><FaCheckCircle color="green" /> Gestão de Promoções</li>
-              <li><FaCheckCircle color="green" /> Suporte Prioritário</li>
-            </PlanFeatures>
-
-            {/* 4. Lógica do botão */}
-            {tenant.plan === 'pro' ? (
-                <Button disabled>Plano Atual</Button>
-            ) : (
-                <Button onClick={() => handleSubscribe('plano_pro_mensal')}>
-                    Fazer Upgrade
+              {/* 3. LÓGICA DE BOTÕES SIMPLIFICADA */}
+              {tenant.plan === plan.id ? (
+                <Button disabled style={{ marginTop: 'auto' }}>Seu Plano Atual</Button>
+              ) : plan.id === 'pro' ? (
+                <Button 
+                  $variant="primary" 
+                  onClick={() => handleSubscribe('plano_pro_mensal')} 
+                  style={{ marginTop: 'auto' }}
+                >
+                  Fazer Upgrade
                 </Button>
-            )}
-          </PlanCard>
+              ) : (
+                <Button $variant="secondary" style={{ marginTop: 'auto' }}>
+                  Fazer Downgrade
+                </Button>
+              )}
+            </PlanCard>
+          ))}
         </PlansContainer>
       )}
     </PageWrapper>
