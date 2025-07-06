@@ -1,8 +1,11 @@
+// Arquivo: src/pages/Admin/ProductsPage/styles.js
+
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
   padding: 2rem;
   background-color: #f4f7f6;
+  min-height: 100vh;
 `;
 
 export const Header = styled.header`
@@ -88,7 +91,13 @@ export const FormActions = styled.div`
   margin-top: 1rem;
 `;
 
-export const ProductListSection = styled.section``;
+export const ProductListSection = styled.section`
+    h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #1a202c;
+    }
+`;
 
 export const ProductListItem = styled.div`
   display: grid;
@@ -144,7 +153,7 @@ export const Tag = styled.span`
   background-color: #f3f4f6;
   color: #4b5563;
   padding: 0.25rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 9999px;
   font-size: 0.8rem;
 `;
 
@@ -152,6 +161,10 @@ export const ActionButtons = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  button {
+    min-width: 150px; // Garante que os botões tenham uma largura mínima
+  }
 `;
 
 export const LoadingText = styled.p`

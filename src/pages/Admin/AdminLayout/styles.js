@@ -11,19 +11,18 @@ export const AdminWrapper = styled.div`
 
 export const Sidebar = styled.aside`
   width: 260px;
+  min-width: 260px;
   background-color: #111827;
   color: #9ca3af;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  z-index: 1000;
   transition: transform 0.3s ease-in-out;
+  z-index: 1000;
 
   @media (max-width: 768px) {
+    position: fixed;
+    height: 100%;
     transform: ${({ $isOpen }) => ($isOpen ? 'translateX(0)' : 'translateX(-100%)')};
   }
 `;
@@ -74,11 +73,33 @@ export const NavSeparator = styled.hr`
 
 export const ContentArea = styled.main`
   flex-grow: 1;
-  margin-left: 260px;
-  transition: margin-left 0.3s ease-in-out;
-  
+  overflow-y: auto;
+
+  .admin-header {
+    background: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+  }
+
+  .header-title {
+    font-size: 1.5rem;
+    margin: 0;
+    color: #111827;
+  }
+
+  .admin-main-content {
+    padding: 2rem;
+  }
+
   @media (max-width: 768px) {
-    margin-left: 0;
+    .admin-header {
+      padding-left: 60px;
+    }
   }
 `;
 
@@ -118,38 +139,34 @@ export const Overlay = styled.div`
 `;
 
 export const NotificationBellWrapper = styled.button`
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  position: relative;
+  background: none;
+  border: none;
   color: #4b5563;
   width: 40px;
   height: 40px;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 900;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  @media (min-width: 769px) {
-    top: 20px;
-    right: 2rem;
+  &:hover {
+    background-color: #f3f4f6;
   }
 `;
 
 export const NotificationBadge = styled.span`
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: 5px;
+  right: 5px;
   background-color: #ef4444;
   color: white;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 12px;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
   font-weight: bold;
   display: flex;
   align-items: center;

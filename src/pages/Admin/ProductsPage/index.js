@@ -100,9 +100,7 @@ const ProductsPage = () => {
     } catch (error) { toast.error('Erro ao apagar.'); }
   };
   
-  // <<< FUNÇÃO PARA ATIVAR/DESATIVAR E DESTACAR/REMOVER DESTAQUE >>>
   const handleToggleBoolean = async (productId, field, currentValue) => {
-    // Atualiza a interface imediatamente para uma melhor experiência (Optimistic UI Update)
     setProducts(prevProducts =>
       prevProducts.map(p =>
         p.id === productId ? { ...p, [field]: !currentValue } : p
@@ -115,7 +113,6 @@ const ProductsPage = () => {
       toast.success('Estado do produto atualizado!');
     } catch (error) {
       toast.error(`Erro ao atualizar. A reverter a alteração.`);
-      // Se der erro, reverte a alteração na interface
       setProducts(prevProducts =>
         prevProducts.map(p =>
           p.id === productId ? { ...p, [field]: currentValue } : p
@@ -152,26 +149,30 @@ const ProductsPage = () => {
 
       <ProductListSection>
         <h3>Produtos Cadastrados</h3>
-        {products.map(product => (
-          <ProductListItem key={product.id} $isAvailable={product.isAvailable}>
-            <ProductImage src={product.imageUrl || 'https://via.placeholder.com/100'} alt={product.name} />
-            <ProductInfo>
-              <h4>{product.name}</h4>
-              <p>{product.description}</p>
-              <ProductDetails>
-                <Price>R$ {(product.price || 0).toFixed(2)}</Price>
-                <Tag>{product.category}</Tag>
-                {product.isAvailable && <Tag style={{background: '#dcfce7', color: '#166534'}}>Disponível</Tag>}
-              </ProductDetails>
-            </ProductInfo>
-            <ActionButtons>
-              <Button onClick={() => handleToggleBoolean(product.id, 'isFeatured', product.isFeatured)} $variant={product.isFeatured ? 'primary' : 'secondary'}>{product.isFeatured ? 'Remover Destaque' : 'Destacar'}</Button>
-              <Button onClick={() => handleToggleBoolean(product.id, 'isAvailable', product.isAvailable)} $variant="secondary">{product.isAvailable ? 'Desativar' : 'Ativar'}</Button>
-              <Button onClick={() => handleEditClick(product)}>Editar</Button>
-              <Button onClick={() => handleDelete(product.id)} $variant="danger">Excluir</Button>
-            </ActionButtons>
-          </ProductListItem>
-        ))}
+        {products.length === 0 && !loading ? (
+            <InfoText>Nenhum produto cadastrado ainda. Use o formulário acima para começar.</InfoText>
+        ) : (
+            products.map(product => (
+              <ProductListItem key={product.id} $isAvailable={product.isAvailable}>
+                <ProductImage src={product.imageUrl || 'https://via.placeholder.com/100'} alt={product.name} />
+                <ProductInfo>
+                  <h4>{product.name}</h4>
+                  <p>{product.description}</p>
+                  <ProductDetails>
+                    <Price>R$ {(product.price || 0).toFixed(2)}</Price>
+                    <Tag>{product.category}</Tag>
+                    {product.isAvailable && <Tag style={{background: '#dcfce7', color: '#166534'}}>Disponível</Tag>}
+                  </ProductDetails>
+                </ProductInfo>
+                <ActionButtons>
+                  <Button onClick={() => handleToggleBoolean(product.id, 'isFeatured', product.isFeatured)} $variant={product.isFeatured ? 'primary' : 'secondary'}>{product.isFeatured ? 'Remover Destaque' : 'Destacar'}</Button>
+                  <Button onClick={() => handleToggleBoolean(product.id, 'isAvailable', product.isAvailable)} $variant="secondary">{product.isAvailable ? 'Desativar' : 'Ativar'}</Button>
+                  <Button onClick={() => handleEditClick(product)}>Editar</Button>
+                  <Button onClick={() => handleDelete(product.id)} $variant="danger">Excluir</Button>
+                </ActionButtons>
+              </ProductListItem>
+            ))
+        )}
       </ProductListSection>
     </PageWrapper>
   );
