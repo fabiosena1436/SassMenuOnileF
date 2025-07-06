@@ -1,10 +1,9 @@
-// Arquivo: src/pages/Admin/ProductsPage/styles.js
-
+// src/pages/Admin/ProductsPage/styles.js
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
   padding: 2rem;
-  background-color: #f4f7f6;
+  background-color: ${({ theme }) => theme.colors.backgroundLight};
   min-height: 100vh;
 `;
 
@@ -17,14 +16,14 @@ export const Header = styled.header`
 
 export const Title = styled.h1`
   font-size: 2rem;
-  color: #1a202c;
+  color: ${({ theme }) => theme.colors.textDarkest};
 `;
 
 export const FormContainer = styled.form`
-  background-color: #ffffff;
+  background-color: ${({ theme }) => theme.colors.white};
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.md};
   margin-bottom: 2.5rem;
 
   h3 {
@@ -51,7 +50,7 @@ export const FormGroup = styled.div`
   label {
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #4a5568;
+    color: ${({ theme }) => theme.colors.textMedium};
   }
 
   &.full-width {
@@ -61,15 +60,15 @@ export const FormGroup = styled.div`
 
 export const Input = styled.input`
   padding: 0.75rem 1rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   font-size: 1rem;
 `;
 
 export const Textarea = styled.textarea`
   padding: 0.75rem 1rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   font-size: 1rem;
   min-height: 80px;
   resize: vertical;
@@ -77,10 +76,10 @@ export const Textarea = styled.textarea`
 
 export const Select = styled.select`
   padding: 0.75rem 1rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   font-size: 1rem;
-  background-color: white;
+  background-color: ${({ theme }) => theme.colors.white};
 `;
 
 export const FormActions = styled.div`
@@ -92,11 +91,11 @@ export const FormActions = styled.div`
 `;
 
 export const ProductListSection = styled.section`
-    h3 {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        color: #1a202c;
-    }
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: ${({ theme }) => theme.colors.textDarkest};
+  }
 `;
 
 export const ProductListItem = styled.div`
@@ -104,19 +103,19 @@ export const ProductListItem = styled.div`
   grid-template-columns: 100px 1fr auto;
   gap: 1.5rem;
   align-items: center;
-  background-color: #ffffff;
+  background-color: ${({ theme }) => theme.colors.white};
   padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
   margin-bottom: 1rem;
-  border-left: 5px solid ${({ $isAvailable }) => $isAvailable ? '#22c55e' : '#a1a1aa'};
+  border-left: 5px solid ${({ $isAvailable, theme }) => $isAvailable ? theme.colors.successDark : theme.colors.neutral};
 `;
 
 export const ProductImage = styled.img`
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
 `;
 
 export const ProductInfo = styled.div`
@@ -126,7 +125,7 @@ export const ProductInfo = styled.div`
   }
   p {
     margin: 0;
-    color: #6b7280;
+    color: ${({ theme }) => theme.colors.textLight};
     font-size: 0.9rem;
     line-height: 1.4;
     display: -webkit-box;
@@ -146,14 +145,14 @@ export const ProductDetails = styled.div`
 
 export const Price = styled.span`
   font-weight: 700;
-  color: #166534;
+  color: ${({ theme }) => theme.colors.successDarker};
 `;
 
 export const Tag = styled.span`
-  background-color: #f3f4f6;
-  color: #4b5563;
+  background-color: ${({ theme }) => theme.colors.backgroundLight};
+  color: ${({ theme }) => theme.colors.textMedium};
   padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
   font-size: 0.8rem;
 `;
 
@@ -163,7 +162,7 @@ export const ActionButtons = styled.div`
   gap: 0.5rem;
 
   button {
-    min-width: 150px; // Garante que os botões tenham uma largura mínima
+    min-width: 150px;
   }
 `;
 
@@ -171,12 +170,12 @@ export const LoadingText = styled.p`
   text-align: center;
   padding: 2rem;
   font-style: italic;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.textLight};
 `;
 
 export const InfoText = styled.p`
   text-align: center;
   padding: 2rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: ${({ theme }) => theme.colors.background};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
 `;

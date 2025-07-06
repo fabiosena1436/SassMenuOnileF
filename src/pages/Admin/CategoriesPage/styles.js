@@ -1,5 +1,4 @@
-// Arquivo: src/pages/Admin/CategoriesPage/styles.js
-
+// src/pages/Admin/CategoriesPage/styles.js
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
@@ -11,27 +10,27 @@ export const PageWrapper = styled.div`
 export const SectionTitle = styled.h1`
   font-size: 2rem;
   margin-bottom: 2rem;
-  color: #1a202c;
+  color: ${({ theme }) => theme.colors.textDarkest};
 `;
 
 export const LoadingText = styled.p`
   text-align: center;
   font-size: 1.2rem;
-  color: #718096;
+  color: ${({ theme }) => theme.colors.textLight};
 `;
 
 export const InfoText = styled.p`
   text-align: center;
   font-size: 1rem;
-  color: #718096;
+  color: ${({ theme }) => theme.colors.textLight};
   margin-top: 2rem;
 `;
 
 export const FormContainer = styled.form`
-  background-color: #fff;
+  background-color: ${({ theme }) => theme.colors.white};
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.md};
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -45,18 +44,18 @@ export const FormGroup = styled.div`
   label {
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #4a5568;
+    color: ${({ theme }) => theme.colors.textMedium};
   }
 
   input {
     padding: 0.75rem 1rem;
-    border: 1px solid #cbd5e0;
-    border-radius: 4px;
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    border-radius: ${({ theme }) => theme.borderRadius.sm};
     font-size: 1rem;
     &:focus {
       outline: none;
-      border-color: #4299e1;
-      box-shadow: 0 0 0 1px #4299e1;
+      border-color: ${({ theme }) => theme.colors.info};
+      box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.info};
     }
   }
 `;
@@ -74,14 +73,14 @@ export const CategoryListItem = styled.li`
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
 export const CategoryInfo = styled.span`
   font-size: 1.1rem;
-  color: #2d3748;
+  color: ${({ theme }) => theme.colors.textDark};
   font-weight: 500;
 `;
 
