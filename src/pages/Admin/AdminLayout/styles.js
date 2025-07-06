@@ -1,19 +1,20 @@
-// Arquivo: src/pages/Admin/AdminLayout/styles.js
-
+// src/pages/Admin/AdminLayout/styles.js
 import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
+
+// Todos os nomes de componentes foram mantidos.
 
 export const AdminWrapper = styled.div`
   display: flex;
   min-height: 100vh;
-  background-color: #f3f4f6;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 export const Sidebar = styled.aside`
   width: 260px;
   min-width: 260px;
-  background-color: #111827;
-  color: #9ca3af;
+  background-color: ${({ theme }) => theme.colors.adminSidebarBg};
+  color: ${({ theme }) => theme.colors.textLight}; /* Cor de texto geral da sidebar */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -30,7 +31,7 @@ export const Sidebar = styled.aside`
 export const SidebarTitle = styled.h1`
   font-size: 1.5rem;
   font-weight: bold;
-  color: white;
+  color: ${({ theme }) => theme.colors.white};
   text-align: center;
   padding: 1.5rem 1rem;
 `;
@@ -45,29 +46,29 @@ export const StyledNavLink = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #d1d5db;
+  color: ${({ theme }) => theme.colors.adminSidebarText};
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   margin: 0.25rem 0;
   border-left: 4px solid transparent;
-  transition: background-color 0.2s, color 0.2s;
+  transition: ${({ theme }) => theme.transitions.colorBg};
 
   &:hover {
-    background-color: #374151;
-    color: white;
+    background-color: ${({ theme }) => theme.colors.adminSidebarHoverBg};
+    color: ${({ theme }) => theme.colors.white};
   }
 
   &.active {
-    background-color: #4f46e5;
-    color: white;
+    background-color: ${({ theme }) => theme.colors.adminPrimary};
+    color: ${({ theme }) => theme.colors.white};
     font-weight: bold;
-    border-left-color: #a5b4fc;
+    border-left-color: ${({ theme }) => theme.colors.adminPrimaryLight};
   }
 `;
 
 export const NavSeparator = styled.hr`
   border: none;
-  border-top: 1px solid #374151;
+  border-top: 1px solid ${({ theme }) => theme.colors.adminSidebarBorder};
   margin: 1rem 1.5rem;
 `;
 
@@ -76,7 +77,7 @@ export const ContentArea = styled.main`
   overflow-y: auto;
 
   .admin-header {
-    background: white;
+    background: ${({ theme }) => theme.colors.white};
     padding: 1rem 2rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     display: flex;
@@ -89,7 +90,7 @@ export const ContentArea = styled.main`
   .header-title {
     font-size: 1.5rem;
     margin: 0;
-    color: #111827;
+    color: ${({ theme }) => theme.colors.text};
   }
 
   .admin-main-content {
@@ -112,12 +113,12 @@ export const MenuButton = styled.button`
     position: fixed;
     top: 15px;
     left: 15px;
-    background: #1f2937;
-    color: white;
+    background: ${({ theme }) => theme.colors.adminSidebarBg};
+    color: ${({ theme }) => theme.colors.white};
     border: none;
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: ${({ theme }) => theme.borderRadius.full};
     cursor: pointer;
     z-index: 1002;
     font-size: 1rem;
@@ -133,7 +134,7 @@ export const Overlay = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: ${({ theme }) => theme.colors.overlay};
     z-index: 999;
   }
 `;
@@ -142,10 +143,10 @@ export const NotificationBellWrapper = styled.button`
   position: relative;
   background: none;
   border: none;
-  color: #4b5563;
+  color: ${({ theme }) => theme.colors.textMedium};
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
   cursor: pointer;
   font-size: 1.3rem;
   display: flex;
@@ -153,7 +154,7 @@ export const NotificationBellWrapper = styled.button`
   justify-content: center;
 
   &:hover {
-    background-color: #f3f4f6;
+    background-color: ${({ theme }) => theme.colors.background};
   }
 `;
 
@@ -161,9 +162,9 @@ export const NotificationBadge = styled.span`
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: #ef4444;
-  color: white;
-  border-radius: 50%;
+  background-color: ${({ theme }) => theme.colors.danger};
+  color: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
   width: 18px;
   height: 18px;
   font-size: 11px;
@@ -171,5 +172,5 @@ export const NotificationBadge = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  border: 2px solid ${({ theme }) => theme.colors.white};
 `;

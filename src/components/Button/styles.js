@@ -1,48 +1,66 @@
+// src/components/Button/styles.js
 import styled, { css } from 'styled-components';
 
+/**
+ * Documentação das Alterações:
+ * - Variedades de Botão (variants): Em vez de definirmos as cores diretamente,
+ * agora cada variante (primary, secondary, danger) busca as cores do nosso
+ * objeto de tema. Ex: theme.colors.primary.
+ * - Propriedades Gerais: O border-radius, a transição e a opacidade para o estado
+ * desabilitado também vêm do tema. Isso garante que todos os botões na aplicação
+ * tenham o mesmo raio de borda e o mesmo comportamento.
+ * - Propriedade $variant: Usamos $variant em vez de variant para indicar ao
+ * styled-components que esta é uma prop transitória e não deve ser passada
+ * para o elemento HTML final.
+ */
 const variants = {
   primary: css`
-    background-color: #7c3aed;
-    color: white;
+    background-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.textInverted};
     &:hover:not(:disabled) {
-      background-color: #6d28d9;
+      background-color: ${({ theme }) => theme.colors.primaryDark};
     }
   `,
   secondary: css`
-    background-color: #e5e7eb;
-    color: #4b5563;
+    background-color: ${({ theme }) => theme.colors.secondary};
+    color: ${({ theme }) => theme.colors.text};
     &:hover:not(:disabled) {
-      background-color: #d1d5db;
+      background-color: ${({ theme }) => theme.colors.secondaryDark};
     }
   `,
   danger: css`
-    background-color: #ef4444;
-    color: white;
+    background-color: ${({ theme }) => theme.colors.danger};
+    color: ${({ theme }) => theme.colors.textInverted};
     &:hover:not(:disabled) {
-      background-color: #dc2626;
+      background-color: ${({ theme }) => theme.colors.dangerDark};
     }
   `,
 };
 
 export const ButtonWrapper = styled.button`
-  padding: 12px 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.lg};
   border: none;
-  border-radius: 8px;
-  font-size: 1em;
-  font-weight: bold;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out, transform 0.1s ease-in-out;
-  
+  transition: ${({ theme }) => theme.transitions.default};
+  text-align: center;
+  line-height: 1.5;
+
+  /* Aplica o estilo da variante (primary, secondary, etc.) */
   ${({ $variant }) => variants[$variant] || variants.primary}
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
   &:active:not(:disabled) {
     transform: scale(0.98);
-  }
-  
-  &:disabled {
-    background-color: #9ca3af;
-    color: #e5e7eb;
-    cursor: not-allowed;
-    opacity: 0.8;
   }
 `;

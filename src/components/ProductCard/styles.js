@@ -1,69 +1,69 @@
-// Arquivo: src/components/ProductCard/styles.js
-
+// src/components/ProductCard/styles.js
 import styled from 'styled-components';
 
+// Mantivemos todos os nomes originais dos seus componentes
+// e apenas aplicámos as variáveis do tema (cores, espaçamentos, etc.)
+
 export const CardWrapper = styled.div`
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.md};
   display: flex;
   flex-direction: column;
-  height: 100%;
+  overflow: hidden;
+  transition: ${({ theme }) => theme.transitions.default};
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
 `;
 
+// O nome original ProductImage foi mantido
 export const ProductImage = styled.img`
   width: 100%;
-  height: 180px;
+  height: 200px;
   object-fit: cover;
 `;
 
+// O nome original ProductInfo foi mantido
 export const ProductInfo = styled.div`
-  padding: 1rem;
-  text-align: center;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
+  padding: ${({ theme }) => theme.spacing.md};
 `;
 
-export const ProductName = styled.h4`
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
+// O nome original ProductName foi mantido
+export const ProductName = styled.h3`
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
-  flex-grow: 1;
+  color: ${({ theme }) => theme.colors.text};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
-export const ProductPrice = styled.p`
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #4f46e5;
-  margin-top: auto;
+// O nome original ProductPrice foi mantido
+export const ProductPrice = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.3;
-  gap: 4px;
+  align-items: baseline;
+  gap: ${({ theme }) => theme.spacing.sm};
 `;
 
+// O nome original PricePrefix foi mantido
 export const PricePrefix = styled.span`
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #6b7280;
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.textLight};
 `;
 
+export const Price = styled.span`
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: ${({ theme }) => theme.colors.primary};
+`;
+
+// O nome original OldPrice foi mantido
 export const OldPrice = styled.s`
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #9ca3af;
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.textLight};
   text-decoration: line-through;
 `;

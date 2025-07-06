@@ -1,86 +1,81 @@
 // src/components/Modal/styles.js
 import styled from 'styled-components';
 
+// Restaurámos a estrutura original dos componentes do Modal
+// e aplicámos as variáveis do tema a cada parte.
+
 export const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: ${({ theme }) => theme.colors.overlay};
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
-  padding: 15px;
 `;
 
 export const ModalContent = styled.div`
-  background-color: #fff;
-  padding: 25px 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-  width: 100%;
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.md};
+  position: relative;
   max-width: 500px;
-  max-height: 90vh;
+  width: 90%;
   display: flex;
   flex-direction: column;
-  position: relative;
-  animation: fadeIn 0.3s ease-out;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
+  max-height: 90vh;
 `;
 
+// O nome original ModalHeader foi mantido
 export const ModalHeader = styled.div`
-  padding-bottom: 15px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
+  padding: ${({ theme }) => theme.spacing.lg};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
+// O nome original ModalTitle foi mantido
 export const ModalTitle = styled.h2`
-  color: #7c3aed;
   margin: 0;
-  text-align: center;
-  font-size: 1.5em;
+  font-size: 1.25rem;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
+// O nome original ModalCloseButton foi mantido
 export const ModalCloseButton = styled.button`
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent;
+  background: none;
   border: none;
-  font-size: 2em;
+  font-size: 1.5rem;
   line-height: 1;
+  color: ${({ theme }) => theme.colors.textLight};
   cursor: pointer;
-  color: #aaa;
-  transition: color 0.2s, transform 0.2s;
+  transition: ${({ theme }) => theme.transitions.default};
 
   &:hover {
-    color: #333;
-    transform: scale(1.1);
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
 
+// O nome original ModalBody foi mantido
 export const ModalBody = styled.div`
-  overflow-y: auto; /* Adiciona scroll se o conteúdo for grande */
-  flex-grow: 1;
+  padding: ${({ theme }) => theme.spacing.lg};
+  overflow-y: auto;
 `;
 
+// O nome original ModalFooter foi mantido
 export const ModalFooter = styled.div`
+  padding: ${({ theme }) => theme.spacing.lg};
+  border-top: 1px solid ${({ theme }) => theme.colors.borderLight};
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
+  gap: ${({ theme }) => theme.spacing.md};
 `;
+
+// Renomeei de volta para CloseButton para o ConfirmationModal não quebrar,
+// mas adicionei os outros que faltavam.
+// No seu Modal/index.js, você pode usar ModalCloseButton agora.
+export const CloseButton = ModalCloseButton;

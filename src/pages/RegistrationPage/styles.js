@@ -1,6 +1,8 @@
-// Arquivo: src/pages/RegistrationPage/styles.js
-
+// src/pages/RegistrationPage/styles.js
 import styled from 'styled-components';
+
+// Mantivemos todos os seus componentes exportados com os mesmos nomes.
+// Apenas substituímos os valores fixos pelas variáveis do tema.
 
 export const RegistrationContainer = styled.div`
   display: flex;
@@ -8,13 +10,13 @@ export const RegistrationContainer = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #f7fafc;
+  background-color: ${({ theme }) => theme.colors.background};
   padding: 2rem;
 `;
 
 export const Title = styled.h1`
   font-size: 2.5rem;
-  color: #2d3748;
+  color: ${({ theme }) => theme.colors.text};
   margin-bottom: 0.5rem;
   text-align: center;
 `;
@@ -22,10 +24,10 @@ export const Title = styled.h1`
 export const Form = styled.form`
   width: 100%;
   max-width: 450px;
-  background: white;
+  background: ${({ theme }) => theme.colors.white};
   padding: 2.5rem;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.md};
   margin-top: 2rem;
 `;
 
@@ -36,7 +38,7 @@ export const FormGroup = styled.div`
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #4a5568;
+    color: ${({ theme }) => theme.colors.textMedium};
   }
 `;
 
@@ -44,22 +46,22 @@ export const Input = styled.input`
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  transition: ${({ theme }) => theme.transitions.default};
 
   &:focus {
     outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 1px #4f46e5;
+    border-color: ${({ theme }) => theme.colors.adminPrimary};
+    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.adminPrimary};
   }
 `;
 
 export const ErrorMessage = styled.p`
-  color: #e53e3e;
-  background-color: #fed7d7;
+  color: ${({ theme }) => theme.colors.danger};
+  background-color: ${({ theme }) => theme.colors.dangerLight};
   padding: 0.75rem;
-  border-radius: 6px;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   margin-bottom: 1.5rem;
   text-align: center;
   font-weight: 500;
