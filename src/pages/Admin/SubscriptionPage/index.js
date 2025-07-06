@@ -1,9 +1,11 @@
+// src/pages/Admin/SubscriptionPage/index.js
 import React, { useState, useMemo } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/Button';
-import { FaCheckCircle } from 'react-icons/fa';
+import { PLANS } from '../../../utils/plans'; // Caminho corrigido para a pasta utils
 import toast from 'react-hot-toast';
+import { FaCheckCircle } from 'react-icons/fa';
 
 import {
   PageWrapper,
@@ -22,55 +24,29 @@ import {
   LoadingText
 } from './styles';
 
-// 1. DADOS CENTRALIZADOS: Toda a informação dos planos vive aqui.
-const PLANS = [
-  {
-    id: 'basic',
-    name: 'Básico',
-    price: 'Grátis',
-    priceDetails: 'para sempre',
-    description: 'Ideal para começar e validar o seu negócio online.',
-    features: [
-      'Cardápio Online Responsivo',
-      'Até 10 produtos cadastrados',
-      'Pedidos via WhatsApp',
-      'Painel de Gestão Simplificado'
-    ],
-    isFeatured: false,
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 'R$ 29,90',
-    priceDetails: '/mês',
-    description: 'A solução completa para profissionalizar e escalar as suas vendas.',
-    features: [
-      'Tudo do plano Básico',
-      'Produtos Ilimitados',
-      'Gestão de Promoções',
-      'Relatórios de Vendas',
-      'Suporte Prioritário'
-    ],
-    isFeatured: true,
-  }
-];
 
 const SubscriptionPage = () => {
   const [loading, setLoading] = useState(false);
   const { tenant } = useAuth();
 
-  // Memoiza o plano atual para evitar recálculos desnecessários
   const currentPlan = useMemo(() => {
     return PLANS.find(p => p.id === tenant?.plan);
   }, [tenant]);
 
   const handleSubscribe = async (planId) => {
+    const selectedPlan = PLANS.find(p => p.id === planId);
+    if (!selectedPlan || !selectedPlan.stripePriceId) {
+        toast.error('Plano inválido para assinatura.');
+        return;
+    };
+
     setLoading(true);
     toast.loading('A preparar o seu checkout seguro...');
     try {
       const functions = getFunctions();
       const createSubscription = httpsCallable(functions, 'createSubscription');
-      const result = await createSubscription({ planId });
+      // Passa o ID de preço do Stripe para a função de back-end
+      const result = await createSubscription({ stripePriceId: selectedPlan.stripePriceId });
       const { checkoutUrl } = result.data;
       window.location.href = checkoutUrl;
     } catch (error) {
@@ -92,7 +68,6 @@ const SubscriptionPage = () => {
         <Subtitle>Faça o upgrade para desbloquear todo o potencial da sua loja.</Subtitle>
       </Header>
       
-      {/* 2. STATUS DA ASSINATURA */}
       <SubscriptionStatus>
         Você está no plano <strong>{currentPlan.name}</strong>. Sua assinatura está ativa.
       </SubscriptionStatus>
@@ -106,7 +81,10 @@ const SubscriptionPage = () => {
               {plan.isFeatured && <FeaturedBadge>Recomendado</FeaturedBadge>}
               <PlanTitle>{plan.name}</PlanTitle>
               <PlanDescription>{plan.description}</PlanDescription>
-              <PlanPrice>{plan.price}<span>{plan.priceDetails}</span></PlanPrice>
+              <PlanPrice>
+                {plan.price}
+                {plan.priceDetails && <span>{plan.priceDetails}</span>}
+              </PlanPrice>
               
               <PlanFeatures>
                 {plan.features.map((feature) => (
@@ -116,16 +94,15 @@ const SubscriptionPage = () => {
                 ))}
               </PlanFeatures>
 
-              {/* 3. LÓGICA DE BOTÕES SIMPLIFICADA */}
               {tenant.plan === plan.id ? (
                 <Button disabled style={{ marginTop: 'auto' }}>Seu Plano Atual</Button>
               ) : plan.id === 'pro' ? (
                 <Button 
                   $variant="primary" 
-                  onClick={() => handleSubscribe('plano_pro_mensal')} 
+                  onClick={() => handleSubscribe(plan.id)} 
                   style={{ marginTop: 'auto' }}
                 >
-                  Fazer Upgrade
+                  Fazer Upgrade para o Pro
                 </Button>
               ) : (
                 <Button $variant="secondary" style={{ marginTop: 'auto' }}>

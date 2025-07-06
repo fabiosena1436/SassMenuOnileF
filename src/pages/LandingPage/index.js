@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
+import { PLANS } from '../../utils/plans'; // Caminho corrigido para a pasta utils
 import {
   LandingWrapper,
   Header,
@@ -23,50 +24,11 @@ import {
 } from './styles';
 import { FaRocket, FaStore, FaMobileAlt, FaCheckCircle } from 'react-icons/fa';
 
-// Dados dos planos - pode alterar isto facilmente no futuro
-const plans = [
-  {
-    name: 'Básico',
-    price: '9,90',
-    features: [
-      'Cardápio Online Ilimitado',
-      'Pedidos via WhatsApp',
-      'Painel de Gestão Simples',
-      'QR Code para Mesas',
-    ],
-    isFeatured: false,
-  },
-  {
-    name: 'Profissional',
-    price: '29,90',
-    features: [
-      'Tudo do plano Básico',
-      'Domínio Personalizado',
-      'Relatórios de Vendas',
-      'Suporte Prioritário',
-    ],
-    isFeatured: true,
-  },
-  {
-    name: 'Premium',
-    price: '49,90',
-    features: [
-      'Tudo do plano Profissional',
-      'Integração com iFood/Uber Eats',
-      'Gestão de Entregadores',
-      'Marketing por E-mail',
-    ],
-    isFeatured: false,
-  },
-];
-
-
 const LandingPage = () => {
   const navigate = useNavigate();
 
   return (
     <LandingWrapper>
-      {/* --- CABEÇALHO (HERO SECTION) --- */}
       <Header>
         <Title>Transforme o seu Negócio com um Cardápio Online Profissional</Title>
         <Subtitle>
@@ -82,18 +44,16 @@ const LandingPage = () => {
         </ButtonGroup>
       </Header>
 
-      {/* --- SECÇÃO DE PROVA VISUAL --- */}
       <Section>
         <SectionTitle>Veja o Poder em Ação</SectionTitle>
         <Showcase>
           <Mockup src="/images/menu-mockup.png" alt="Exemplo de cardápio online num telemóvel" />
           <Mockup src="/images/admin-mockup.png" alt="Exemplo do painel de administração" />
         </Showcase>
-       
+         <p style={{textAlign: 'center', marginTop: '1rem', color: '#6b7280'}}>*Imagens meramente ilustrativas. Substitua pelas suas capturas de ecrã.*</p>
       </Section>
 
 
-      {/* --- SECÇÃO DE FUNCIONALIDADES --- */}
       <Features>
         <FeatureCard>
           <FaRocket size={40} />
@@ -112,32 +72,37 @@ const LandingPage = () => {
         </FeatureCard>
       </Features>
 
-      {/* --- SECÇÃO DE PREÇOS --- */}
       <Section>
-        <SectionTitle>Planos Transparentes para o seu Sucesso</SectionTitle>
+        <SectionTitle>Comece Grátis, Cresça com o Pro</SectionTitle>
         <PricingPlan>
-          {plans.map(plan => (
-            <PlanCard key={plan.name} $isFeatured={plan.isFeatured}>
+          {PLANS.map(plan => (
+            <PlanCard key={plan.id} $isFeatured={plan.isFeatured}>
               <PlanTitle>{plan.name}</PlanTitle>
-              <PlanPrice>R$ {plan.price}<span>/mês</span></PlanPrice>
+              <PlanPrice>
+                {plan.price}
+                {plan.priceDetails && <span>{plan.priceDetails}</span>}
+              </PlanPrice>
               <PlanFeatureList>
                 {plan.features.map(feature => (
                   <li key={feature}><FaCheckCircle color="#22c55e" /> {feature}</li>
                 ))}
               </PlanFeatureList>
-              <Button $variant={plan.isFeatured ? 'primary' : 'secondary'} style={{ marginTop: 'auto' }}>
-                Começar com o Plano {plan.name}
+              <Button 
+                $variant={plan.isFeatured ? 'primary' : 'secondary'} 
+                style={{ marginTop: 'auto' }}
+                onClick={() => navigate('/register')}
+              >
+                {plan.id === 'basic' ? 'Começar Gratuitamente' : 'Escolher o Pro'}
               </Button>
             </PlanCard>
           ))}
         </PricingPlan>
       </Section>
 
-      {/* --- CHAMADA PARA AÇÃO FINAL --- */}
       <CallToAction>
         <h2>Pronto para começar a vender mais?</h2>
         <Button onClick={() => navigate('/register')} style={{ padding: '1rem 2rem', fontSize: '1.2rem' }}>
-          Quero o meu cardápio online grátis
+          Criar o meu cardápio grátis
         </Button>
       </CallToAction>
     </LandingWrapper>
