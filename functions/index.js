@@ -28,7 +28,7 @@ exports.createSubscription = onCall({ secrets: ["MERCADOPAGO_TOKEN"] }, async (r
         throw new HttpsError("invalid-argument", "Dados inválidos fornecidos.");
     }
     const plans = {
-        plano_pro_mensal: { reason: "Plano Pro Mensal - Vibe Açaí SaaS", auto_recurring: { frequency: 1, frequency_type: "months", transaction_amount: 29.90, currency_id: "BRL" } }
+        plano_pro_mensal: { reason: "Plano Pro Mensal - Vibe Açaí SaaS", auto_recurring: { frequency: 1, frequency_type: "months", transaction_amount: 1.00, currency_id: "BRL" } }
     };
     const selectedPlan = plans[planId];
     if (!selectedPlan) {
