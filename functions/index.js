@@ -1,4 +1,4 @@
-// Ficheiro: functions/index.js
+// Ficheiro: functions/index.js (Versão corrigida para Geração 1)
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
@@ -7,16 +7,16 @@ const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 admin.initializeApp();
 const db = admin.firestore();
 
-// As informações dos planos continuam aqui, servindo de "fonte da verdade" para o backend.
 const PLANS = {
   pro: {
     id: "pro",
     title: "Plano Pro",
-    price: 49.90, // Preço que será enviado para o Mercado Pago
+    price: 49.90, 
   },
 };
 
-exports.createSubscription = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_TOKEN"] }).https.onCall(async (data, context) => {
+// Voltamos à sintaxe original da Geração 1
+exports.createSubscription = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError("unauthenticated", "Utilizador não autenticado.");
   }
@@ -32,10 +32,12 @@ exports.createSubscription = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_T
   const userDoc = await db.collection("tenants").doc(userId).get();
   const userEmail = userDoc.data().email;
 
-  const client = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN });
-  
+  // Acedemos à chave através de functions.config()
+  const accessToken = functions.config().mercadopago.access_token;
+  const client = new MercadoPagoConfig({ accessToken });
+
   const preference = new Preference(client);
-  const notification_url = `https://SEU_PROJETO.cloudfunctions.net/mercadoPagoWebhook?user_id=${userId}&plan=${plan.id}`;
+  const notification_url = `https://southamerica-east1-1:432238664625:web:764ec9b5680c35967a3b90.cloudfunctions.net/mercadoPagoWebhook?user_id=${userId}&plan=${plan.id}`;
 
   try {
     const result = await preference.create({
@@ -48,8 +50,8 @@ exports.createSubscription = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_T
         }],
         payer: { email: userEmail },
         back_urls: {
-          success: `https://SEU_DOMINIO_OU_APP_URL/admin/assinatura?status=success`,
-          failure: `https://SEU_DOMINIO_OU_APP_URL/admin/assinatura?status=failure`,
+          success: `http://localhost:3000/admin/assinatura?status=success`,
+          failure: `http://localhost:3000/admin/assinatura?status=failure`,
         },
         notification_url: notification_url,
       },
@@ -61,17 +63,14 @@ exports.createSubscription = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_T
   }
 });
 
-
-// --- ATUALIZAÇÃO DE SEGURANÇA NO WEBHOOK ---
-exports.mercadoPagoWebhook = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_TOKEN"] }).https.onRequest(async (req, res) => {
-  // Apenas o método POST é permitido
+// Webhook na sintaxe da Geração 1
+exports.mercadoPagoWebhook = functions.https.onRequest(async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
   const { query } = req;
-  
-  // Verificamos o tópico da notificação (deve ser 'payment')
+
   if (query.type === 'payment') {
     const paymentId = query['data.id'];
     const userId = query.user_id;
@@ -82,23 +81,16 @@ exports.mercadoPagoWebhook = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_T
     }
 
     try {
-      const client = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN });
+      const accessToken = functions.config().mercadopago.access_token;
+      const client = new MercadoPagoConfig({ accessToken });
       const payment = new Payment(client);
-      
-      // Busca os detalhes do pagamento na API do Mercado Pago usando o ID
+
       const paymentInfo = await payment.get({ id: paymentId });
-      
-      // **Verificação crucial**: Confirma se o pagamento está aprovado ('approved')
+
       if (paymentInfo.status === 'approved') {
-        console.log(`Pagamento ${paymentId} aprovado para o utilizador ${userId}. A atualizar para o plano '${planId}'.`);
-        
-        // Atualiza o plano do utilizador no Firestore
         await db.collection("tenants").doc(userId).update({ plan: planId });
-        
-        // Responde ao Mercado Pago que a notificação foi recebida com sucesso
         return res.status(200).send('Notificação processada com sucesso.');
       } else {
-        console.log(`Notificação de pagamento ${paymentId} recebida com estado '${paymentInfo.status}'. Nenhuma ação necessária.`);
         return res.status(200).send('Notificação recebida, mas não aprovada.');
       }
 
@@ -108,6 +100,5 @@ exports.mercadoPagoWebhook = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_T
     }
   }
 
-  // Se a notificação não for do tipo 'payment', apenas confirma o recebimento.
   res.status(200).send('Notificação recebida.');
 });
