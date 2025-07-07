@@ -14,6 +14,9 @@ import {
   ProductDetails, Price, Tag, ActionButtons, LoadingText, InfoText
 } from './styles';
 
+// --- NOVO: Definição do limite de produtos para o plano básico ---
+const FREE_PLAN_PRODUCT_LIMIT = 10;
+
 const ProductsPage = () => {
   const { tenant, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -21,6 +24,9 @@ const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // --- NOVO: Estado para verificar se o limite foi atingido ---
+  const [isLimitReached, setLimitReached] = useState(false);
 
   const [editingProduct, setEditingProduct] = useState(null);
   const initialFormData = {
@@ -41,8 +47,17 @@ const ProductsPage = () => {
         getDocs(query(categoriesRef, orderBy('name'))),
       ]);
 
-      setProducts(productsSnap.docs.map(d => ({ ...d.data(), id: d.id })));
+      const productData = productsSnap.docs.map(d => ({ ...d.data(), id: d.id }));
+      setProducts(productData);
       setCategories(categoriesSnap.docs.map(d => ({ ...d.data(), id: d.id })));
+
+      // --- NOVO: Lógica para verificar o limite de produtos ---
+      if (tenant.plan === 'basic' && productData.length >= FREE_PLAN_PRODUCT_LIMIT) {
+        setLimitReached(true);
+      } else {
+        setLimitReached(false);
+      }
+
     } catch (error) { toast.error("Erro ao carregar dados."); }
     finally { setLoading(false); }
   }, [tenant]);
@@ -73,6 +88,13 @@ const ProductsPage = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // --- NOVO: Verificação de limite antes de criar novo produto ---
+    if (isLimitReached && !editingProduct) {
+      toast.error("Você atingiu o limite de produtos para o seu plano. Faça um upgrade para adicionar mais!");
+      return;
+    }
+
     if (!tenant?.id || !formData.name || !formData.price || !formData.category) {
       return toast.error("Nome, Preço e Categoria são obrigatórios.");
     }
@@ -132,23 +154,36 @@ const ProductsPage = () => {
         <Button onClick={() => navigate(`/loja/${tenant.slug}`)} $variant="secondary">Voltar para o Site</Button>
       </Header>
       
-      <FormContainer onSubmit={handleSubmit}>
-        <h3>{editingProduct ? 'A Editar Produto' : 'Adicionar Novo Produto'}</h3>
-        <FormGrid>
-          <FormGroup><label>Nome Produto</label><Input name="name" value={formData.name} onChange={handleInputChange} required /></FormGroup>
-          <FormGroup><label>Preço (Ex: 12.50)</label><Input name="price" value={formData.price} onChange={handleInputChange} type="number" step="0.01" required /></FormGroup>
-          <FormGroup><label>Categoria</label><Select name="category" value={formData.category} onChange={handleInputChange} required><option value="">Selecione uma categoria</option>{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</Select></FormGroup>
-          <FormGroup><label>URL da Imagem</label><Input name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} /></FormGroup>
-          <FormGroup className="full-width"><label>Descrição (Opcional)</label><Textarea name="description" value={formData.description} onChange={handleInputChange} /></FormGroup>
-        </FormGrid>
-        <FormActions>
-          {editingProduct && <Button type="button" $variant="secondary" onClick={resetForm}>Cancelar Edição</Button>}
-          <Button type="submit">{editingProduct ? 'Salvar Alterações' : 'Adicionar Produto'}</Button>
-        </FormActions>
-      </FormContainer>
+      {/* --- NOVO: Mensagem de aviso sobre o limite --- */}
+      {isLimitReached && (
+        <InfoText style={{
+            backgroundColor: '#fffbe6', color: '#b45309', marginBottom: '2rem',
+            border: '1px solid #fde68a'
+        }}>
+            <strong>Atenção:</strong> Você atingiu o limite de {FREE_PLAN_PRODUCT_LIMIT} produtos do plano Básico. Para adicionar mais, <a href="/admin/assinatura" style={{textDecoration: 'underline'}}>faça um upgrade para o plano Pro</a>.
+        </InfoText>
+      )}
+
+      {/* --- MUDANÇA: O formulário fica desabilitado se o limite for atingido e não estiver editando --- */}
+      <fieldset disabled={isLimitReached && !editingProduct}>
+        <FormContainer onSubmit={handleSubmit}>
+            <h3>{editingProduct ? 'A Editar Produto' : 'Adicionar Novo Produto'}</h3>
+            <FormGrid>
+            <FormGroup><label>Nome Produto</label><Input name="name" value={formData.name} onChange={handleInputChange} required /></FormGroup>
+            <FormGroup><label>Preço (Ex: 12.50)</label><Input name="price" value={formData.price} onChange={handleInputChange} type="number" step="0.01" required /></FormGroup>
+            <FormGroup><label>Categoria</label><Select name="category" value={formData.category} onChange={handleInputChange} required><option value="">Selecione uma categoria</option>{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</Select></FormGroup>
+            <FormGroup><label>URL da Imagem</label><Input name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} /></FormGroup>
+            <FormGroup className="full-width"><label>Descrição (Opcional)</label><Textarea name="description" value={formData.description} onChange={handleInputChange} /></FormGroup>
+            </FormGrid>
+            <FormActions>
+            {editingProduct && <Button type="button" $variant="secondary" onClick={resetForm}>Cancelar Edição</Button>}
+            <Button type="submit">{editingProduct ? 'Salvar Alterações' : 'Adicionar Produto'}</Button>
+            </FormActions>
+        </FormContainer>
+      </fieldset>
 
       <ProductListSection>
-        <h3>Produtos Cadastrados</h3>
+        <h3>Produtos Cadastrados ({products.length}/{tenant.plan === 'basic' ? FREE_PLAN_PRODUCT_LIMIT : 'Ilimitado'})</h3>
         {products.length === 0 && !loading ? (
             <InfoText>Nenhum produto cadastrado ainda. Use o formulário acima para começar.</InfoText>
         ) : (
