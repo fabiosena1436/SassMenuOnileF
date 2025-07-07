@@ -50,7 +50,7 @@ const LandingPage = () => {
           <Mockup src="/images/menu-mockup.png" alt="Exemplo de cardápio online num telemóvel" />
           <Mockup src="/images/admin-mockup.png" alt="Exemplo do painel de administração" />
         </Showcase>
-         <p style={{textAlign: 'center', marginTop: '1rem', color: '#6b7280'}}>*Imagens meramente ilustrativas. Substitua pelas suas capturas de ecrã.*</p>
+        
       </Section>
 
 
