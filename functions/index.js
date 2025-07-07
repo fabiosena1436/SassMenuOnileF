@@ -1,124 +1,113 @@
-// Arquivo: functions/index.js
+// Ficheiro: functions/index.js
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { MercadoPagoConfig, Preference } = require("mercadopago");
+const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-// --- INÍCIO DA ATUALIZAÇÃO ---
-
-// Objeto para guardar as informações dos planos.
-// Facilita a manutenção e evita "números mágicos" no código.
+// As informações dos planos continuam aqui, servindo de "fonte da verdade" para o backend.
 const PLANS = {
   pro: {
     id: "pro",
     title: "Plano Pro",
-    price: 49.90, // Preço real do plano Pro
+    price: 49.90, // Preço que será enviado para o Mercado Pago
   },
-  // Futuramente, você poderia adicionar outros planos aqui
-  // basico: {
-  //   id: "basico",
-  //   title: "Plano Básico",
-  //   price: 29.90,
-  // }
 };
 
-exports.createSubscription = functions.https.onCall(async (data, context) => {
+exports.createSubscription = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_TOKEN"] }).https.onCall(async (data, context) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "O usuário precisa estar autenticado.",
-    );
+    throw new functions.https.HttpsError("unauthenticated", "Utilizador não autenticado.");
   }
 
-  const { planId } = data; // Recebe o ID do plano do frontend
-  const plan = PLANS[planId]; // Busca as informações do plano
+  const { planId } = data;
+  const plan = PLANS[planId];
 
   if (!plan) {
-    throw new functions.https.HttpsError(
-      "invalid-argument",
-      "O plano selecionado não é válido.",
-    );
+    throw new functions.https.HttpsError("invalid-argument", "Plano inválido.");
   }
 
   const userId = context.auth.uid;
   const userDoc = await db.collection("tenants").doc(userId).get();
   const userEmail = userDoc.data().email;
 
-  const client = new MercadoPagoConfig({
-    accessToken: functions.config().mercadopago.access_token,
-  });
+  const client = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN });
+  
   const preference = new Preference(client);
+  const notification_url = `https://SEU_PROJETO.cloudfunctions.net/mercadoPagoWebhook?user_id=${userId}&plan=${plan.id}`;
 
   try {
     const result = await preference.create({
       body: {
-        items: [
-          {
-            id: plan.id,
-            title: plan.title,
-            quantity: 1,
-            unit_price: plan.price, // Usa o preço do plano selecionado
-          },
-        ],
-        payer: {
-          email: userEmail,
-        },
+        items: [{
+          id: plan.id,
+          title: plan.title,
+          quantity: 1,
+          unit_price: plan.price,
+        }],
+        payer: { email: userEmail },
         back_urls: {
           success: `https://SEU_DOMINIO_OU_APP_URL/admin/assinatura?status=success`,
           failure: `https://SEU_DOMINIO_OU_APP_URL/admin/assinatura?status=failure`,
         },
-        // O notification_url continua o mesmo, apontando para o nosso webhook
-        notification_url: `https://SEU_PROJETO.cloudfunctions.net/mercadoPagoWebhook?user_id=${userId}`,
+        notification_url: notification_url,
       },
     });
-
     return { preferenceId: result.id };
   } catch (error) {
-    console.error("Erro ao criar preferência no Mercado Pago:", error);
-    throw new functions.https.HttpsError(
-      "internal",
-      "Não foi possível criar a assinatura.",
-    );
+    console.error("Erro no Mercado Pago:", error);
+    throw new functions.https.HttpsError("internal", "Erro ao criar a assinatura.");
   }
 });
 
-// --- FIM DA ATUALIZAÇÃO ---
 
-
-// A função do webhook continua a mesma, mas vamos adicionar uma verificação extra
-exports.mercadoPagoWebhook = functions.https.onRequest(async (req, res) => {
-  // ATENÇÃO: O modo de teste que usamos deve ser removido ou protegido em produção.
-  // Vamos manter por enquanto para facilitar, mas com um aviso.
-  if (req.body.test_mode && req.body.user_id) {
-    console.log("!!! MODO DE TESTE ATIVADO !!!");
-    const userId = req.body.user_id;
-    await db.collection("tenants").doc(userId).update({ plan: "pro" });
-    return res.status(200).send("Webhook de teste recebido com sucesso!");
+// --- ATUALIZAÇÃO DE SEGURANÇA NO WEBHOOK ---
+exports.mercadoPagoWebhook = functions.runWith({ secrets: ["MERCADOPAGO_ACCESS_TOKEN"] }).https.onRequest(async (req, res) => {
+  // Apenas o método POST é permitido
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
   }
 
-  const payment = req.query; // Para pagamentos reais, a info vem na query
-  const topic = payment.topic || payment.type;
+  const { query } = req;
+  
+  // Verificamos o tópico da notificação (deve ser 'payment')
+  if (query.type === 'payment') {
+    const paymentId = query['data.id'];
+    const userId = query.user_id;
+    const planId = query.plan;
 
-  if (topic === "payment") {
-    const paymentId = payment.id || payment["data.id"];
-    const userId = req.query.user_id;
-
-    if (!userId) {
-      return res.status(400).send("User ID não encontrado na URL da notificação.");
+    if (!userId || !planId) {
+      return res.status(400).send('Parâmetros em falta na URL da notificação.');
     }
-    
-    // Aqui você faria uma chamada à API do Mercado Pago para verificar o status do paymentId
-    // e, se o pagamento foi aprovado ("status: 'approved'"), você atualiza o plano.
-    // Por simplicidade, vamos assumir que a notificação já é a confirmação.
-    
-    console.log(`Pagamento ${paymentId} recebido para o usuário ${userId}. Atualizando para 'pro'.`);
-    await db.collection("tenants").doc(userId).update({
-      plan: "pro", // Futuramente, você pode pegar o ID do plano do próprio pagamento
-    });
+
+    try {
+      const client = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN });
+      const payment = new Payment(client);
+      
+      // Busca os detalhes do pagamento na API do Mercado Pago usando o ID
+      const paymentInfo = await payment.get({ id: paymentId });
+      
+      // **Verificação crucial**: Confirma se o pagamento está aprovado ('approved')
+      if (paymentInfo.status === 'approved') {
+        console.log(`Pagamento ${paymentId} aprovado para o utilizador ${userId}. A atualizar para o plano '${planId}'.`);
+        
+        // Atualiza o plano do utilizador no Firestore
+        await db.collection("tenants").doc(userId).update({ plan: planId });
+        
+        // Responde ao Mercado Pago que a notificação foi recebida com sucesso
+        return res.status(200).send('Notificação processada com sucesso.');
+      } else {
+        console.log(`Notificação de pagamento ${paymentId} recebida com estado '${paymentInfo.status}'. Nenhuma ação necessária.`);
+        return res.status(200).send('Notificação recebida, mas não aprovada.');
+      }
+
+    } catch (error) {
+      console.error("Erro ao verificar o pagamento:", error);
+      return res.status(500).send('Erro interno ao processar a notificação.');
+    }
   }
 
-  res.status(200).send("ok");
+  // Se a notificação não for do tipo 'payment', apenas confirma o recebimento.
+  res.status(200).send('Notificação recebida.');
 });

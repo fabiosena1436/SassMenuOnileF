@@ -1,12 +1,14 @@
-// src/pages/Admin/SubscriptionPage/index.js
+// Arquivo: src/pages/Admin/SubscriptionPage/index.js
 import React, { useState, useMemo } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/Button';
-import { PLANS } from '../../../utils/plans'; // Caminho corrigido para a pasta utils
+import { PLANS } from '../../../utils/plans';
 import toast from 'react-hot-toast';
 import { FaCheckCircle } from 'react-icons/fa';
+import { loadMercadoPago } from '@mercadopago/sdk-js';
 
+// Importando os componentes de estilo que correspondem ao seu design
 import {
   PageWrapper,
   Header,
@@ -24,9 +26,8 @@ import {
   LoadingText
 } from './styles';
 
-
 const SubscriptionPage = () => {
-  const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { tenant } = useAuth();
 
   const currentPlan = useMemo(() => {
@@ -40,20 +41,37 @@ const SubscriptionPage = () => {
         return;
     };
 
-    setLoading(true);
+    setIsRedirecting(true);
     toast.loading('A preparar o seu checkout seguro...');
+    
     try {
       const functions = getFunctions();
       const createSubscription = httpsCallable(functions, 'createSubscription');
-      // Passa o ID de preço do Stripe para a função de back-end
-      const result = await createSubscription({ stripePriceId: selectedPlan.stripePriceId });
-      const { checkoutUrl } = result.data;
-      window.location.href = checkoutUrl;
+      
+      const { data } = await createSubscription({ stripePriceId: selectedPlan.stripePriceId });
+      const preferenceId = data.preferenceId;
+
+      if (preferenceId) {
+        await loadMercadoPago();
+        const mp = new window.MercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY, {
+          locale: 'pt-BR'
+        });
+        
+        toast.dismiss();
+        
+        document.getElementById('plans-container').style.display = 'none';
+        document.getElementById('checkout-container').style.display = 'block';
+
+        mp.checkout({
+          preference: { id: preferenceId },
+          render: { container: '.checkout-container', label: 'Confirmar e Pagar' }
+        });
+      }
     } catch (error) {
       console.error("Erro ao criar a assinatura:", error);
       toast.dismiss();
       toast.error("Ocorreu um erro ao iniciar a sua assinatura.");
-      setLoading(false);
+      setIsRedirecting(false);
     }
   };
 
@@ -72,10 +90,12 @@ const SubscriptionPage = () => {
         Você está no plano <strong>{currentPlan.name}</strong>. Sua assinatura está ativa.
       </SubscriptionStatus>
 
-      {loading ? (
-        <LoadingText>A redirecionar para o checkout...</LoadingText>
+      {isRedirecting ? (
+        <div id="checkout-container" className="checkout-container" style={{ marginTop: '2rem' }}>
+          <LoadingText>A carregar checkout...</LoadingText>
+        </div>
       ) : (
-        <PlansContainer>
+        <PlansContainer id="plans-container">
           {PLANS.map((plan) => (
             <PlanCard key={plan.id} $isFeatured={plan.isFeatured}>
               {plan.isFeatured && <FeaturedBadge>Recomendado</FeaturedBadge>}
@@ -101,8 +121,9 @@ const SubscriptionPage = () => {
                   $variant="primary" 
                   onClick={() => handleSubscribe(plan.id)} 
                   style={{ marginTop: 'auto' }}
+                  disabled={isRedirecting}
                 >
-                  Fazer Upgrade para o Pro
+                  {isRedirecting ? 'Aguarde...' : 'Fazer Upgrade para o Pro'}
                 </Button>
               ) : (
                 <Button $variant="secondary" style={{ marginTop: 'auto' }}>
