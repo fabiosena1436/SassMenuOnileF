@@ -1,4 +1,4 @@
-// Arquivo: src/pages/Admin/ProductsPage/index.js
+// Arquivo: src/pages/Admin/ProductsPage/index.js (Versão Correta)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,13 +8,14 @@ import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/Button';
 import toast from 'react-hot-toast';
 
+// Atenção: A importação de estilos agora é a correta para a página de produtos.
 import {
   PageWrapper, Header, Title, FormContainer, FormGrid, FormGroup, Input, Textarea, Select,
   FormActions, ProductListSection, ProductListItem, ProductImage, ProductInfo,
   ProductDetails, Price, Tag, ActionButtons, LoadingText, InfoText
 } from './styles';
 
-// --- NOVO: Definição do limite de produtos para o plano básico ---
+// Definição do limite de produtos para o plano básico.
 const FREE_PLAN_PRODUCT_LIMIT = 10;
 
 const ProductsPage = () => {
@@ -25,7 +26,7 @@ const ProductsPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- NOVO: Estado para verificar se o limite foi atingido ---
+  // Estado para verificar se o limite de produtos do plano foi atingido.
   const [isLimitReached, setLimitReached] = useState(false);
 
   const [editingProduct, setEditingProduct] = useState(null);
@@ -35,6 +36,7 @@ const ProductsPage = () => {
   };
   const [formData, setFormData] = useState(initialFormData);
 
+  // Função para buscar os dados do Firestore
   const fetchData = useCallback(async () => {
     if (!tenant?.id) return;
     setLoading(true);
@@ -51,15 +53,19 @@ const ProductsPage = () => {
       setProducts(productData);
       setCategories(categoriesSnap.docs.map(d => ({ ...d.data(), id: d.id })));
 
-      // --- NOVO: Lógica para verificar o limite de produtos ---
+      // Lógica para verificar o limite de produtos baseado no plano do usuário.
       if (tenant.plan === 'basic' && productData.length >= FREE_PLAN_PRODUCT_LIMIT) {
         setLimitReached(true);
       } else {
         setLimitReached(false);
       }
 
-    } catch (error) { toast.error("Erro ao carregar dados."); }
-    finally { setLoading(false); }
+    } catch (error) { 
+      console.error("Erro ao carregar dados:", error);
+      toast.error("Erro ao carregar os seus produtos e categorias."); 
+    } finally { 
+      setLoading(false); 
+    }
   }, [tenant]);
 
   useEffect(() => {
@@ -89,9 +95,9 @@ const ProductsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // --- NOVO: Verificação de limite antes de criar novo produto ---
+    // Bloqueia a criação de um novo produto (mas não a edição) se o limite for atingido.
     if (isLimitReached && !editingProduct) {
-      toast.error("Você atingiu o limite de produtos para o seu plano. Faça um upgrade para adicionar mais!");
+      toast.error("Você atingiu o limite de produtos do seu plano. Faça um upgrade para adicionar mais!");
       return;
     }
 
@@ -103,68 +109,69 @@ const ProductsPage = () => {
     try {
       if (editingProduct) {
         await updateDoc(doc(db, 'tenants', tenant.id, 'products', editingProduct.id), dataToSave);
-        toast.success('Produto atualizado!');
+        toast.success('Produto atualizado com sucesso!');
       } else {
         await addDoc(collection(db, 'tenants', tenant.id, 'products'), dataToSave);
-        toast.success('Produto adicionado!');
+        toast.success('Produto adicionado com sucesso!');
       }
       resetForm();
-      await fetchData();
-    } catch (error) { toast.error('Erro ao salvar o produto.'); }
+      await fetchData(); // Re-busca os dados para atualizar a lista e a contagem.
+    } catch (error) { 
+        console.error("Erro ao salvar produto:", error);
+        toast.error('Ocorreu um erro ao salvar o produto.'); 
+    }
   };
   
   const handleDelete = async (productId) => {
-    if (!window.confirm("Apagar este produto? Esta ação não pode ser desfeita.")) return;
+    if (!window.confirm("Tem a certeza que deseja apagar este produto? Esta ação não pode ser desfeita.")) return;
     try {
       await deleteDoc(doc(db, 'tenants', tenant.id, 'products', productId));
-      toast.success('Produto apagado!');
+      toast.success('Produto apagado com sucesso!');
       fetchData();
-    } catch (error) { toast.error('Erro ao apagar.'); }
+    } catch (error) { 
+        console.error("Erro ao apagar:", error);
+        toast.error('Ocorreu um erro ao apagar o produto.'); 
+    }
   };
   
   const handleToggleBoolean = async (productId, field, currentValue) => {
-    setProducts(prevProducts =>
-      prevProducts.map(p =>
-        p.id === productId ? { ...p, [field]: !currentValue } : p
-      )
+    const optimisticProducts = products.map(p =>
+      p.id === productId ? { ...p, [field]: !currentValue } : p
     );
+    setProducts(optimisticProducts);
 
     try {
       const docRef = doc(db, 'tenants', tenant.id, 'products', productId);
       await updateDoc(docRef, { [field]: !currentValue });
       toast.success('Estado do produto atualizado!');
     } catch (error) {
+      console.error("Erro ao atualizar estado:", error);
       toast.error(`Erro ao atualizar. A reverter a alteração.`);
-      setProducts(prevProducts =>
-        prevProducts.map(p =>
-          p.id === productId ? { ...p, [field]: currentValue } : p
-        )
+      // Reverte a alteração visual em caso de erro na base de dados
+      const revertedProducts = products.map(p =>
+        p.id === productId ? { ...p, [field]: currentValue } : p
       );
+      setProducts(revertedProducts);
     }
   };
 
   if (loading) {
-    return <PageWrapper><LoadingText>A carregar...</LoadingText></PageWrapper>;
+    return <PageWrapper><LoadingText>A carregar os seus produtos...</LoadingText></PageWrapper>;
   }
 
   return (
     <PageWrapper>
       <Header>
         <Title>Gerenciamento de Produtos</Title>
-        <Button onClick={() => navigate(`/loja/${tenant.slug}`)} $variant="secondary">Voltar para o Site</Button>
+        <Button onClick={() => navigate(`/loja/${tenant.slug}`)} variant="secondary">Ver a minha Loja</Button>
       </Header>
       
-      {/* --- NOVO: Mensagem de aviso sobre o limite --- */}
       {isLimitReached && (
-        <InfoText style={{
-            backgroundColor: '#fffbe6', color: '#b45309', marginBottom: '2rem',
-            border: '1px solid #fde68a'
-        }}>
-            <strong>Atenção:</strong> Você atingiu o limite de {FREE_PLAN_PRODUCT_LIMIT} produtos do plano Básico. Para adicionar mais, <a href="/admin/assinatura" style={{textDecoration: 'underline'}}>faça um upgrade para o plano Pro</a>.
+        <InfoText>
+            <strong>Atenção:</strong> Você atingiu o limite de {FREE_PLAN_PRODUCT_LIMIT} produtos do plano Básico. Para adicionar mais, <a href="/admin/assinatura">faça um upgrade para o plano Pro</a>.
         </InfoText>
       )}
 
-      {/* --- MUDANÇA: O formulário fica desabilitado se o limite for atingido e não estiver editando --- */}
       <fieldset disabled={isLimitReached && !editingProduct}>
         <FormContainer onSubmit={handleSubmit}>
             <h3>{editingProduct ? 'A Editar Produto' : 'Adicionar Novo Produto'}</h3>
@@ -176,7 +183,7 @@ const ProductsPage = () => {
             <FormGroup className="full-width"><label>Descrição (Opcional)</label><Textarea name="description" value={formData.description} onChange={handleInputChange} /></FormGroup>
             </FormGrid>
             <FormActions>
-            {editingProduct && <Button type="button" $variant="secondary" onClick={resetForm}>Cancelar Edição</Button>}
+            {editingProduct && <Button type="button" variant="secondary" onClick={resetForm}>Cancelar Edição</Button>}
             <Button type="submit">{editingProduct ? 'Salvar Alterações' : 'Adicionar Produto'}</Button>
             </FormActions>
         </FormContainer>
@@ -196,14 +203,13 @@ const ProductsPage = () => {
                   <ProductDetails>
                     <Price>R$ {(product.price || 0).toFixed(2)}</Price>
                     <Tag>{product.category}</Tag>
-                    {product.isAvailable && <Tag style={{background: '#dcfce7', color: '#166534'}}>Disponível</Tag>}
                   </ProductDetails>
                 </ProductInfo>
                 <ActionButtons>
-                  <Button onClick={() => handleToggleBoolean(product.id, 'isFeatured', product.isFeatured)} $variant={product.isFeatured ? 'primary' : 'secondary'}>{product.isFeatured ? 'Remover Destaque' : 'Destacar'}</Button>
-                  <Button onClick={() => handleToggleBoolean(product.id, 'isAvailable', product.isAvailable)} $variant="secondary">{product.isAvailable ? 'Desativar' : 'Ativar'}</Button>
+                  <Button onClick={() => handleToggleBoolean(product.id, 'isFeatured', product.isFeatured)} variant={product.isFeatured ? 'primary' : 'secondary'}>{product.isFeatured ? 'Remover Destaque' : 'Destacar'}</Button>
+                  <Button onClick={() => handleToggleBoolean(product.id, 'isAvailable', product.isAvailable)} variant="secondary">{product.isAvailable ? 'Desativar' : 'Ativar'}</Button>
                   <Button onClick={() => handleEditClick(product)}>Editar</Button>
-                  <Button onClick={() => handleDelete(product.id)} $variant="danger">Excluir</Button>
+                  <Button onClick={() => handleDelete(product.id)} variant="danger">Excluir</Button>
                 </ActionButtons>
               </ProductListItem>
             ))

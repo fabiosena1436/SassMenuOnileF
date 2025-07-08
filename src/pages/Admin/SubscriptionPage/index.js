@@ -34,19 +34,21 @@ const SubscriptionPage = () => {
       
       const { init_point } = result.data;
       if (init_point) {
-        window.location.href = init_point; // Redireciona para o checkout do Mercado Pago
+        // Redireciona o usuário para a página de pagamento do Mercado Pago
+        window.location.href = init_point; 
       }
     } catch (error) {
       console.error("Erro ao criar a assinatura:", error);
       toast.dismiss();
       toast.error("Ocorreu um erro ao iniciar a sua assinatura.");
-      setLoadingAction(null);
+    } finally {
+        setLoadingAction(null);
     }
   };
 
   // --- LÓGICA PARA CANCELAR A ASSINATURA ---
   const handleCancel = async () => {
-    if (!window.confirm("Tem a certeza que deseja cancelar a sua assinatura? Perderá o acesso às funcionalidades Pro. A cobrança será interrompida imediatamente.")) {
+    if (!window.confirm("Tem a certeza que deseja cancelar a sua assinatura? Perderá o acesso às funcionalidades Pro. A cobrança será interrompida.")) {
       return;
     }
     
@@ -60,6 +62,7 @@ const SubscriptionPage = () => {
       
       toast.dismiss();
       toast.success("Assinatura cancelada com sucesso!");
+      // O webhook tratará de atualizar o plano no banco de dados.
     } catch (error) {
       console.error("Erro ao cancelar:", error);
       toast.dismiss();
@@ -103,24 +106,29 @@ const SubscriptionPage = () => {
               ))}
             </PlanFeatures>
 
-            {/* Lógica dos Botões */}
+            {/* LÓGICA DOS BOTÕES MELHORADA */}
             <div style={{ marginTop: 'auto' }}>
               {tenant.plan === plan.id ? (
+                // Se o plano atual do usuário é este
                 plan.id === 'pro' ? (
+                  // E é o plano PRO, mostra o botão de cancelar
                   <Button 
-                    $variant="danger" 
+                    variant="danger" // Usando a variante correta do seu componente Button
                     onClick={handleCancel}
                     disabled={loadingAction === 'cancel'}
                   >
                     {loadingAction === 'cancel' ? 'A cancelar...' : 'Cancelar Assinatura'}
                   </Button>
                 ) : (
+                  // Se é o plano BASIC, mostra um botão desabilitado
                   <Button disabled>Seu Plano Atual</Button>
                 )
               ) : (
+                // Se o plano atual do usuário é DIFERENTE deste
                 plan.id === 'pro' && (
+                  // E este card é do plano PRO, mostra o botão de upgrade
                   <Button 
-                    $variant="primary" 
+                    variant="primary" 
                     onClick={handleSubscribe}
                     disabled={loadingAction === 'subscribe'}
                   >
@@ -131,7 +139,7 @@ const SubscriptionPage = () => {
             </div>
           </PlanCard>
         ))}
-      </PlansContainer> {/* <- ESTA ERA A LINHA COM O ERRO, AGORA CORRIGIDA */}
+      </PlansContainer>
     </PageWrapper>
   );
 };

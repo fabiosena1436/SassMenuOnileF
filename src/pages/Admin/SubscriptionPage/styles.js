@@ -1,19 +1,20 @@
-// Ficheiro: src/pages/Admin/SubscriptionPage/styles.js
+// Arquivo: src/pages/Admin/SubscriptionPage/styles.js
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const PageWrapper = styled.div`
   padding: 2rem;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
 `;
 
-export const Header = styled.div`
-  text-align: center;
+export const Header = styled.header`
   margin-bottom: 2rem;
+  text-align: center;
 `;
 
-export const SectionTitle = styled.h2`
+export const SectionTitle = styled.h1`
   font-size: 2.5rem;
   font-weight: 700;
   color: #1a202c;
@@ -21,69 +22,76 @@ export const SectionTitle = styled.h2`
 `;
 
 export const Subtitle = styled.p`
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   color: #718096;
 `;
 
-export const SubscriptionStatus = styled.div`
-  background-color: #ebf8ff;
-  color: #3182ce;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #90cdf4;
+export const LoadingText = styled.p`
   text-align: center;
-  margin: 0 auto 3rem auto;
-  font-weight: 500;
-  max-width: 800px;
+  font-size: 1.2rem;
+  color: #718096;
+  padding: 3rem;
+`;
+
+export const SubscriptionStatus = styled.div`
+  text-align: center;
+  background-color: #e6fffa;
+  color: #2c7a7b;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 3rem;
+  font-size: 1.1rem;
 
   strong {
-    font-weight: 700;
+    font-weight: 600;
   }
 `;
 
 export const PlansContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: stretch; /* Garante que os cards tenham a mesma altura */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  flex-wrap: wrap;
+  justify-content: center;
 `;
 
 export const PlanCard = styled.div`
-  background: #ffffff;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 2.5rem;
-  width: 100%;
-  max-width: 380px;
-  text-align: center;
-  border: 2px solid ${({ $isFeatured }) => $isFeatured ? '#4299e1' : 'transparent'};
+  padding: 2rem;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
   position: relative;
-  transition: all 0.3s ease-in-out;
+  overflow: hidden;
 
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
+  ${({ $isFeatured }) =>
+    $isFeatured &&
+    css`
+      border-color: #4299e1;
+      border-width: 2px;
+      transform: scale(1.02);
+    `}
 `;
 
 export const FeaturedBadge = styled.div`
   position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #4299e1;
-  color: #ffffff;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  top: 1.5rem;
+  right: -50px;
+  background-color: #4299e1;
+  color: white;
+  padding: 0.5rem 3rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transform: rotate(45deg);
+  transform-origin: top left;
+  width: 170px;
+  text-align: center;
 `;
 
 export const PlanTitle = styled.h3`
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #2d3748;
   margin-bottom: 0.5rem;
@@ -91,30 +99,29 @@ export const PlanTitle = styled.h3`
 
 export const PlanDescription = styled.p`
   color: #718096;
-  min-height: 40px;
+  font-size: 1rem;
   margin-bottom: 1.5rem;
+  flex-grow: 1; /* Makes description take available space */
 `;
 
-export const PlanPrice = styled.p`
-  font-size: 3rem;
+export const PlanPrice = styled.div`
+  font-size: 2.25rem;
   font-weight: 700;
   color: #1a202c;
-  margin: 0.5rem 0;
+  margin-bottom: 1.5rem;
 
   span {
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 400;
     color: #718096;
-    margin-left: 0.25rem;
+    margin-left: 0.5rem;
   }
 `;
 
 export const PlanFeatures = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 2rem 0;
-  text-align: left;
-  flex-grow: 1;
+  margin-bottom: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -123,18 +130,11 @@ export const PlanFeatures = styled.ul`
 export const FeatureItem = styled.li`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.75rem;
   color: #4a5568;
-  
-  svg {
-    color: #48bb78;
-    flex-shrink: 0;
-  }
-`;
 
-export const LoadingText = styled.p`
-  text-align: center;
-  font-size: 1.2rem;
-  color: #718096;
-  padding: 3rem;
+  svg {
+    color: #48bb78; /* Green checkmark */
+    min-width: 20px;
+  }
 `;
