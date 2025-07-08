@@ -50,7 +50,7 @@
 //         }],
 //         payer: { email: userEmail },
 //         back_urls: {
-//           success: `http://localhost:3000/admin/assinatura?status=success`,
+//           success: `https://sass-menu-onile-f-11iv-1m02ndx4s-fabiosena1436s-projects.vercel.app/admin/assinatura=success`,
 //           failure: `http://localhost:3000/admin/assinatura?status=failure`,
 //         },
 //         notification_url: notification_url,
@@ -139,7 +139,7 @@ exports.createSubscription = functions.https.onCall(async (data, context) => {
           currency_id: "BRL",
         },
         payer_email: userEmail,
-        back_url: `https://sass-menu-onile-f-11iv-1m02ndx4s-fabiosena1436s-projects.vercel.app//admin/assinatura`,
+        back_url: `https://sass-menu-onile-f-11iv-1m02ndx4s-fabiosena1436s-projects.vercel.app/admin/assinatura`,
         external_reference: userId, // Guardamos o nosso ID de utilizador para referência
       },
     });
