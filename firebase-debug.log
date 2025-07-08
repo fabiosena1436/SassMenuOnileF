@@ -66,3 +66,29 @@
 [debug] [2025-07-08T16:36:42.030Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/access_token [none]
 [debug] [2025-07-08T16:36:42.306Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/accesstoken 200
 [debug] [2025-07-08T16:36:42.306Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/accesstoken {"name":"projects/menuonlinesass/configs/mercadopago/variables/accesstoken","updateTime":"2025-07-02T19:43:51.574564044Z","text":"APP_USR-15d161b3-8137-4241-9d64-4370ecf270dc"}
+[debug] [2025-07-08T16:36:42.510Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/token 200
+[debug] [2025-07-08T16:36:42.511Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/token {"name":"projects/menuonlinesass/configs/mercadopago/variables/token","updateTime":"2025-07-03T16:59:07.673783817Z","text":"APP_USR-15d161b3-8137-4241-9d64-4370ecf270dc"}
+[debug] [2025-07-08T16:36:42.523Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/access_token 200
+[debug] [2025-07-08T16:36:42.523Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/access_token {"name":"projects/menuonlinesass/configs/mercadopago/variables/access_token","updateTime":"2025-07-07T18:30:32.737273017Z","text":"APP_USR-6544161302302806-070212-fb3db2855411af7aceb6f6bafbd1f4e9-254662741"}
+[debug] [2025-07-08T16:36:42.525Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2025-07-08T16:36:43.738Z] > [functions] package.json contents: {
+  "name": "functions",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.1",
+    "mercadopago": "^2.0.8"
+  }
+}
+[debug] [2025-07-08T16:36:43.738Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-07-08T16:36:43.739Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-07-08T16:36:43.749Z] Found firebase-functions binary at 'C:\Users\55189\Documents\SassMenuOnileF\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8814
+
+[debug] [2025-07-08T16:36:44.507Z] Got response from /__/functions.yaml {"endpoints":{"createSubscription":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"createSubscription"},"cancelSubscription":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"cancelSubscription"},"mercadoPagoWebhook":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"mercadoPagoWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
