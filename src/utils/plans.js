@@ -1,39 +1,36 @@
-// src/utils/plans.js
-import { FaCheckCircle } from 'react-icons/fa';
-import React from 'react';
+// Ficheiro: src/utils/plans.js
 
-// CORRIGIDO: Agora reflete o seu modelo de 2 planos original.
 export const PLANS = [
   {
     id: 'basic',
     name: 'Básico',
+    description: 'A forma mais rápida de ter o seu cardápio online e receber pedidos.',
     price: 'Grátis',
     priceDetails: 'para começar',
-    description: 'A forma mais rápida de ter o seu cardápio online e receber pedidos.',
+    isFeatured: false,
+    // O ID do preço no Mercado Pago será usado pelo backend
+    // Por enquanto, não é usado, mas é uma boa prática
+    mercadoPagoPlanId: null, 
     features: [
       'Cardápio Online Responsivo',
       'Até 10 produtos cadastrados',
       'Pedidos via WhatsApp',
       'Painel de Gestão',
     ],
-    isFeatured: false,
-    stripePriceId: null
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: 'R$ 29,90',
-    priceDetails: '/mês',
     description: 'A solução completa para profissionalizar e escalar as suas vendas.',
+    price: 'R$ 49,90',
+    priceDetails: '/mês',
+    isFeatured: true,
+    mercadoPagoPlanId: 'plano_pro_mensal_menu_online', // ID único para o plano no MP
     features: [
       'Tudo do plano Básico',
       'Produtos Ilimitados',
       'Gestão de Promoções',
       'Suporte Prioritário',
     ],
-    isFeatured: true,
-    stripePriceId: 'plano_pro_mensal'
-  }
+  },
 ];
-
-// ... (o componente auxiliar PlanFeatureList continua o mesmo)

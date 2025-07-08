@@ -1,4 +1,5 @@
-// Arquivo: src/pages/Admin/SubscriptionPage/index.js
+// Ficheiro: src/pages/Admin/SubscriptionPage/index.js
+
 import React, { useState, useMemo } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -6,76 +7,69 @@ import Button from '../../../components/Button';
 import { PLANS } from '../../../utils/plans';
 import toast from 'react-hot-toast';
 import { FaCheckCircle } from 'react-icons/fa';
-import { loadMercadoPago } from '@mercadopago/sdk-js';
 
-// Importando os componentes de estilo que correspondem ao seu design
 import {
-  PageWrapper,
-  Header,
-  SectionTitle,
-  Subtitle,
-  SubscriptionStatus,
-  PlansContainer,
-  PlanCard,
-  PlanTitle,
-  PlanDescription,
-  PlanPrice,
-  PlanFeatures,
-  FeatureItem,
-  FeaturedBadge,
-  LoadingText
+  PageWrapper, Header, SectionTitle, Subtitle, SubscriptionStatus, PlansContainer,
+  PlanCard, PlanTitle, PlanDescription, PlanPrice, PlanFeatures, FeatureItem,
+  FeaturedBadge, LoadingText
 } from './styles';
 
 const SubscriptionPage = () => {
-  const [isRedirecting, setIsRedirecting] = useState(false);
-  const { tenant } = useAuth();
+  const [loadingAction, setLoadingAction] = useState(null); // 'subscribe' ou 'cancel'
+  const { tenant, loading: authLoading } = useAuth();
 
   const currentPlan = useMemo(() => {
     return PLANS.find(p => p.id === tenant?.plan);
   }, [tenant]);
 
-  const handleSubscribe = async (planId) => {
-    const selectedPlan = PLANS.find(p => p.id === planId);
-    if (!selectedPlan || !selectedPlan.stripePriceId) {
-        toast.error('Plano inválido para assinatura.');
-        return;
-    };
-
-    setIsRedirecting(true);
+  // --- LÓGICA PARA FAZER O UPGRADE ---
+  const handleSubscribe = async () => {
+    setLoadingAction('subscribe');
     toast.loading('A preparar o seu checkout seguro...');
     
     try {
       const functions = getFunctions();
       const createSubscription = httpsCallable(functions, 'createSubscription');
+      const result = await createSubscription();
       
-      const { data } = await createSubscription({ stripePriceId: selectedPlan.stripePriceId });
-      const preferenceId = data.preferenceId;
-
-      if (preferenceId) {
-        await loadMercadoPago();
-        const mp = new window.MercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY, {
-          locale: 'pt-BR'
-        });
-        
-        toast.dismiss();
-        
-        document.getElementById('plans-container').style.display = 'none';
-        document.getElementById('checkout-container').style.display = 'block';
-
-        mp.checkout({
-          preference: { id: preferenceId },
-          render: { container: '.checkout-container', label: 'Confirmar e Pagar' }
-        });
+      const { init_point } = result.data;
+      if (init_point) {
+        window.location.href = init_point; // Redireciona para o checkout do Mercado Pago
       }
     } catch (error) {
       console.error("Erro ao criar a assinatura:", error);
       toast.dismiss();
       toast.error("Ocorreu um erro ao iniciar a sua assinatura.");
-      setIsRedirecting(false);
+      setLoadingAction(null);
     }
   };
 
-  if (!tenant || !currentPlan) {
+  // --- LÓGICA PARA CANCELAR A ASSINATURA ---
+  const handleCancel = async () => {
+    if (!window.confirm("Tem a certeza que deseja cancelar a sua assinatura? Perderá o acesso às funcionalidades Pro. A cobrança será interrompida imediatamente.")) {
+      return;
+    }
+    
+    setLoadingAction('cancel');
+    toast.loading('A processar o cancelamento...');
+
+    try {
+      const functions = getFunctions();
+      const cancelSubscription = httpsCallable(functions, 'cancelSubscription');
+      await cancelSubscription();
+      
+      toast.dismiss();
+      toast.success("Assinatura cancelada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao cancelar:", error);
+      toast.dismiss();
+      toast.error("Não foi possível cancelar a assinatura. Tente novamente.");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  if (authLoading || !tenant || !currentPlan) {
     return <PageWrapper><LoadingText>A carregar informações do seu plano...</LoadingText></PageWrapper>;
   }
 
@@ -87,53 +81,57 @@ const SubscriptionPage = () => {
       </Header>
       
       <SubscriptionStatus>
-        Você está no plano <strong>{currentPlan.name}</strong>. Sua assinatura está ativa.
+        Você está no plano <strong>{currentPlan.name}</strong>.
       </SubscriptionStatus>
 
-      {isRedirecting ? (
-        <div id="checkout-container" className="checkout-container" style={{ marginTop: '2rem' }}>
-          <LoadingText>A carregar checkout...</LoadingText>
-        </div>
-      ) : (
-        <PlansContainer id="plans-container">
-          {PLANS.map((plan) => (
-            <PlanCard key={plan.id} $isFeatured={plan.isFeatured}>
-              {plan.isFeatured && <FeaturedBadge>Recomendado</FeaturedBadge>}
-              <PlanTitle>{plan.name}</PlanTitle>
-              <PlanDescription>{plan.description}</PlanDescription>
-              <PlanPrice>
-                {plan.price}
-                {plan.priceDetails && <span>{plan.priceDetails}</span>}
-              </PlanPrice>
-              
-              <PlanFeatures>
-                {plan.features.map((feature) => (
-                  <FeatureItem key={feature}>
-                    <FaCheckCircle /> {feature}
-                  </FeatureItem>
-                ))}
-              </PlanFeatures>
+      <PlansContainer>
+        {PLANS.map((plan) => (
+          <PlanCard key={plan.id} $isFeatured={plan.isFeatured}>
+            {plan.isFeatured && <FeaturedBadge>Recomendado</FeaturedBadge>}
+            <PlanTitle>{plan.name}</PlanTitle>
+            <PlanDescription>{plan.description}</PlanDescription>
+            <PlanPrice>
+              {plan.price}
+              {plan.priceDetails && <span>{plan.priceDetails}</span>}
+            </PlanPrice>
+            
+            <PlanFeatures>
+              {plan.features.map((feature, index) => (
+                <FeatureItem key={index}>
+                  <FaCheckCircle /> {feature}
+                </FeatureItem>
+              ))}
+            </PlanFeatures>
 
+            {/* Lógica dos Botões */}
+            <div style={{ marginTop: 'auto' }}>
               {tenant.plan === plan.id ? (
-                <Button disabled style={{ marginTop: 'auto' }}>Seu Plano Atual</Button>
-              ) : plan.id === 'pro' ? (
-                <Button 
-                  $variant="primary" 
-                  onClick={() => handleSubscribe(plan.id)} 
-                  style={{ marginTop: 'auto' }}
-                  disabled={isRedirecting}
-                >
-                  {isRedirecting ? 'Aguarde...' : 'Fazer Upgrade para o Pro'}
-                </Button>
+                plan.id === 'pro' ? (
+                  <Button 
+                    $variant="danger" 
+                    onClick={handleCancel}
+                    disabled={loadingAction === 'cancel'}
+                  >
+                    {loadingAction === 'cancel' ? 'A cancelar...' : 'Cancelar Assinatura'}
+                  </Button>
+                ) : (
+                  <Button disabled>Seu Plano Atual</Button>
+                )
               ) : (
-                <Button $variant="secondary" style={{ marginTop: 'auto' }}>
-                  Fazer Downgrade
-                </Button>
+                plan.id === 'pro' && (
+                  <Button 
+                    $variant="primary" 
+                    onClick={handleSubscribe}
+                    disabled={loadingAction === 'subscribe'}
+                  >
+                    {loadingAction === 'subscribe' ? 'Aguarde...' : 'Fazer Upgrade para Pro'}
+                  </Button>
+                )
               )}
-            </PlanCard>
-          ))}
-        </PlansContainer>
-      )}
+            </div>
+          </PlanCard>
+        ))}
+      </PlansContainer> {/* <- ESTA ERA A LINHA COM O ERRO, AGORA CORRIGIDA */}
     </PageWrapper>
   );
 };
