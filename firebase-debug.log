@@ -1,0 +1,68 @@
+[debug] [2025-07-08T16:36:37.608Z] ----------------------------------------------------------------------
+[debug] [2025-07-08T16:36:37.611Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\55189\AppData\Local\Yarn\Data\global\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2025-07-08T16:36:37.611Z] CLI Version:   14.9.0
+[debug] [2025-07-08T16:36:37.611Z] Platform:      win32
+[debug] [2025-07-08T16:36:37.611Z] Node Version:  v20.18.0
+[debug] [2025-07-08T16:36:37.611Z] Time:          Tue Jul 08 2025 13:36:37 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2025-07-08T16:36:37.611Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-08T16:36:37.775Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-08T16:36:37.775Z] > authorizing via signed-in user (fabio.vigilante.sena@gmail.com)
+[debug] [2025-07-08T16:36:37.775Z] [iam] checking project menuonlinesass for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-07-08T16:36:37.776Z] Checked if tokens are valid: false, expires at: 1751993380703
+[debug] [2025-07-08T16:36:37.776Z] Checked if tokens are valid: false, expires at: 1751993380703
+[debug] [2025-07-08T16:36:37.777Z] > refreshing access token with scopes: []
+[debug] [2025-07-08T16:36:37.778Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-07-08T16:36:37.778Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-07-08T16:36:38.005Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-07-08T16:36:38.005Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-07-08T16:36:38.012Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass:testIamPermissions [none]
+[debug] [2025-07-08T16:36:38.013Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass:testIamPermissions x-goog-quota-user=projects/menuonlinesass
+[debug] [2025-07-08T16:36:38.013Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-07-08T16:36:38.945Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass:testIamPermissions 200
+[debug] [2025-07-08T16:36:38.945Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-07-08T16:36:38.946Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:38.946Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:38.946Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/menuonlinesass/serviceAccounts/menuonlinesass@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-07-08T16:36:38.946Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/menuonlinesass/serviceAccounts/menuonlinesass@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-07-08T16:36:39.876Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/menuonlinesass/serviceAccounts/menuonlinesass@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-07-08T16:36:39.877Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/menuonlinesass/serviceAccounts/menuonlinesass@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'menuonlinesass'...
+[info] 
+[info] i  deploying functions 
+[debug] [2025-07-08T16:36:39.881Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:39.881Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:39.882Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass [none]
+[debug] [2025-07-08T16:36:40.106Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass 200
+[debug] [2025-07-08T16:36:40.106Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/menuonlinesass {"projectNumber":"432238664625","projectId":"menuonlinesass","lifecycleState":"ACTIVE","name":"menuonlineSass","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-06-27T17:12:09.239341Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-07-08T16:36:40.110Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:40.110Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:40.110Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/menuonlinesass/adminSdkConfig [none]
+[debug] [2025-07-08T16:36:40.623Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/menuonlinesass/adminSdkConfig 200
+[debug] [2025-07-08T16:36:40.623Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/menuonlinesass/adminSdkConfig {"projectId":"menuonlinesass","storageBucket":"menuonlinesass.firebasestorage.app"}
+[debug] [2025-07-08T16:36:40.624Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:40.624Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:40.624Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs [none]
+[debug] [2025-07-08T16:36:41.084Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs 200
+[debug] [2025-07-08T16:36:41.084Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs {"configs":[{"name":"projects/menuonlinesass/configs/mercadopago"}]}
+[debug] [2025-07-08T16:36:41.084Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:41.084Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:41.085Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables [none]
+[debug] [2025-07-08T16:36:42.027Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables 200
+[debug] [2025-07-08T16:36:42.028Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables {"variables":[{"name":"projects/menuonlinesass/configs/mercadopago/variables/accesstoken","updateTime":"2025-07-02T19:43:51.574564044Z"},{"name":"projects/menuonlinesass/configs/mercadopago/variables/token","updateTime":"2025-07-03T16:59:07.673783817Z"},{"name":"projects/menuonlinesass/configs/mercadopago/variables/access_token","updateTime":"2025-07-07T18:30:32.737273017Z"}]}
+[debug] [2025-07-08T16:36:42.028Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:42.028Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:42.028Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:42.028Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:42.028Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:42.028Z] Checked if tokens are valid: true, expires at: 1751996197005
+[debug] [2025-07-08T16:36:42.028Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/accesstoken [none]
+[debug] [2025-07-08T16:36:42.028Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/token [none]
+[debug] [2025-07-08T16:36:42.030Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/access_token [none]
+[debug] [2025-07-08T16:36:42.306Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/accesstoken 200
+[debug] [2025-07-08T16:36:42.306Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/menuonlinesass/configs/mercadopago/variables/accesstoken {"name":"projects/menuonlinesass/configs/mercadopago/variables/accesstoken","updateTime":"2025-07-02T19:43:51.574564044Z","text":"APP_USR-15d161b3-8137-4241-9d64-4370ecf270dc"}
