@@ -1,16 +1,16 @@
-// Ficheiro: functions/index.js (Versão Final de Produção)
+// Ficheiro: functions/index.js (Versão Final com Verificação de Assinatura)
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const crypto = require("crypto"); // Módulo nativo do Node.js para criptografia
 const { MercadoPagoConfig, PreApproval } = require("mercadopago");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-// --- FUNÇÃO PARA CRIAR UMA ASSINATURA RECORRENTE ---
+// --- FUNÇÃO PARA CRIAR UMA ASSINATURA ---
 exports.createSubscription = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
-    console.error("Tentativa de chamada não autenticada.");
     throw new functions.https.HttpsError("unauthenticated", "Utilizador não autenticado.");
   }
 
@@ -29,7 +29,6 @@ exports.createSubscription = functions.https.onCall(async (data, context) => {
     const preApprovalClient = new PreApproval(client);
 
     // ATENÇÃO: Verifique se este é o seu domínio final e público.
-    // Tem de ser HTTPS para funcionar em produção.
     const backUrl = `https://sass-menu-onile-f-11iv.vercel.app//admin/assinatura`;
 
     const response = await preApprovalClient.create({
@@ -54,6 +53,7 @@ exports.createSubscription = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError("internal", "Não foi possível criar a assinatura. Verifique os logs do Firebase para o erro detalhado.");
   }
 });
+
 
 // --- FUNÇÃO PARA CANCELAR A ASSINATURA ---
 exports.cancelSubscription = functions.https.onCall(async (data, context) => {
@@ -85,14 +85,47 @@ exports.cancelSubscription = functions.https.onCall(async (data, context) => {
   }
 });
 
-// --- WEBHOOK SEGURO ---
+
+// --- WEBHOOK SEGURO COM VERIFICAÇÃO DE ASSINATURA ---
 exports.mercadoPagoWebhook = functions.https.onRequest(async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
-  const notification = req.body;
+  // PASSO 1: VERIFICAR A ASSINATURA (NOVA LÓGICA DE SEGURANÇA)
+  const webhookSecret = functions.config().mercadopago.webhook_secret;
+  const signatureHeader = req.headers['x-signature'];
   
+  if (!signatureHeader || !webhookSecret) {
+    console.error("Webhook recebido sem assinatura ou secret não configurada.");
+    return res.status(401).send("Unauthorized");
+  }
+
+  try {
+    const parts = signatureHeader.split(',');
+    const ts = parts.find(part => part.startsWith('ts=')).split('=')[1];
+    const hash = parts.find(part => part.startsWith('v1=')).split('=')[1];
+    
+    const manifest = `id:${req.body.id};request-id:${req.headers['x-request-id']};ts:${ts};`;
+    
+    const hmac = crypto.createHmac('sha256', webhookSecret);
+    hmac.update(manifest);
+    const expectedHash = hmac.digest('hex');
+
+    if (expectedHash !== hash) {
+      console.error("FALHA DE VERIFICAÇÃO: A assinatura do webhook é inválida.");
+      return res.status(401).send("Invalid signature");
+    }
+  } catch (e) {
+      console.error("Erro ao processar a assinatura do webhook:", e);
+      return res.status(400).send("Bad Request: Invalid signature format.");
+  }
+  
+  // Se a assinatura for válida, continuamos o processamento normal.
+  console.log("Assinatura do webhook verificada com sucesso.");
+
+  const notification = req.body;
+
   try {
     if (notification.type === 'preapproval' && notification.data && notification.data.id) {
       const subscriptionId = notification.data.id;
@@ -123,7 +156,7 @@ exports.mercadoPagoWebhook = functions.https.onRequest(async (req, res) => {
       }
     }
   } catch (error) {
-    console.error("Erro no processamento do webhook:", error);
+    console.error("Erro no processamento da notificação do webhook:", error);
     return res.status(500).send("Erro interno no webhook.");
   }
 
