@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../../../services/firebaseConfig';
 import { collection, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
@@ -9,6 +9,10 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+
+// --- NOVO: Importa o useAuth para saber qual é o lojista logado ---
+import { useAuth } from '../../../contexts/AuthContext';
+
 import {
   PageWrapper,
   SectionTitle,
@@ -24,7 +28,11 @@ import {
   CardActionsContainer
 } from './styles';
 
+
 const DashboardOverviewPage = () => {
+  // --- NOVO: Obtém os dados do lojista (tenant) ---
+  const { tenant } = useAuth();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [salesToday, setSalesToday] = useState(0);
@@ -39,10 +47,21 @@ const DashboardOverviewPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const fetchData = async () => {
+  // --- ALTERADO: A função agora depende do tenant.id ---
+  const fetchData = useCallback(async () => {
+    // Não executa a função se ainda não sabemos qual é o lojista
+    if (!tenant?.id) {
+        setLoading(false);
+        return;
+    }
+
     setLoading(true);
     try {
-      const ordersCollectionRef = collection(db, 'orders');
+      // --- CORREÇÃO PRINCIPAL AQUI ---
+      // A consulta agora aponta para a sub-coleção de pedidos DENTRO do lojista logado.
+      // O caminho é /tenants/{ID do lojista}/orders
+      const ordersCollectionRef = collection(db, 'tenants', tenant.id, 'orders');
+      
       const q = query(ordersCollectionRef, orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
       const ordersData = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
@@ -73,31 +92,37 @@ const DashboardOverviewPage = () => {
 
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
-      toast.error("Erro ao carregar os dados.");
+      toast.error("Erro ao carregar os dados. Verifique as suas permissões.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [tenant]); // Adicionamos tenant como dependência
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  // --- NOVO --- Função para enviar notificação pelo WhatsApp
   const sendWhatsAppNotification = (phone, customerName, orderId) => {
     const cleanedPhone = phone.replace(/\D/g, '');
-    const message = `Olá, ${customerName}! Seu pedido #${orderId.substring(0, 5)} da Vibe Açaí saiu para entrega e chegará em breve! 🛵`;
-    const whatsappLink = `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(message)}`;
+    // --- MELHORIA: A mensagem agora pode usar o nome da loja ---
+    const storeName = tenant?.storeName || "a nossa loja";
+    const message = `Olá, ${customerName}! Seu pedido #${orderId.substring(0, 5)} da ${storeName} saiu para entrega e chegará em breve! 🛵`;
+    const whatsappLink = `https://wa.me/55${cleanedPhone}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappLink, '_blank');
     toast.success(`Notificação para ${customerName} pronta para envio!`);
   };
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
-    const orderDocRef = doc(db, 'orders', orderId);
+    // --- CORREÇÃO DE SEGURANÇA ---
+    // Garante que a atualização também aconteça na sub-coleção correta.
+    if (!tenant?.id) return toast.error("Não foi possível identificar a sua loja.");
+
+    const orderDocRef = doc(db, 'tenants', tenant.id, 'orders', orderId);
     try {
       await updateDoc(orderDocRef, { status: newStatus });
       toast.success("Status do pedido atualizado!");
 
-      // --- ALTERADO --- Lógica para notificação de entrega
       if (newStatus === 'Saiu para Entrega') {
         const order = orders.find(o => o.id === orderId);
         if (order && order.phone) {
@@ -106,14 +131,15 @@ const DashboardOverviewPage = () => {
           toast.error("Cliente não possui telefone para notificar.");
         }
       }
-      fetchData();
+      // Otimização: Em vez de re-buscar tudo, apenas atualiza o estado localmente.
+      setOrders(prevOrders => prevOrders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
     } catch (error) {
       console.error("Erro ao atualizar status:", error);
       toast.error("Falha ao atualizar o status.");
     }
   };
 
-  // --- NOVO --- Função para abrir a página de impressão
   const handlePrintOrder = (orderId) => {
     window.open(`/admin/print/order/${orderId}`, '_blank');
   };
@@ -138,7 +164,6 @@ const DashboardOverviewPage = () => {
         </StatusSelector>
       )
     },
-    // --- NOVO --- Coluna de Ações com botão de imprimir
     {
       field: 'actions',
       headerName: 'Ações',

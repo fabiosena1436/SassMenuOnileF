@@ -1,4 +1,4 @@
-// Arquivo: src/pages/Admin/AdminLayout/index.js
+// Arquivo: src/pages/Admin/AdminLayout/index.js (Versão Corrigida)
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { auth, db } from '../../../services/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import Button from '../../../components/Button';
-import { FaBars, FaTimes, FaBell, FaCopy } from 'react-icons/fa'; // Importar ícone de cópia
+import { FaBars, FaTimes, FaBell, FaCopy } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
@@ -25,23 +25,33 @@ import {
 } from './styles';
 
 const AdminLayout = () => {
-  const { tenant } = useAuth(); // Pegamos o tenant para o link e o plano
+  const { tenant } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const isInitialLoad = useRef(true);
 
-  // Lógica de notificação (permanece igual)
   useEffect(() => {
     if (!tenant?.id) return;
-    const ordersQuery = query(collection(db, "orders"), where("tenantId", "==", tenant.id), where("status", "==", "pending"));
+
+    // Ajuste na query para buscar os pedidos da subcoleção do tenant
+    const ordersQuery = query(
+      collection(db, "tenants", tenant.id, "orders"), // Caminho corrigido
+      where("status", "==", "Pendente")
+    );
+
     const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
       setNotificationCount(snapshot.size);
-      if (isInitialLoad.current) { isInitialLoad.current = false; return; }
+      if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        return;
+      }
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
-          // ... (código do toast e do som)
+          toast.success('Novo pedido recebido!');
+          // Opcional: tocar um som de notificação
+          // new Audio('/path/to/notification.mp3').play();
         }
       });
     });
@@ -55,6 +65,7 @@ const AdminLayout = () => {
   };
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  
   const handleLinkClick = () => {
     if (window.innerWidth <= 768) {
       setSidebarOpen(false);
@@ -63,17 +74,17 @@ const AdminLayout = () => {
 
   const getPageTitle = () => {
     const path = location.pathname;
+    // --- LÓGICA DE TÍTULO AJUSTADA ---
+    if (path === '/admin') return 'Visão Geral & Pedidos'; // Título para a página inicial
     if (path.includes('/products')) return 'Gerir Produtos';
     if (path.includes('/categories')) return 'Gerir Categorias';
     if (path.includes('/promotions')) return 'Gerir Promoções';
     if (path.includes('/toppings')) return 'Gerir Adicionais';
     if (path.includes('/settings')) return 'Configurações da Loja';
     if (path.includes('/assinatura')) return 'Minha Assinatura';
-    if (path.includes('/orders')) return 'Visão Geral & Pedidos';
     return 'Visão Geral';
   };
   
-  // <<< NOVA FUNÇÃO ADICIONADA >>>
   const handleCopyStoreLink = () => {
     if (!tenant?.slug) return toast.error("Link da loja não encontrado.");
     const storeUrl = `${window.location.origin}/loja/${tenant.slug}`;
@@ -92,7 +103,10 @@ const AdminLayout = () => {
         </div>
         <NavSeparator />
         <NavList>
-          <StyledNavLink to="/admin/dashboard" end onClick={handleLinkClick}>Visão Geral & Pedidos</StyledNavLink>
+          {/* --- CORREÇÃO PRINCIPAL AQUI --- */}
+          {/* O link agora aponta para "/admin", que é a rota do dashboard */}
+          <StyledNavLink to="/admin" end onClick={handleLinkClick}>Visão Geral & Pedidos</StyledNavLink>
+          
           <StyledNavLink to="/admin/products" onClick={handleLinkClick}>Produtos</StyledNavLink>
           <StyledNavLink to="/admin/categories" onClick={handleLinkClick}>Categorias</StyledNavLink>
           <StyledNavLink to="/admin/toppings" onClick={handleLinkClick}>Adicionais</StyledNavLink>
@@ -104,24 +118,23 @@ const AdminLayout = () => {
           <StyledNavLink to="/admin/assinatura" onClick={handleLinkClick}>Minha Assinatura</StyledNavLink>
         </NavList>
         <div style={{ marginTop: 'auto', padding: '20px' }}>
-          <Button onClick={handleLogout} $variant="danger" style={{width: '100%'}}>Sair</Button>
+          <Button onClick={handleLogout} variant="danger" style={{width: '100%'}}>Sair</Button>
         </div>
       </Sidebar>
 
       <ContentArea>
         <header className="admin-header">
           <MenuButton onClick={toggleSidebar}>
-            <FaBars />
+            {isSidebarOpen ? <FaTimes /> : <FaBars />}
           </MenuButton>
           <h1 className="header-title">{getPageTitle()}</h1>
 
-          {/* <<< BOTÃO ADICIONADO AQUI, SEM ALTERAR O RESTO DO LAYOUT >>> */}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Button onClick={handleCopyStoreLink} $variant="secondary">
+            <Button onClick={handleCopyStoreLink} variant="secondary">
                 <FaCopy style={{ marginRight: '8px' }} />
                 Copiar Link
             </Button>
-            <NotificationBellWrapper onClick={() => navigate('/admin/orders')}>
+            <NotificationBellWrapper onClick={() => navigate('/admin')}>
               <FaBell />
               {notificationCount > 0 && <NotificationBadge>{notificationCount}</NotificationBadge>}
             </NotificationBellWrapper>

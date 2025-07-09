@@ -1,4 +1,5 @@
-// src/pages/CheckoutPage/styles.js
+// Arquivo: src/pages/CheckoutPage/styles.js (Versão Completa e Corrigida)
+
 import styled from 'styled-components';
 
 export const CheckoutWrapper = styled.div`
@@ -81,4 +82,22 @@ export const ConditionalField = styled.div`
   margin-left: 1.5rem;
   margin-bottom: 0.75rem;
   border-left: 3px solid ${({ theme }) => theme.colors.borderLight};
+`;
+
+// --- ESTILOS DO SUMÁRIO ADICIONADOS AQUI ---
+export const SummaryLine = styled.div`
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    color: #4A5568;
+    margin-bottom: 0.5rem;
+`;
+
+export const GrandTotalLine = styled(SummaryLine)`
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #2D3748;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E2E8F0;
 `;
