@@ -64,10 +64,8 @@ const SuperAdminDashboardPage = () => {
     }
   };
 
-  // <<< MUDANÇA PRINCIPAL AQUI >>>
   const filteredUsers = useMemo(() => {
     return users.filter(user =>
-      // Se user.email não existir, trata-o como uma string vazia '' para evitar o erro.
       (user.email || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [users, searchTerm]);
@@ -126,7 +124,7 @@ const SuperAdminDashboardPage = () => {
                 <Td data-label="Loja">
                     {associatedTenant ? (
                         <TenantLink href={`/loja/${associatedTenant.slug}`} target="_blank">
-                            {associatedTenant.name} {associatedTenant.plan && <Tag>{associatedTenant.plan}</Tag>}
+                            {associatedTenant.storeName} {associatedTenant.plan && <Tag>{associatedTenant.plan}</Tag>}
                         </TenantLink>
                     ) : (
                         '-'

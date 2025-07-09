@@ -36,7 +36,10 @@ const PromotionsPage = () => {
       
       setPromotions(promoSnap.docs.map(d => ({ id: d.id, ...d.data() })));
       setProducts(productsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-    } catch (error) { toast.error("Erro ao carregar dados. Verifique o console para mais detalhes sobre índices do Firestore."); console.error(error) }
+    } catch (error) { 
+        toast.error("Erro ao carregar dados. Verifique o console para mais detalhes sobre índices do Firestore."); 
+        console.error("Erro de Firestore (verifique os índices):", error);
+    }
     finally { setLoading(false); }
   }, [tenant]);
 
@@ -65,7 +68,8 @@ const PromotionsPage = () => {
   const handleEditClick = (promo) => {
     setEditingPromo(promo);
     const priceAsString = promo.promotionalPrice?.toString() || '';
-    setFormData({ ...promo, promotionalPrice: priceAsString });
+    const originalPriceAsString = promo.originalPrice?.toString() || '';
+    setFormData({ ...promo, promotionalPrice: priceAsString, originalPrice: originalPriceAsString });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
@@ -90,7 +94,10 @@ const PromotionsPage = () => {
       }
       resetForm();
       fetchData();
-    } catch (error) { toast.error('Erro ao salvar promoção.'); }
+    } catch (error) { 
+        toast.error('Erro ao salvar promoção.');
+        console.error("Erro ao salvar promoção: ", error);
+    }
   };
   
   const handleDelete = async (promoId) => {
@@ -125,7 +132,6 @@ const PromotionsPage = () => {
             <label>Produto em Promoção</label>
             <Select name="productId" value={formData.productId} onChange={handleInputChange} required>
               <option value="">-- Escolha um produto --</option>
-              {/* <<< CORREÇÃO AQUI: Trocado 'categories' por 'products' >>> */}
               {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </Select>
           </FormGroup>
@@ -142,7 +148,7 @@ const PromotionsPage = () => {
         {promotions.length > 0 ? promotions.map(promo => {
           const product = products.find(p => p.id === promo.productId);
           return (
-            <PromotionListItem key={promo.id}>
+            <PromotionListItem key={promo.id} $isActive={promo.isActive}>
               <PromoImage src={product?.imageUrl || 'https://via.placeholder.com/80'} alt={promo.name} />
               <PromoInfo>
                 <h4>{promo.name}</h4>
