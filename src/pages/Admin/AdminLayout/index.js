@@ -1,4 +1,4 @@
-// Arquivo: src/pages/Admin/AdminLayout/index.js (Versão Corrigida)
+// Arquivo: src/pages/Admin/AdminLayout/index.js
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { auth, db } from '../../../services/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import Button from '../../../components/Button';
-import { FaBars, FaTimes, FaBell, FaCopy } from 'react-icons/fa';
+import { FaBars, FaTimes, FaBell } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
@@ -35,9 +35,8 @@ const AdminLayout = () => {
   useEffect(() => {
     if (!tenant?.id) return;
 
-    // Ajuste na query para buscar os pedidos da subcoleção do tenant
     const ordersQuery = query(
-      collection(db, "tenants", tenant.id, "orders"), // Caminho corrigido
+      collection(db, "tenants", tenant.id, "orders"),
       where("status", "==", "Pendente")
     );
 
@@ -50,14 +49,12 @@ const AdminLayout = () => {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           toast.success('Novo pedido recebido!');
-          // Opcional: tocar um som de notificação
-          // new Audio('/path/to/notification.mp3').play();
         }
       });
     });
     return () => unsubscribe();
   }, [tenant]);
-  
+
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/admin/login');
@@ -65,7 +62,7 @@ const AdminLayout = () => {
   };
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
-  
+
   const handleLinkClick = () => {
     if (window.innerWidth <= 768) {
       setSidebarOpen(false);
@@ -74,8 +71,7 @@ const AdminLayout = () => {
 
   const getPageTitle = () => {
     const path = location.pathname;
-    // --- LÓGICA DE TÍTULO AJUSTADA ---
-    if (path === '/admin') return 'Visão Geral & Pedidos'; // Título para a página inicial
+    if (path === '/admin') return 'Visão Geral & Pedidos';
     if (path.includes('/products')) return 'Gerir Produtos';
     if (path.includes('/categories')) return 'Gerir Categorias';
     if (path.includes('/promotions')) return 'Gerir Promoções';
@@ -83,7 +79,7 @@ const AdminLayout = () => {
     if (path.includes('/assinatura')) return 'Minha Assinatura';
     return 'Visão Geral';
   };
-  
+
   const handleCopyStoreLink = () => {
     if (!tenant?.slug) return toast.error("Link da loja não encontrado.");
     const storeUrl = `${window.location.origin}/loja/${tenant.slug}`;
@@ -102,10 +98,7 @@ const AdminLayout = () => {
         </div>
         <NavSeparator />
         <NavList>
-          {/* --- CORREÇÃO PRINCIPAL AQUI --- */}
-          {/* O link agora aponta para "/admin", que é a rota do dashboard */}
           <StyledNavLink to="/admin" end onClick={handleLinkClick}>Visão Geral & Pedidos</StyledNavLink>
-          
           <StyledNavLink to="/admin/products" onClick={handleLinkClick}>Produtos</StyledNavLink>
           <StyledNavLink to="/admin/categories" onClick={handleLinkClick}>Categorias</StyledNavLink>
           {tenant?.plan === 'pro' && (
@@ -126,11 +119,9 @@ const AdminLayout = () => {
             {isSidebarOpen ? <FaTimes /> : <FaBars />}
           </MenuButton>
           <h1 className="header-title">{getPageTitle()}</h1>
-
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <Button onClick={handleCopyStoreLink} variant="secondary">
-                <FaCopy style={{ marginRight: '8px' }} />
-                Copiar Link da sua Loja para divulgar
+                Copiar Link da Loja
             </Button>
             <NotificationBellWrapper onClick={() => navigate('/admin')}>
               <FaBell />

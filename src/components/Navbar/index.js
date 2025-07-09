@@ -1,4 +1,4 @@
-// Arquivo: src/components/Navbar/index.js
+// Arquivo: src/components/Navbar/index.js (VERSÃO CORRIGIDA)
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -11,12 +11,12 @@ import {
   Logo,
   NavLinks,
   NavLinkItem,
-  RightActions, // Adicionado para agrupar ações
+  RightActions,
   CartIcon,
   CartCount,
   AdminLink,
-  MobileBottomNav,  // <-- NOVO: Importa o contêiner da navegação inferior
-  MobileNavLink   // <-- NOVO: Importa o link da navegação inferior
+  MobileBottomNav,
+  MobileNavLink
 } from './styles';
 
 const Navbar = () => {
@@ -27,6 +27,11 @@ const Navbar = () => {
   if (!store) {
     return null;
   }
+
+  // --- LÓGICA ADICIONADA AQUI ---
+  // Verifica se a rota atual é a de detalhe do produto.
+  // Se for, não devemos mostrar a barra de navegação inferior.
+  const isProductDetailPage = pathname.includes('/produto/');
 
   const homeLink = `/loja/${store.slug}`;
   const menuLink = `/loja/${store.slug}/cardapio`;
@@ -49,13 +54,13 @@ const Navbar = () => {
 
         {/* Links de navegação para Desktop */}
         <NavLinks>
-          <NavLinkItem active={isActive(homeLink)}>
+          <NavLinkItem active={isActive(homeLink) ? 1 : 0}>
             <Link to={homeLink}>
               <FiHome />
               <span>Início</span>
             </Link>
           </NavLinkItem>
-          <NavLinkItem active={isActive(menuLink)}>
+          <NavLinkItem active={isActive(menuLink) ? 1 : 0}>
             <Link to={menuLink}>
               <FiList />
               <span>Cardápio</span>
@@ -75,25 +80,28 @@ const Navbar = () => {
         </RightActions>
       </NavbarContainer>
 
-      {/* --- NOVA BARRA DE NAVEGAÇÃO INFERIOR PARA MOBILE --- */}
-      <MobileBottomNav>
-        <MobileNavLink to={homeLink} active={isActive(homeLink) ? 1 : 0}>
-          <FiHome />
-          <span>Início</span>
-        </MobileNavLink>
-        <MobileNavLink to={menuLink} active={isActive(menuLink) ? 1 : 0}>
-          <FiList />
-          <span>Cardápio</span>
-        </MobileNavLink>
-        <MobileNavLink to={cartLink} active={isActive(cartLink) ? 1 : 0}>
-          <FiShoppingCart />
-          <span>Carrinho</span>
-        </MobileNavLink>
-        <MobileNavLink to="/admin" active={pathname.startsWith('/admin') ? 1 : 0}>
-          <FiUser />
-          <span>Admin</span>
-        </MobileNavLink>
-      </MobileBottomNav>
+      {/* --- RENDERIZAÇÃO CONDICIONAL DA BARRA INFERIOR --- */}
+      {/* A barra só será mostrada se NÃO for a página de produto */}
+      {!isProductDetailPage && (
+        <MobileBottomNav>
+          <MobileNavLink to={homeLink} active={isActive(homeLink) ? 1 : 0}>
+            <FiHome />
+            <span>Início</span>
+          </MobileNavLink>
+          <MobileNavLink to={menuLink} active={isActive(menuLink) ? 1 : 0}>
+            <FiList />
+            <span>Cardápio</span>
+          </MobileNavLink>
+          <MobileNavLink to={cartLink} active={isActive(cartLink) ? 1 : 0}>
+            <FiShoppingCart />
+            <span>Carrinho</span>
+          </MobileNavLink>
+          <MobileNavLink to="/admin" active={pathname.startsWith('/admin') ? 1 : 0}>
+            <FiUser />
+            <span>Admin</span>
+          </MobileNavLink>
+        </MobileBottomNav>
+      )}
     </>
   );
 };

@@ -1,23 +1,24 @@
+// Arquivo: src/components/Button/index.js
+
 import React from 'react';
-// --- ERRO CORRIGIDO: Importa ButtonWrapper, o nome correto do componente de estilo ---
 import { ButtonWrapper } from './styles';
 
 /**
- * Um componente de botão reutilizável com variantes.
- * @param {object} props - As props do componente.
- * @param {function} props.onClick - A função a ser chamada quando o botão é clicado.
- * @param {React.ReactNode} props.children - O conteúdo do botão (texto, ícone, etc.).
- * @param {('primary'|'secondary'|'danger')} [props.variant='primary'] - A variante visual do botão.
- * @param {boolean} [props.disabled=false] - Se o botão está desabilitado.
- * @param {string} [props.type='button'] - O tipo do botão (ex: 'button', 'submit').
- * @param {object} [props.style] - Estilos inline para o botão.
+ * Componente de botão reutilizável com variantes de estilo.
+ * @param {object} props As propriedades do componente.
+ * @param {React.ReactNode} props.children O conteúdo a ser exibido no botão.
+ * @param {function} [props.onClick] A função a ser chamada no clique.
+ * @param {('primary' | 'secondary' | 'danger')} [props.variant='primary'] A variante visual do botão.
+ * @param {boolean} [props.disabled=false] Controla se o botão está desabilitado.
+ * @param {string} [props.type='button'] O atributo 'type' do botão (ex: 'button', 'submit').
+ * @param {object} [props.style] Estilos inline customizados.
+ * @param {string} [props.$variant] Prop transitória para o styled-components.
  */
-const Button = ({ onClick, children, variant = 'primary', disabled = false, type = 'button', style }) => {
+const Button = ({ children, onClick, variant = 'primary', disabled = false, type = 'button', style }) => {
   return (
-    // --- ERRO CORRIGIDO: Usa ButtonWrapper ---
     <ButtonWrapper
       onClick={onClick}
-      $variant={variant}
+      $variant={variant} // Usa a prop transitória
       disabled={disabled}
       type={type}
       style={style}
