@@ -1,9 +1,12 @@
 // Arquivo: src/pages/Admin/PromotionsPage/styles.js
-
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 export const Header = styled.header`
@@ -16,6 +19,10 @@ export const Header = styled.header`
 export const Title = styled.h1`
   font-size: 2rem;
   color: #1a202c;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 export const FormContainer = styled.form`
@@ -29,6 +36,10 @@ export const FormContainer = styled.form`
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
   }
 `;
 
@@ -90,8 +101,14 @@ export const PromotionListItem = styled.div`
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-  position: relative;
   border-left: 5px solid ${({ $isActive }) => ($isActive ? '#22c55e' : '#a1a1aa')};
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start; /* Alinha itens à esquerda */
+    gap: 1rem;
+  }
 `;
 
 export const PromoImage = styled.img`
@@ -99,6 +116,7 @@ export const PromoImage = styled.img`
   height: 80px;
   object-fit: cover;
   border-radius: 6px;
+  flex-shrink: 0;
 `;
 
 export const PromoInfo = styled.div`
@@ -114,17 +132,32 @@ export const PromoInfo = styled.div`
 `;
 
 export const PromoStatus = styled.span`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
   font-size: 0.8rem;
   font-weight: bold;
-  color: ${({ $isActive }) => ($isActive ? '#16a34a' : '#6b7280')};
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: ${({ $isActive }) => ($isActive ? '#166534' : '#3f3f46')};
+  background-color: ${({ $isActive }) => ($isActive ? '#bbf7d0' : '#e4e4e7')};
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    align-self: flex-start;
+  }
 `;
 
 export const PromoActions = styled.div`
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    width: 100%;
+    
+    button {
+      flex-grow: 1; /* Faz os botões ocuparem espaço igual */
+    }
+  }
 `;
 
 export const LoadingText = styled.p`

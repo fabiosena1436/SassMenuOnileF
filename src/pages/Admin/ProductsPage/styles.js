@@ -5,7 +5,8 @@ export const PageWrapper = styled.div`
   padding: 2rem;
   background-color: ${({ theme }) => theme.colors.backgroundLight};
   min-height: 100vh;
-   @media (max-width: 768px) {
+  
+  @media (max-width: 768px) {
     padding: 1rem;
   }
 `;
@@ -22,6 +23,10 @@ export const Header = styled.header`
 export const Title = styled.h1`
   font-size: 2rem;
   color: ${({ theme }) => theme.colors.textDarkest};
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 export const FormContainer = styled.form`
@@ -36,7 +41,8 @@ export const FormContainer = styled.form`
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
   }
-    @media (max-width: 768px) {
+
+  @media (max-width: 768px) {
     padding: 1.5rem;
   }
 `;
@@ -96,6 +102,15 @@ export const FormActions = styled.div`
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1rem;
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    flex-direction: column-reverse; /* Empilha os botões */
+    
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 export const ProductListSection = styled.section`
@@ -165,10 +180,11 @@ export const ProductDetails = styled.div`
   gap: 1rem;
   font-size: 0.9rem;
   align-items: center;
+  flex-wrap: wrap; /* Permite quebrar linha */
 
   @media (max-width: 992px) {
-      grid-column: 2 / 3;
-      grid-row: 2 / 3;
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
   }
 `;
 
@@ -201,7 +217,7 @@ export const ActionButtons = styled.div`
 
   button {
     min-width: 150px;
-      @media (max-width: 768px) {
+    @media (max-width: 768px) {
       min-width: auto;
       flex-grow: 1;
     }
@@ -215,9 +231,17 @@ export const LoadingText = styled.p`
   color: ${({ theme }) => theme.colors.textLight};
 `;
 
-export const InfoText = styled.p`
+export const InfoText = styled.div`
   text-align: center;
   padding: 2rem;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: ${({ theme }) => theme.colors.infoBg};
+  border: 1px solid ${({ theme }) => theme.colors.infoBorder};
+  color: ${({ theme }) => theme.colors.infoText};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
+  margin: 1rem 0;
+
+  a {
+    color: ${({ theme }) => theme.colors.primaryDark};
+    font-weight: bold;
+  }
 `;

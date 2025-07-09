@@ -1,5 +1,4 @@
-// Arquivo: src/pages/Admin/SettingsPage/styles.js (Versão Completa e Final)
-
+// Arquivo: src/pages/Admin/SettingsPage/styles.js
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
@@ -12,6 +11,13 @@ export const PageWrapper = styled.div`
     color: ${({ theme }) => theme.colors.textDark}; 
     margin-bottom: 30px; 
   }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
 `;
 
 export const SectionTitle = styled.h2`
@@ -20,13 +26,18 @@ export const SectionTitle = styled.h2`
   margin-top: 40px; 
   margin-bottom: 15px; 
   border-bottom: 1px solid ${({ theme }) => theme.colors.borderMedium}; 
-  padding-bottom: 10px; 
+  padding-bottom: 10px;
+
+  @media (max-width: 768px) {
+    font-size: 1.25em;
+  }
 `;
 
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 15px;
+  margin-top: auto; /* Empurra o formulário para baixo */
 `;
 
 export const FormGroup = styled.div`
@@ -67,9 +78,9 @@ export const SettingsBlock = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.lg}; 
   border: 1px solid ${({ theme }) => theme.colors.borderLight};
   box-shadow: ${({ theme }) => theme.shadows.sm};
-  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 `;
 
 export const CurrentValueDisplay = styled.div`
@@ -78,7 +89,6 @@ export const CurrentValueDisplay = styled.div`
   padding: 1rem;
   border-radius: ${({ theme }) => theme.borderRadius.md};
   border-left: 4px solid ${({ theme }) => theme.colors.primary};
-  flex-grow: 1; /* Faz este bloco crescer para preencher o espaço */
   
   h4 {
     margin: 0 0 5px 0;
@@ -106,6 +116,7 @@ export const ActionButtons = styled.div`
   display: flex;
   gap: 10px;
   margin-top: 10px;
+  flex-wrap: wrap; /* --- MUDANÇA PARA RESPONSIVIDADE --- */
 `;
 
 export const SettingsGrid = styled.div`
