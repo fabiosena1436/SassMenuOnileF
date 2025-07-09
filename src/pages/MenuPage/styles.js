@@ -1,11 +1,12 @@
-// Arquivo: src/pages/MenuPage/styles.js
+// Arquivo: src/pages/MenuPage/styles.js (VERSÃO CORRIGIDA)
 
 import styled from 'styled-components';
 
 export const MenuPageWrapper = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  /* O padding-top foi removido para eliminar o espaço extra */
+  padding: 0 1rem 2rem;
 `;
 
 export const MenuHeader = styled.div`
@@ -16,7 +17,7 @@ export const MenuHeader = styled.div`
 export const MenuTitle = styled.h1`
   font-size: 2.5rem;
   color: #1f2937;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
@@ -25,7 +26,7 @@ export const MenuTitle = styled.h1`
 export const SearchContainer = styled.div`
   margin-bottom: 2rem;
   position: relative;
-  
+
   svg {
     position: absolute;
     left: 15px;
@@ -69,20 +70,6 @@ export const CategoryButton = styled.button`
   transition: all 0.2s ease-in-out;
 `;
 
-export const ProductListContainer = styled.div`
-  /* Estilo padrão para Desktop (Grid) */
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 2rem;
-
-  /* Em telas menores, muda para um container de lista */
-  @media (max-width: 768px) {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem; /* Espaçamento entre os itens da lista */
-  }
-`;
-
 export const LoadingText = styled.p`
   text-align: center;
   padding: 4rem;
@@ -101,7 +88,7 @@ export const DesktopProductList = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     display: none;
   }
@@ -109,10 +96,22 @@ export const DesktopProductList = styled.div`
 
 export const MobileProductList = styled.div`
   display: none;
-  
+
   @media (max-width: 768px) {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    /* Adicionado para dar espaço no final da lista */
+    padding-bottom: 80px; 
   }
+`;
+
+// --- NOVO ESTILO PARA O TÍTULO DO GRUPO DE PRODUTOS ---
+export const ProductGroupTitle = styled.h2`
+    font-size: 1.5rem;
+    color: ${({ theme }) => theme.colors.textDark};
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid ${({ theme }) => theme.colors.borderLight};
 `;
