@@ -1,55 +1,59 @@
-// Arquivo: src/pages/Admin/SettingsPage/index.js
+// Arquivo: src/pages/Admin/SettingsPage/index.js (Versão Final e Completa)
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from '../../../services/firebaseConfig';
 import Button from '../../../components/Button';
 import toast from 'react-hot-toast';
 
 import {
-  PageWrapper,
-  SectionTitle,
-  Form,
-  FormGroup,
-  LoadingText,
-  StatusDisplay,
-  SettingsBlock,
-  SettingsGrid
+  PageWrapper, SectionTitle, LoadingText, SettingsBlock,
+  Form, FormGroup, CurrentValueDisplay, ActionButtons, SettingsGrid
 } from './styles';
 
 const SettingsPage = () => {
   const { tenant, loading: authLoading } = useAuth();
 
-  // Estados locais para os campos do formulário
-  const [isStoreOpen, setIsStoreOpen] = useState(true);
-  const [deliveryFee, setDeliveryFee] = useState('');
-  const [openingHoursText, setOpeningHoursText] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
-  const [bannerUrl, setBannerUrl] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [instagram, setInstagram] = useState('');
-  const [address, setAddress] = useState('');
-  const [pixKey, setPixKey] = useState('');
+  // Estados locais para controlar os campos de edição
+  const [editData, setEditData] = useState({
+    storeName: '',
+    deliveryFee: '', 
+    openingHoursText: '', 
+    logoUrl: '', 
+    bannerUrl: '',
+    whatsapp: '', 
+    instagram: '', 
+    address: '', 
+    pixKey: ''
+  });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Popula os campos quando os dados do lojista são carregados
+  // Popula os campos de edição quando os dados do lojista são carregados
   useEffect(() => {
     if (tenant) {
-      setIsStoreOpen(tenant.isStoreOpen ?? true);
-      setDeliveryFee(tenant.deliveryFee?.toString() ?? '0');
-      setOpeningHoursText(tenant.openingHoursText ?? '');
-      setLogoUrl(tenant.logoUrl ?? '');
-      setBannerUrl(tenant.bannerUrl ?? '');
-      setWhatsapp(tenant.whatsapp ?? '');
-      setInstagram(tenant.instagram ?? '');
-      setAddress(tenant.address ?? '');
-      setPixKey(tenant.pixKey ?? '');
+      setEditData({
+        storeName: tenant.storeName ?? '',
+        deliveryFee: tenant.deliveryFee?.toString() ?? '0',
+        openingHoursText: tenant.openingHoursText ?? '',
+        logoUrl: tenant.logoUrl ?? '',
+        bannerUrl: tenant.bannerUrl ?? '',
+        whatsapp: tenant.whatsapp ?? '',
+        instagram: tenant.instagram ?? '',
+        address: tenant.address ?? '',
+        pixKey: tenant.pixKey ?? ''
+      });
     }
   }, [tenant]);
 
-  // Função genérica para atualizar qualquer configuração no documento do lojista
+  // Função genérica para lidar com a mudança nos inputs
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Função genérica para atualizar/remover configurações
   const handleUpdateSetting = async (dataToUpdate, successMessage) => {
     if (!tenant?.id) return toast.error("Não foi possível encontrar os dados da sua loja.");
 
@@ -65,18 +69,26 @@ const SettingsPage = () => {
       setIsSubmitting(false);
     }
   };
-
-  const handleToggleStoreStatus = () => {
-    const newStatus = !isStoreOpen;
-    setIsStoreOpen(newStatus); // Atualiza o estado local para feedback imediato
-    handleUpdateSetting({ isStoreOpen: newStatus }, `Loja marcada como ${newStatus ? 'ABERTA' : 'FECHADA'}.`);
-  };
   
-  // Função de HOF (Higher-Order Function) para simplificar os handlers de submit
-  const handleSubmit = (handler) => (e) => {
+  // Função para lidar com o submit dos formulários
+  const handleSubmit = (e, field, value) => {
     e.preventDefault();
-    handler();
+    let data = {};
+    if(field === 'deliveryFee') {
+        const feeValue = parseFloat(value);
+        if (isNaN(feeValue) || feeValue < 0) return toast.error('Valor inválido para taxa.');
+        data[field] = feeValue;
+    } else {
+        data[field] = value.trim();
+    }
+    handleUpdateSetting(data, 'Configuração salva com sucesso!');
   };
+
+  // Função para remover um campo
+  const handleRemove = (field, name) => {
+    if(!window.confirm(`Tem a certeza que quer remover ${name}?`)) return;
+    handleUpdateSetting({ [field]: deleteField() }, `${name} removido com sucesso!`);
+  }
   
   if (authLoading || !tenant) {
     return <PageWrapper><LoadingText>A carregar configurações...</LoadingText></PageWrapper>;
@@ -86,85 +98,126 @@ const SettingsPage = () => {
     <PageWrapper>
       <h1>Configurações da Loja</h1>
 
-      <SectionTitle>Status e Horários</SectionTitle>
+      <SectionTitle>Informações Gerais</SectionTitle>
       <SettingsBlock>
-        <StatusDisplay $isOpen={isStoreOpen}>
-          Status Atual da Loja: {isStoreOpen ? 'ABERTA' : 'FECHADA'}
-        </StatusDisplay>
-        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>Quando a loja está fechada, os clientes não podem finalizar pedidos.</p>
-        <Button onClick={handleToggleStoreStatus} disabled={isSubmitting} style={{ backgroundColor: isStoreOpen ? '#f59e0b' : '#22c55e', marginTop: '10px' }}>
-          {isStoreOpen ? 'FECHAR LOJA' : 'ABRIR LOJA'}
-        </Button>
-        <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid #ddd' }} />
-        <Form onSubmit={handleSubmit(() => handleUpdateSetting({ openingHoursText }, 'Horário de funcionamento salvo!'))}>
-          <FormGroup>
-            <label>Texto de Horário de Funcionamento (visível para o cliente):</label>
-            <textarea value={openingHoursText} onChange={(e) => setOpeningHoursText(e.target.value)} placeholder="Ex: Seg a Sex: 18h - 23h&#10;Sáb e Dom: 18h - 00h" />
-          </FormGroup>
-          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar Horário'}</Button>
-        </Form>
+          <CurrentValueDisplay>
+              <h4>Nome da Loja Atual</h4>
+              <p>{tenant.storeName || <span className="no-value">Não definido</span>}</p>
+          </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'storeName', editData.storeName)}>
+            <FormGroup>
+              <label>Editar Nome da Loja:</label>
+              <input type="text" name="storeName" value={editData.storeName} onChange={handleInputChange}/>
+            </FormGroup>
+            <ActionButtons>
+                <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar Nome'}</Button>
+            </ActionButtons>
+          </Form>
       </SettingsBlock>
-      
+
       <SectionTitle>Identidade Visual</SectionTitle>
       <SettingsGrid>
-        <Form onSubmit={handleSubmit(() => handleUpdateSetting({ logoUrl: logoUrl.trim() }, 'URL da Logo salva!'))}>
-          <FormGroup>
-            <label>URL da Logo:</label>
-            <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://servidor.com/sua-logo.png" />
-            {logoUrl && <img src={logoUrl} alt="Pré-visualização do logo" />}
-          </FormGroup>
-          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar Logo'}</Button>
-        </Form>
-        <Form onSubmit={handleSubmit(() => handleUpdateSetting({ bannerUrl: bannerUrl.trim() }, 'URL do Banner salvo!'))}>
-          <FormGroup>
-            <label>URL do Banner da Página Inicial:</label>
-            <input type="text" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} placeholder="https://servidor.com/seu-banner.jpg" />
-            {bannerUrl && <img src={bannerUrl} alt="Pré-visualização do banner" />}
-          </FormGroup>
-          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar Banner'}</Button>
-        </Form>
+        <SettingsBlock>
+          <CurrentValueDisplay>
+            <h4>Logo Atual</h4>
+            {tenant.logoUrl ? <img src={tenant.logoUrl} alt="Logo atual" style={{maxWidth: '150px', maxHeight: '100px', objectFit: 'contain'}}/> : <p className="no-value">Nenhuma logo definida</p>}
+          </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'logoUrl', editData.logoUrl)}>
+            <FormGroup>
+              <label>URL da nova Logo:</label>
+              <input type="text" name="logoUrl" value={editData.logoUrl} onChange={handleInputChange} placeholder="https://servidor.com/sua-logo.png" />
+            </FormGroup>
+            <ActionButtons>
+              <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar Logo'}</Button>
+              {tenant.logoUrl && <Button type="button" variant="danger" onClick={() => handleRemove('logoUrl', 'a Logo')}>Remover</Button>}
+            </ActionButtons>
+          </Form>
+        </SettingsBlock>
+        <SettingsBlock>
+          <CurrentValueDisplay>
+            <h4>Banner Atual</h4>
+            {tenant.bannerUrl ? <img src={tenant.bannerUrl} alt="Banner atual" style={{width: '100%', objectFit: 'cover', borderRadius: '8px'}}/> : <p className="no-value">Nenhum banner definido</p>}
+          </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'bannerUrl', editData.bannerUrl)}>
+            <FormGroup>
+              <label>URL do novo Banner:</label>
+              <input type="text" name="bannerUrl" value={editData.bannerUrl} onChange={handleInputChange} placeholder="https://servidor.com/seu-banner.jpg" />
+            </FormGroup>
+             <ActionButtons>
+              <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar Banner'}</Button>
+              {tenant.bannerUrl && <Button type="button" variant="danger" onClick={() => handleRemove('bannerUrl', 'o Banner')}>Remover</Button>}
+            </ActionButtons>
+          </Form>
+        </SettingsBlock>
       </SettingsGrid>
-
-      <SectionTitle>Contato e Redes Sociais</SectionTitle>
-      <Form onSubmit={handleSubmit(() => handleUpdateSetting({ whatsapp: whatsapp.trim(), instagram: instagram.trim(), address: address.trim() }, 'Informações de contato salvas!'))}>
-        <FormGroup>
-          <label>WhatsApp (só números com código do país)</label>
-          <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="Ex: 5511999998888" />
-        </FormGroup>
-        <FormGroup>
-          <label>Instagram (só o usuário, sem @)</label>
-          <input type="text" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="Ex: seuusuario" />
-        </FormGroup>
-        <FormGroup>
-          <label>Endereço</label>
-          <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Ex: Rua Exemplo, 123, Bairro, Cidade - SP" />
-        </FormGroup>
-        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar Informações de Contato'}</Button>
-      </Form>
       
       <SectionTitle>Pagamento e Entrega</SectionTitle>
       <SettingsGrid>
-        <Form onSubmit={handleSubmit(() => handleUpdateSetting({ pixKey: pixKey.trim() }, 'Chave PIX atualizada!'))}>
-          <FormGroup>
-            <label>Chave PIX:</label>
-            <input type="text" value={pixKey} onChange={(e) => setPixKey(e.target.value)} placeholder="Sua chave PIX" />
-          </FormGroup>
-          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar Chave PIX'}</Button>
-        </Form>
-        <Form onSubmit={handleSubmit(() => {
-            const feeValue = parseFloat(deliveryFee);
-            if (isNaN(feeValue) || feeValue < 0) {
-              return toast.error('Valor inválido para taxa.');
-            }
-            handleUpdateSetting({ deliveryFee: feeValue }, 'Taxa de entrega atualizada!');
-        })}>
-          <FormGroup>
-            <label>Taxa de Entrega (R$):</label>
-            <input type="number" value={deliveryFee} onChange={(e) => setDeliveryFee(e.target.value)} placeholder="Ex: 5.00" step="0.01" min="0" />
-          </FormGroup>
-          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar Taxa de Entrega'}</Button>
-        </Form>
+        <SettingsBlock>
+          <CurrentValueDisplay>
+              <h4>Chave PIX Atual</h4>
+              <p>{tenant.pixKey || <span className="no-value">Nenhuma</span>}</p>
+          </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'pixKey', editData.pixKey)}>
+            <FormGroup><label>Editar Chave PIX:</label><input type="text" name="pixKey" value={editData.pixKey} onChange={handleInputChange}/></FormGroup>
+            <ActionButtons>
+                <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar Chave PIX'}</Button>
+                {tenant.pixKey && <Button type="button" variant="danger" onClick={() => handleRemove('pixKey', 'a Chave PIX')}>Remover</Button>}
+            </ActionButtons>
+          </Form>
+        </SettingsBlock>
+        <SettingsBlock>
+            <CurrentValueDisplay>
+                <h4>Taxa de Entrega Atual</h4>
+                <p>R$ {(tenant.deliveryFee || 0).toFixed(2).replace('.', ',')}</p>
+            </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'deliveryFee', editData.deliveryFee)}>
+            <FormGroup><label>Editar Taxa de Entrega (R$):</label><input type="number" name="deliveryFee" value={editData.deliveryFee} onChange={handleInputChange} step="0.01" min="0" /></FormGroup>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar Taxa'}</Button>
+          </Form>
+        </SettingsBlock>
       </SettingsGrid>
+
+      <SectionTitle>Informações de Contato</SectionTitle>
+       <SettingsGrid>
+        <SettingsBlock>
+            <CurrentValueDisplay>
+                <h4>WhatsApp para Pedidos</h4>
+                <p>{tenant.whatsapp || <span className="no-value">Não definido</span>}</p>
+            </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'whatsapp', editData.whatsapp)}>
+            <FormGroup><label>Editar WhatsApp (só números com DDD):</label><input type="tel" name="whatsapp" value={editData.whatsapp} onChange={handleInputChange} placeholder="5518999998888" /></FormGroup>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar WhatsApp'}</Button>
+          </Form>
+        </SettingsBlock>
+        <SettingsBlock>
+          <CurrentValueDisplay>
+              <h4>Instagram</h4>
+              <p>{tenant.instagram || <span className="no-value">Não definido</span>}</p>
+          </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'instagram', editData.instagram)}>
+            <FormGroup><label>Editar Instagram (link completo):</label><input type="text" name="instagram" value={editData.instagram} onChange={handleInputChange} placeholder="https://instagram.com/seu-perfil"/></FormGroup>
+            <ActionButtons>
+                <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar Instagram'}</Button>
+                {tenant.instagram && <Button type="button" variant="danger" onClick={() => handleRemove('instagram', 'o Instagram')}>Remover</Button>}
+            </ActionButtons>
+          </Form>
+        </SettingsBlock>
+      </SettingsGrid>
+       <SettingsBlock style={{ gridColumn: '1 / -1' }}> {/* Ocupa a largura toda */}
+          <CurrentValueDisplay>
+              <h4>Endereço da Loja</h4>
+              <p>{tenant.address || <span className="no-value">Não definido</span>}</p>
+          </CurrentValueDisplay>
+          <Form onSubmit={(e) => handleSubmit(e, 'address', editData.address)}>
+            <FormGroup><label>Editar Endereço Completo:</label><input type="text" name="address" value={editData.address} onChange={handleInputChange} placeholder="Rua Exemplo, 123, Bairro - Cidade, SP" /></FormGroup>
+            <ActionButtons>
+                <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A salvar...' : 'Salvar Endereço'}</Button>
+                {tenant.address && <Button type="button" variant="danger" onClick={() => handleRemove('address', 'o Endereço')}>Remover</Button>}
+            </ActionButtons>
+          </Form>
+        </SettingsBlock>
+
     </PageWrapper>
   );
 };

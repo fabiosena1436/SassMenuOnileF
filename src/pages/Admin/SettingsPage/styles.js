@@ -1,4 +1,5 @@
-// src/pages/Admin/SettingsPage/styles.js
+// Arquivo: src/pages/Admin/SettingsPage/styles.js (Versão Completa e Final)
+
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
@@ -17,33 +18,26 @@ export const SectionTitle = styled.h2`
   font-size: 1.5em; 
   color: ${({ theme }) => theme.colors.textMedium}; 
   margin-top: 40px; 
-  margin-bottom: 20px; 
+  margin-bottom: 15px; 
   border-bottom: 1px solid ${({ theme }) => theme.colors.borderMedium}; 
   padding-bottom: 10px; 
 `;
 
 export const Form = styled.form`
-  background-color: ${({ theme }) => theme.colors.background}; 
-  padding: 20px; 
-  border-radius: ${({ theme }) => theme.borderRadius.lg}; 
-  margin-top: 10px; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 15px; 
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
-  height: 100%; 
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 `;
 
 export const FormGroup = styled.div`
-  display: flex; 
-  flex-direction: column; 
-  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
   
   label { 
     margin-bottom: 8px; 
     font-weight: 600; 
     color: ${({ theme }) => theme.colors.textDark}; 
-  } 
+  }
   
   input, 
   textarea { 
@@ -58,20 +52,6 @@ export const FormGroup = styled.div`
     min-height: 100px; 
     resize: vertical; 
   }
-  
-  p { 
-    font-size: 0.9em; 
-    margin-top: 5px; 
-    color: ${({ theme }) => theme.colors.textLight}; 
-  }
-  
-  img {
-    max-width: 150px; 
-    height: auto;
-    margin-top: 10px; 
-    border-radius: ${({ theme }) => theme.borderRadius.lg}; 
-    border: 1px solid ${({ theme }) => theme.colors.borderMedium};
-  }
 `;
 
 export const LoadingText = styled.p`
@@ -81,22 +61,51 @@ export const LoadingText = styled.p`
   margin-top: 20px;
 `;
 
-export const StatusDisplay = styled.div`
-  margin-bottom: 10px; 
-  font-size: 1.1em; 
-  font-weight: bold;
-  padding: 1rem;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  text-align: center;
-  background-color: ${({ $isOpen, theme }) => ($isOpen ? theme.colors.successLight : theme.colors.dangerLight)};
-  color: ${({ $isOpen, theme }) => ($isOpen ? theme.colors.successDarker : theme.colors.dangerDark)};
-`;
-
 export const SettingsBlock = styled.div`
-  padding: 20px; 
-  background-color: ${({ theme }) => theme.colors.background};
+  padding: 25px; 
+  background-color: ${({ theme }) => theme.colors.white};
   border-radius: ${({ theme }) => theme.borderRadius.lg}; 
   border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const CurrentValueDisplay = styled.div`
+  margin-bottom: 1.5rem;
+  background-color: ${({ theme }) => theme.colors.background};
+  padding: 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border-left: 4px solid ${({ theme }) => theme.colors.primary};
+  flex-grow: 1; /* Faz este bloco crescer para preencher o espaço */
+  
+  h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+    color: ${({ theme }) => theme.colors.textMedium};
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: ${({ theme }) => theme.colors.textDarkest};
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  .no-value {
+    font-style: italic;
+    font-weight: 500;
+    color: ${({ theme }) => theme.colors.textLight};
+  }
+`;
+
+export const ActionButtons = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 `;
 
 export const SettingsGrid = styled.div`

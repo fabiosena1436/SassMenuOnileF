@@ -101,3 +101,36 @@ export const GrandTotalLine = styled(SummaryLine)`
     padding-top: 1rem;
     border-top: 1px solid #E2E8F0;
 `;
+export const PixInstructions = styled.div`
+  padding: 1rem 1rem 1rem 1.5rem;
+  margin: -0.5rem 0 1rem 1.5rem;
+  border-left: 3px solid ${({ theme }) => theme.colors.primary};
+  background-color: ${({ theme }) => theme.colors.primaryLightest};
+  border-radius: 0 ${({ theme }) => theme.borderRadius.md} ${({ theme }) => theme.borderRadius.md} 0;
+  
+  p {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: ${({ theme }) => theme.colors.textMedium};
+  }
+
+  strong {
+    font-size: 1.1rem;
+    color: ${({ theme }) => theme.colors.textTitle};
+    word-break: break-all;
+  }
+
+  button {
+    margin-top: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    background-color: ${({ theme }) => theme.colors.primary};
+    color: white;
+    border: none;
+    border-radius: ${({ theme }) => theme.borderRadius.sm};
+    cursor: pointer;
+    &:hover {
+        background-color: ${({ theme }) => theme.colors.primaryDark};
+    }
+  }
+`;

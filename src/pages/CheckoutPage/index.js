@@ -1,28 +1,17 @@
-// Arquivo: src/pages/CheckoutPage/index.js (Versão Final com Caminhos Corrigidos)
+// Arquivo: src/pages/CheckoutPage/index.js (Versão Final com o JSX Corrigido)
 
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../../contexts/CartContext';
 import { useStore } from '../../contexts/StoreContext';
 import { useNavigate } from 'react-router-dom';
-
-// --- CORREÇÃO PRINCIPAL AQUI ---
-// Os caminhos foram ajustados de ../../../ para ../../
 import { db } from '../../services/firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import Button from '../../components/Button';
 
 import {
-  CheckoutWrapper,
-  Title,
-  Section,
-  SectionTitle,
-  FormGroup,
-  Input,
-  PaymentOption,
-  ConditionalField,
-  SummaryLine,
-  GrandTotalLine
+  CheckoutWrapper, Title, Section, SectionTitle, FormGroup, Input,
+  PaymentOption, ConditionalField, SummaryLine, GrandTotalLine, PixInstructions
 } from './styles';
 
 const CheckoutPage = () => {
@@ -43,6 +32,13 @@ const CheckoutPage = () => {
 
   const handleChange = (e) => {
     setCustomerData({ ...customerData, [e.target.name]: e.target.value });
+  };
+  
+  const handleCopyPixKey = () => {
+    if(!store?.pixKey) return;
+    navigator.clipboard.writeText(store.pixKey)
+      .then(() => toast.success('Chave PIX copiada!'))
+      .catch(() => toast.error('Falha ao copiar a chave.'));
   };
 
   const formatOrderForWhatsApp = () => {
@@ -78,19 +74,11 @@ const CheckoutPage = () => {
 
     try {
       await addDoc(collection(db, "tenants", store.id, "orders"), {
-        items: cart,
-        grandTotal: finalTotal,
-        itemsSubtotal: cartTotal,
-        deliveryFee: deliveryFee,
-        status: 'Pendente',
-        createdAt: serverTimestamp(),
-        paymentMethod: paymentMethod,
-        customerName: customerData.name,
-        phone: customerData.phone,
+        items: cart, grandTotal: finalTotal, itemsSubtotal: cartTotal, deliveryFee: deliveryFee,
+        status: 'Pendente', createdAt: serverTimestamp(), paymentMethod: paymentMethod,
+        customerName: customerData.name, phone: customerData.phone,
         address: `${customerData.address}, ${customerData.number}, ${customerData.neighborhood}`,
-        complement: customerData.complement,
-        tenantId: store.id,
-        storeName: store.storeName,
+        complement: customerData.complement, tenantId: store.id, storeName: store.storeName,
       });
       
       const message = formatOrderForWhatsApp();
@@ -124,75 +112,58 @@ const CheckoutPage = () => {
         <Title>Finalizar Pedido</Title>
         <Section>
           <SectionTitle>1. Seus Dados</SectionTitle>
-          <FormGroup>
-            <label htmlFor="name">Nome Completo</label>
-            <Input id="name" name="name" onChange={handleChange} value={customerData.name} required />
-          </FormGroup>
-          <FormGroup>
-            <label htmlFor="phone">Telefone (WhatsApp)</label>
-            <Input id="phone" name="phone" onChange={handleChange} value={customerData.phone} placeholder="Ex: 18999998888" required />
-          </FormGroup>
+          <FormGroup><label htmlFor="name">Nome Completo</label><Input id="name" name="name" onChange={handleChange} value={customerData.name} required /></FormGroup>
+          <FormGroup><label htmlFor="phone">Telefone (WhatsApp)</label><Input id="phone" name="phone" onChange={handleChange} value={customerData.phone} placeholder="Ex: 18999998888" required /></FormGroup>
         </Section>
         
         <Section>
           <SectionTitle>2. Endereço de Entrega</SectionTitle>
-           <FormGroup>
-                <label htmlFor="address">Rua e Número</label>
-                <Input id="address" name="address" onChange={handleChange} value={customerData.address} required />
-            </FormGroup>
-             <FormGroup>
-                <label htmlFor="neighborhood">Bairro</label>
-                <Input id="neighborhood" name="neighborhood" onChange={handleChange} value={customerData.neighborhood} required />
-            </FormGroup>
-            <FormGroup>
-                <label htmlFor="complement">Complemento (Opcional)</label>
-                <Input id="complement" name="complement" onChange={handleChange} value={customerData.complement} placeholder="Ex: Casa, Apto, Bloco, etc."/>
-            </FormGroup>
+           <FormGroup><label htmlFor="address">Rua e Número</label><Input id="address" name="address" onChange={handleChange} value={customerData.address} required /></FormGroup>
+           <FormGroup><label htmlFor="neighborhood">Bairro</label><Input id="neighborhood" name="neighborhood" onChange={handleChange} value={customerData.neighborhood} required /></FormGroup>
+           <FormGroup><label htmlFor="complement">Complemento (Opcional)</label><Input id="complement" name="complement" onChange={handleChange} value={customerData.complement} placeholder="Ex: Casa, Apto, Bloco, etc."/></FormGroup>
         </Section>
 
         <Section>
           <SectionTitle>3. Forma de Pagamento</SectionTitle>
+          {/* Opção Dinheiro */}
           <PaymentOption $isSelected={paymentMethod === 'dinheiro'}>
             <input type="radio" name="paymentMethod" value="dinheiro" checked={paymentMethod === 'dinheiro'} onChange={(e) => setPaymentMethod(e.target.value)} /> Dinheiro
           </PaymentOption>
           {paymentMethod === 'dinheiro' && (
             <ConditionalField>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input type="checkbox" checked={needsChange} onChange={(e) => setNeedsChange(e.target.checked)} /> Precisa de troco?
-              </label>
-              {needsChange && (
-                <FormGroup style={{marginTop: '1rem'}}>
-                  <label htmlFor="changeFor">Troco para quanto?</label>
-                  <Input type="number" id="changeFor" placeholder="Ex: 50" value={changeFor} onChange={(e) => setChangeFor(e.target.value)}/>
-                </FormGroup>
-              )}
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><input type="checkbox" checked={needsChange} onChange={(e) => setNeedsChange(e.target.checked)} /> Precisa de troco?</label>
+              {needsChange && (<FormGroup style={{marginTop: '1rem'}}><label htmlFor="changeFor">Troco para quanto?</label><Input type="number" id="changeFor" placeholder="Ex: 50" value={changeFor} onChange={(e) => setChangeFor(e.target.value)}/></FormGroup>)}
             </ConditionalField>
           )}
 
+          {/* Opção Cartão */}
           <PaymentOption $isSelected={paymentMethod === 'cartao'}>
             <input type="radio" name="paymentMethod" value="cartao" checked={paymentMethod === 'cartao'} onChange={(e) => setPaymentMethod(e.target.value)} /> Cartão (na entrega)
           </PaymentOption>
           
+          {/* Opção PIX */}
           {store.pixKey && (
-            <PaymentOption $isSelected={paymentMethod === 'pix'}>
-                <input type="radio" name="paymentMethod" value="pix" checked={paymentMethod === 'pix'} onChange={(e) => setPaymentMethod(e.target.value)} /> PIX
-            </PaymentOption>
+            <>
+              <PaymentOption $isSelected={paymentMethod === 'pix'}>
+                  <input type="radio" name="paymentMethod" value="pix" checked={paymentMethod === 'pix'} onChange={(e) => setPaymentMethod(e.target.value)} /> PIX
+              </PaymentOption>
+              {paymentMethod === 'pix' && (
+                <PixInstructions>
+                  <p>Copie a chave PIX e pague no seu app do banco:</p>
+                  <strong>{store.pixKey}</strong>
+                  <br />
+                  <button type="button" onClick={handleCopyPixKey}>Copiar Chave</button>
+                </PixInstructions>
+              )}
+            </>
           )}
         </Section>
         
         <Section>
-             <SummaryLine>
-                <span>Subtotal:</span>
-                <span>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
-            </SummaryLine>
-            <SummaryLine>
-                <span>Taxa de Entrega:</span>
-                <span>R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
-            </SummaryLine>
-            <GrandTotalLine>
-                <span>Total a Pagar:</span>
-                <span>R$ {finalTotal.toFixed(2).replace('.', ',')}</span>
-            </GrandTotalLine>
+             <SummaryLine><span>Subtotal:</span><span>R$ {cartTotal.toFixed(2).replace('.', ',')}</span></SummaryLine>
+             {/* --- ERRO DE DIGITAÇÃO CORRIGIDO AQUI --- */}
+             <SummaryLine><span>Taxa de Entrega:</span><span>R$ {deliveryFee.toFixed(2).replace('.', ',')}</span></SummaryLine>
+             <GrandTotalLine><span>Total a Pagar:</span><span>R$ {finalTotal.toFixed(2).replace('.', ',')}</span></GrandTotalLine>
         </Section>
 
         <Button type="submit" disabled={loading} style={{width: '100%', marginTop: '2rem', padding: '1rem'}}>
