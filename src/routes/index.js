@@ -1,5 +1,3 @@
-// Arquivo: src/routes/index.js (Versão Final e Corrigida)
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
@@ -28,24 +26,22 @@ import CategoriesPage from '../pages/Admin/CategoriesPage';
 import SettingsPage from '../pages/Admin/SettingsPage';
 import PromotionsPage from '../pages/Admin/PromotionsPage';
 import SubscriptionPage from '../pages/Admin/SubscriptionPage';
-
-// --- NOVA PÁGINA IMPORTADA AQUI ---
 import PrintableReceiptPage from '../pages/Admin/PrintableReceiptPage';
 
-// Página Super Admin
+// --- NOVAS PÁGINAS SUPER ADMIN IMPORTADAS ---
+import SuperAdminLoginPage from '../pages/SuperAdmin/SuperAdminLoginPage';
 import SuperAdminDashboardPage from '../pages/SuperAdmin/SuperAdminDashboardPage';
-
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* ROTA PRINCIPAL: A "vitrine" do teu SaaS */}
+      {/* ROTA PRINCIPAL */}
       <Route path="/" element={<LandingPage />} />
 
-      {/* ROTA DE REGISTO: Para novos lojistas se inscreverem */}
+      {/* ROTA DE REGISTO */}
       <Route path="/register" element={<RegistrationPage />} />
 
-      {/* ROTAS PÚBLICAS DA LOJA: O cardápio de cada cliente */}
+      {/* ROTAS PÚBLICAS DA LOJA */}
       <Route path="/loja/:storeSlug" element={<StoreLayout />}>
         <Route index element={<HomePage />} />
         <Route path="cardapio" element={<MenuPage />} />
@@ -54,9 +50,8 @@ const AppRoutes = () => {
         <Route path="checkout" element={<CheckoutPage />} />
       </Route>
 
-      {/* ROTAS DE ADMINISTRAÇÃO: O painel de cada lojista */}
+      {/* ROTAS DE ADMINISTRAÇÃO (LOJISTA) */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
-
       <Route 
         path="/admin" 
         element={
@@ -71,13 +66,14 @@ const AppRoutes = () => {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="promotions" element={<PromotionsPage />} />
         <Route path="assinatura" element={<SubscriptionPage />} />
-        
-        {/* --- NOVA ROTA ADICIONADA AQUI --- */}
-        {/* Esta rota corresponde ao link do botão de imprimir */}
         <Route path="print/order/:orderId" element={<PrintableReceiptPage />} />
       </Route>
 
-      {/* ROTA SUPER ADMIN: O teu painel de controlo geral */}
+      {/* --- ROTAS SUPER ADMIN --- */}
+      {/* Rota de login exclusiva para Super Admin */}
+      <Route path="/super-admin/login" element={<SuperAdminLoginPage />} />
+
+      {/* Rota protegida para o painel de Super Admin */}
       <Route
         path="/super-admin"
         element={
@@ -86,6 +82,7 @@ const AppRoutes = () => {
           </SuperAdminRoute>
         }
       />
+      {/* Fim das rotas Super Admin */}
 
       <Route path="*" element={<div><h1>404 - Página Não Encontrada</h1></div>} />
     </Routes>

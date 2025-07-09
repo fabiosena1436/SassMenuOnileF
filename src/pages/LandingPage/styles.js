@@ -11,6 +11,11 @@ export const Header = styled.header`
   color: ${({ theme }) => theme.colors.textInverted};
   padding: 6rem 2rem;
   text-align: center;
+  
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    padding: 4rem 1rem;
+  }
 `;
 
 export const Title = styled.h1`
@@ -18,6 +23,11 @@ export const Title = styled.h1`
   max-width: 800px;
   margin: 0 auto 1rem auto;
   font-weight: 700;
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 export const Subtitle = styled.p`
@@ -25,6 +35,11 @@ export const Subtitle = styled.p`
   max-width: 600px;
   margin: 0 auto;
   opacity: 0.9;
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 export const ButtonGroup = styled.div`
@@ -34,10 +49,25 @@ export const ButtonGroup = styled.div`
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 480px) {
+    flex-direction: column;
+    width: 100%;
+    
+    button {
+      width: 100%;
+      max-width: 320px;
+    }
+  }
 `;
 
 export const Section = styled.section`
   padding: 5rem 2rem;
+
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
 `;
 
 export const SectionTitle = styled.h2`
@@ -46,6 +76,11 @@ export const SectionTitle = styled.h2`
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textDarkest};
   margin-bottom: 3rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
 `;
 
 export const Showcase = styled.div`
@@ -78,6 +113,10 @@ export const Features = styled.section`
   padding: 4rem 2rem;
   flex-wrap: wrap;
   background-color: ${({ theme }) => theme.colors.background};
+
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
 `;
 
 export const FeatureCard = styled.div`
@@ -102,7 +141,7 @@ export const FeatureCard = styled.div`
 export const PricingPlan = styled.div`
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch; /* Garante que os cards tenham a mesma altura */
   gap: 2rem;
   flex-wrap: wrap;
 `;
@@ -123,6 +162,13 @@ export const PlanCard = styled.div`
   
   &:hover {
     transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    transform: none; /* Remove o efeito de escala inicial no mobile */
+    &:hover {
+      transform: none; /* Remove também o hover */
+    }
   }
 `;
 
@@ -171,5 +217,12 @@ export const CallToAction = styled.section`
   h2 {
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+    h2 {
+      font-size: 1.8rem;
+    }
   }
 `;

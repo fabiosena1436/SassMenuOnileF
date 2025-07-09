@@ -1,8 +1,7 @@
-// src/pages/LandingPage/index.js
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react'; // Hooks adicionados
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
-import { PLANS } from '../../utils/plans'; // Caminho corrigido para a pasta utils
+import { PLANS } from '../../utils/plans';
 import {
   LandingWrapper,
   Header,
@@ -23,9 +22,45 @@ import {
   CallToAction,
 } from './styles';
 import { FaRocket, FaStore, FaMobileAlt, FaCheckCircle } from 'react-icons/fa';
+import toast from 'react-hot-toast'; // Adicionado para feedback visual
 
 const LandingPage = () => {
   const navigate = useNavigate();
+
+  // --- LÓGICA DO ATALHO SECRETO ---
+  const [secretClickCount, setSecretClickCount] = useState(0);
+  const clickTimeoutRef = useRef(null);
+
+  // Limpa o timeout se o componente for desmontado
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleSecretClick = () => {
+    // Limpa o timeout anterior a cada clique
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+  
+    const newCount = secretClickCount + 1;
+    setSecretClickCount(newCount);
+  
+    if (newCount >= 7) {
+      toast.success('Acesso Super Admin Liberado!');
+      // --- CORREÇÃO AQUI ---
+      navigate('/super-admin/login'); // Rota corrigida para o login do super admin
+      setSecretClickCount(0);
+    } else {
+      clickTimeoutRef.current = setTimeout(() => {
+        setSecretClickCount(0);
+      }, 2000);
+    }
+  };
+  // --- FIM DA LÓGICA DO ATALHO SECRETO ---
 
   return (
     <LandingWrapper>
@@ -45,14 +80,13 @@ const LandingPage = () => {
       </Header>
 
       <Section>
-        <SectionTitle>Veja o Poder em Ação</SectionTitle>
+        {/* O gatilho secreto está neste título */}
+        <SectionTitle onClick={handleSecretClick}>Veja o Poder em Ação</SectionTitle>
         <Showcase>
           <Mockup src="/images/menu-mockup.png" alt="Exemplo de cardápio online num telemóvel" />
           <Mockup src="/images/admin-mockup.png" alt="Exemplo do painel de administração" />
         </Showcase>
-        
       </Section>
-
 
       <Features>
         <FeatureCard>

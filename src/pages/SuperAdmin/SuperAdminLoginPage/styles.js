@@ -1,4 +1,3 @@
-// src/pages/AdminLoginPage/styles.js
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
@@ -10,8 +9,9 @@ export const LoginPageWrapper = styled.div`
 
 export const BrandingPanel = styled.div`
   flex: 1;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.primaryDark});
-  color: ${({ theme }) => theme.colors.white};
+  /* Cor diferente para o painel do super admin */
+  background: linear-gradient(135deg, #2c3e50, #4ca1af); 
+  color: white;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -55,7 +55,6 @@ export const LoginForm = styled.form`
   display: flex;
   flex-direction: column;
 
-  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
   @media (max-width: 480px) {
     padding: 2rem 1.5rem;
   }
@@ -65,7 +64,7 @@ export const Logo = styled(Link)`
   text-align: center;
   font-size: 2rem;
   font-weight: bold;
-  color: ${({ theme }) => theme.colors.primary};
+  color: #34495e; /* Cor do logo ajustada */
   text-decoration: none;
   margin-bottom: 1rem;
 `;
@@ -108,23 +107,9 @@ export const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: ${({ theme }) => theme.colors.primary};
+    border-color: #2c3e50; /* Cor de foco ajustada */
     background-color: ${({ theme }) => theme.colors.white};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}33;
-  }
-`;
-
-export const ForgotPassword = styled.a`
-  align-self: flex-end;
-  margin-top: -1rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
-  color: ${({ theme }) => theme.colors.primary};
-  text-decoration: none;
-  font-weight: 500;
-
-  &:hover {
-    text-decoration: underline;
+    box-shadow: 0 0 0 3px #2c3e5033;
   }
 `;
 
@@ -136,54 +121,6 @@ export const ErrorMessage = styled.p`
   text-align: center;
   font-weight: 500;
   margin-bottom: 1.5rem;
-`;
-
-export const Separator = styled.div`
-  display: flex;
-  align-items: center;
-  text-align: center;
-  color: ${({ theme }) => theme.colors.textSubtle};
-  margin: 1.5rem 0;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
-  }
-
-  &:not(:empty)::before {
-    margin-right: .5em;
-  }
-
-  &:not(:empty)::after {
-    margin-left: .5em;
-  }
-`;
-
-export const SocialLoginContainer = styled.div`
-  display: flex;
-  gap: 1rem;
-`;
-
-export const SocialButton = styled.button`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background-color: ${({ theme }) => theme.colors.white};
-  font-weight: 600;
-  cursor: pointer;
-  transition: ${({ theme }) => theme.transitions.default};
-
-  &:hover {
-    border-color: ${({ theme, $variant }) => ($variant === 'google' ? '#DB4437' : '#1877F2')};
-    color: ${({ theme, $variant }) => ($variant === 'google' ? '#DB4437' : '#1877F2')};
-  }
 `;
 
 export const BackLink = styled(Link)`
