@@ -1,4 +1,4 @@
-# 🍔 Sass Menu Online - Cardápio Digital SaaS
+# 🍔 SaaS Menu Online - Cardápio Digital SaaS
 
 > Plataforma completa no modelo Software as a Service (SaaS) para que restaurantes, lanchonetes e bares possam criar e gerenciar seus próprios cardápios digitais de forma rápida e profissional.
 
