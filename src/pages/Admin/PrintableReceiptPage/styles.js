@@ -1,138 +1,134 @@
+// Arquivo: src/pages/Admin/PrintableReceiptPage/styles.js (Versão Completa e Final)
+
 import styled from 'styled-components';
 
 export const ReceiptWrapper = styled.div`
-  width: 100%;
-  max-width: 80mm;
-  margin: 20px auto;
-  padding: 15px;
-  font-family: 'Courier New', Courier, monospace;
+  width: 300px; /* Largura comum para impressoras de 80mm */
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para alinhamento */
   color: #000;
-  background-color: #fff;
-  border: 1px dashed #ccc;
-
-  @media print {
-    border: none;
-    margin: 0;
-    padding: 0;
-    max-width: 100%;
-    .no-print {
-      display: none;
-    }
-  }
 `;
 
 export const Header = styled.header`
   text-align: center;
-  margin-bottom: 20px;
-  border-bottom: 2px dashed #000;
-  padding-bottom: 10px;
-`;
+  margin-bottom: 1.5rem;
+  
+  img {
+    max-width: 150px;
+    margin-bottom: 0.5rem;
+  }
 
-export const Title = styled.h1`
-  font-size: 18px;
-  margin: 0 0 5px 0;
-`;
+  h1 {
+    font-size: 1.5rem;
+    margin: 0;
+  }
 
-export const InfoSection = styled.section`
-  margin-bottom: 20px;
-  h3 {
-    font-size: 14px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 4px;
+  p {
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
   }
 `;
 
-export const InfoRow = styled.div`
+export const Section = styled.section`
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed #888;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+`;
+
+export const InfoLine = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
-  font-size: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
 
-  &.grand-total {
-    font-size: 16px;
+  span:first-child {
     font-weight: bold;
-    margin-top: 10px;
-    border-top: 2px solid #000;
-    padding-top: 5px;
   }
 `;
 
-export const ItemsSection = styled.section`
-  margin-bottom: 20px;
-  h3 {
-    font-size: 14px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 4px;
-  }
+export const ItemList = styled.div`
+  margin-top: 1rem;
 `;
 
-export const ItemTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
+export const Item = styled.div`
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 
-  th, td {
-    text-align: left;
-    padding: 4px 0;
-    vertical-align: top;
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
   }
 
-  th:last-child, td:last-child {
-    text-align: right;
-  }
-  
-  th:first-child, td:first-child {
-    width: 40px;
-  }
-
-  .toppings-list {
-    font-size: 10px;
-    font-style: italic;
+  .item-details {
+    font-size: 0.8rem;
     color: #333;
-    padding-left: 10px;
+    padding-left: 1rem;
   }
+`;
 
-  /* --- NOVO --- Estilo para o preço unitário */
-  .unit-price {
-    font-size: 10px;
-    font-style: italic;
-    color: #555;
-  }
+export const Totals = styled.div`
+  margin-top: 1rem;
 `;
 
 export const Footer = styled.footer`
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 2px dashed #000;
-
-  hr {
-    border: none;
-    border-top: 1px dashed #ccc;
-    margin: 10px 0;
-  }
-`;
-
-export const LoadingText = styled.p`
-  font-family: Arial, sans-serif;
   text-align: center;
-  margin-top: 50px;
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
 `;
 
 export const PrintButton = styled.button`
   display: block;
   width: 100%;
-  padding: 10px;
-  margin-top: 20px;
-  background-color: #7c3aed;
+  padding: 1rem;
+  margin-top: 2rem;
+  background-color: ${({ theme }) => theme.colors.primary};
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
-  font-size: 16px;
+`;
 
-  &:hover {
-    background-color: #6d28d9;
+// --- REGRAS DE IMPRESSÃO ---
+// Isto garante que na hora de imprimir, o layout fique perfeito.
+export const PrintStyles = styled.div`
+  @media print {
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+    }
+    
+    #root {
+      padding: 0;
+    }
+
+    ${ReceiptWrapper} {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    ${PrintButton} {
+      display: none; /* Esconde o botão de imprimir na impressão */
+    }
+  }
+`;
+
+export const AddressBlock = styled.div`
+  font-size: 0.9rem;
+  line-height: 1.4;
+
+  p {
+    margin: 0;
   }
 `;

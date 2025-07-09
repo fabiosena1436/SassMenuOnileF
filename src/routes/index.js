@@ -1,7 +1,7 @@
-// Arquivo: src/routes/index.js
+// Arquivo: src/routes/index.js (Versão Final e Corrigida)
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 // Layouts e Componentes
 import AdminLayout from '../pages/Admin/AdminLayout';
@@ -28,6 +28,9 @@ import CategoriesPage from '../pages/Admin/CategoriesPage';
 import SettingsPage from '../pages/Admin/SettingsPage';
 import PromotionsPage from '../pages/Admin/PromotionsPage';
 import SubscriptionPage from '../pages/Admin/SubscriptionPage';
+
+// --- NOVA PÁGINA IMPORTADA AQUI ---
+import PrintableReceiptPage from '../pages/Admin/PrintableReceiptPage';
 
 // Página Super Admin
 import SuperAdminDashboardPage from '../pages/SuperAdmin/SuperAdminDashboardPage';
@@ -68,6 +71,10 @@ const AppRoutes = () => {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="promotions" element={<PromotionsPage />} />
         <Route path="assinatura" element={<SubscriptionPage />} />
+        
+        {/* --- NOVA ROTA ADICIONADA AQUI --- */}
+        {/* Esta rota corresponde ao link do botão de imprimir */}
+        <Route path="print/order/:orderId" element={<PrintableReceiptPage />} />
       </Route>
 
       {/* ROTA SUPER ADMIN: O teu painel de controlo geral */}

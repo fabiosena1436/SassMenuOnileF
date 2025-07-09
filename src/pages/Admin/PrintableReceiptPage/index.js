@@ -1,140 +1,142 @@
-import React, { useState, useEffect, useRef } from 'react';
+// Arquivo: src/pages/Admin/PrintableReceiptPage/index.js (Versão Final com Preço Corrigido)
+
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../services/firebaseConfig';
+import { useAuth } from '../../../contexts/AuthContext';
+
 import {
-  ReceiptWrapper,
-  Header,
-  Title,
-  InfoSection,
-  InfoRow,
-  ItemsSection,
-  ItemTable,
-  Footer,
-  LoadingText,
-  PrintButton
+  ReceiptWrapper, Header, Section, InfoLine, ItemList, Item, AddressBlock,
+  Totals, Footer, PrintButton, PrintStyles
 } from './styles';
 
 const PrintableReceiptPage = () => {
   const { orderId } = useParams();
+  const { tenant } = useAuth();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const hasPrinted = useRef(false);
 
   useEffect(() => {
+    if (!orderId || !tenant?.id) return;
+
     const fetchOrder = async () => {
-      if (!orderId) {
-        setLoading(false);
-        return;
-      }
+      setLoading(true);
       try {
-        const orderDocRef = doc(db, 'orders', orderId);
+        const orderDocRef = doc(db, 'tenants', tenant.id, 'orders', orderId);
         const docSnap = await getDoc(orderDocRef);
+
         if (docSnap.exists()) {
           setOrder({ id: docSnap.id, ...docSnap.data() });
+          setTimeout(() => window.print(), 500);
         } else {
           console.error("Pedido não encontrado!");
         }
       } catch (error) {
-        console.error("Erro ao buscar o pedido:", error);
+        console.error("Erro ao buscar pedido:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchOrder();
-  }, [orderId]);
 
-  useEffect(() => {
-    if (order && !hasPrinted.current) {
-      window.print();
-      hasPrinted.current = true;
-    }
-  }, [order]);
+    fetchOrder();
+  }, [orderId, tenant]);
 
   if (loading) {
-    return <LoadingText>Carregando dados do pedido...</LoadingText>;
+    return <p>A carregar recibo...</p>;
   }
 
   if (!order) {
-    return <LoadingText>Pedido não encontrado.</LoadingText>;
+    return <p>Pedido não encontrado ou dados insuficientes para gerar o recibo.</p>;
   }
 
+  const needsChange = order.paymentMethod === 'dinheiro' && order.changeFor && order.changeFor > order.grandTotal;
+  const changeAmount = needsChange ? order.changeFor - order.grandTotal : 0;
+
   return (
-    <ReceiptWrapper>
-      <Header>
-        <Title>Vibe Açaí - Recibo do Pedido</Title>
-        <p>ID do Pedido: {order.id.substring(0, 8)}...</p>
-        <p>Data: {order.createdAt?.toDate().toLocaleString('pt-BR')}</p>
-      </Header>
+    <>
+      <PrintStyles />
+      <ReceiptWrapper>
+        <Header>
+          {tenant.logoUrl && <img src={tenant.logoUrl} alt="Logo da Loja" />}
+          <h1>{tenant.storeName}</h1>
+          <p>{tenant.address}</p>
+        </Header>
 
-      <InfoSection>
-        <h3>Dados do Cliente</h3>
-        <InfoRow><strong>Nome:</strong> {order.customerName}</InfoRow>
-        <InfoRow><strong>Telefone:</strong> {order.phone}</InfoRow>
-        <InfoRow><strong>Endereço:</strong> {order.address}</InfoRow>
-      </InfoSection>
+        <Section>
+          <InfoLine><span>Pedido:</span> <span>#{order.id.substring(0, 8)}</span></InfoLine>
+          <InfoLine><span>Data:</span> <span>{order.createdAt?.toDate().toLocaleString('pt-BR')}</span></InfoLine>
+        </Section>
+        
+        <Section>
+          <h4>Entregar para:</h4>
+          <AddressBlock>
+            <p><strong>{order.customerName}</strong></p>
+            <p>{order.address}</p>
+            {order.neighborhood && <p>Bairro: {order.neighborhood}</p>}
+            {order.complement && <p>Complemento: {order.complement}</p>}
+            <p>Telefone: {order.phone}</p>
+          </AddressBlock>
+        </Section>
 
-      <ItemsSection>
-        <h3>Itens do Pedido</h3>
-        <ItemTable>
-          <thead>
-            <tr>
-              <th>Qtd.</th>
-              <th>Produto</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.items.map((item) => (
-              <tr key={item.id_cart || item.id}>
-                <td>{item.quantity}x</td>
-                <td>
-                  {item.name}
-                  {/* --- ALTERADO --- Mostra o preço unitário se a quantidade for maior que 1 */}
-                  {item.quantity > 1 && (
-                    <div className="unit-price">
-                      (R$ {item.price.toFixed(2).replace('.', ',')} / un)
-                    </div>
-                  )}
-                  {item.selectedToppings && item.selectedToppings.length > 0 && (
-                    <div className="toppings-list">
-                      Adicionais: {item.selectedToppings.map(t => t.name).join(', ')}
-                    </div>
-                  )}
-                </td>
-                <td>R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}</td>
-              </tr>
+        <Section>
+          <h4>Itens do Pedido</h4>
+          <ItemList>
+            {order.items.map((item, index) => (
+              <Item key={index}>
+                <div className="item-header">
+                  <span>{item.quantity}x {item.name}</span>
+                  {/* --- CORREÇÃO PRINCIPAL AQUI --- */}
+                  {/* Trocado item.price por item.totalPrice para buscar o preço unitário correto */}
+                  <span>R$ {((item.totalPrice || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                </div>
+                {(item.size || (item.toppings && item.toppings.length > 0)) && (
+                  <div className="item-details">
+                    {item.size && `Tamanho: ${item.size.name}`}
+                    {item.toppings && item.toppings.length > 0 && 
+                      (<div>Adicionais: {item.toppings.map(t => t.name).join(', ')}</div>)
+                    }
+                  </div>
+                )}
+              </Item>
             ))}
-          </tbody>
-        </ItemTable>
-      </ItemsSection>
+          </ItemList>
+        </Section>
+        
+        <Section>
+          <Totals>
+            <InfoLine><span>Subtotal:</span> <span>R$ {order.itemsSubtotal.toFixed(2)}</span></InfoLine>
+            <InfoLine><span>Taxa de Entrega:</span> <span>R$ {order.deliveryFee.toFixed(2)}</span></InfoLine>
+            <InfoLine style={{fontWeight: 'bold', fontSize: '1.1rem', marginTop: '0.5rem'}}>
+              <span>TOTAL:</span> 
+              <span>R$ {order.grandTotal.toFixed(2)}</span>
+            </InfoLine>
+          </Totals>
+        </Section>
 
-      <Footer>
-        <InfoRow>
-          <span>Subtotal dos Itens:</span>
-          <strong>R$ {order.itemsSubtotal.toFixed(2).replace('.', ',')}</strong>
-        </InfoRow>
-        <InfoRow>
-          <span>Taxa de Entrega:</span>
-          <strong>R$ {order.deliveryFee.toFixed(2).replace('.', ',')}</strong>
-        </InfoRow>
-        <InfoRow className="grand-total">
-          <span>TOTAL GERAL:</span>
-          <strong>R$ {order.grandTotal.toFixed(2).replace('.', ',')}</strong>
-        </InfoRow>
-        <hr />
-        <InfoRow>
-          <span>Forma de Pagamento:</span>
-          <strong>{order.paymentMethodFormatted}</strong>
-        </InfoRow>
-      </Footer>
+        <Section>
+          <InfoLine><span>Pagamento:</span> <span>{order.paymentMethod}</span></InfoLine>
+          {needsChange && (
+              <>
+                <InfoLine><span>Pagar com:</span> <span>R$ {order.changeFor.toFixed(2)}</span></InfoLine>
+                <InfoLine style={{fontWeight: 'bold', color: '#c0392b'}}>
+                    <span>TROCO:</span> 
+                    <span>R$ {changeAmount.toFixed(2)}</span>
+                </InfoLine>
+              </>
+          )}
+        </Section>
 
-      <div className="no-print">
+        <Footer>
+          <p>Obrigado pela preferência!</p>
+        </Footer>
+        
         <PrintButton onClick={() => window.print()}>
-          Imprimir novamente
+          Imprimir Novamente
         </PrintButton>
-      </div>
-    </ReceiptWrapper>
+
+      </ReceiptWrapper>
+    </>
   );
 };
 

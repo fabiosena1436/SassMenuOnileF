@@ -134,3 +134,9 @@ export const PixInstructions = styled.div`
     }
   }
 `;
+
+export const AddressGrid = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Coluna da rua é 2x maior que a do número */
+  gap: 1rem;
+`;

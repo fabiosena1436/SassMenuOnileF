@@ -1,4 +1,4 @@
-// Arquivo: src/pages/CheckoutPage/index.js (Versão Final com o JSX Corrigido)
+// Arquivo: src/pages/CheckoutPage/index.js (Versão Final com Troco)
 
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../../contexts/CartContext';
@@ -11,7 +11,8 @@ import Button from '../../components/Button';
 
 import {
   CheckoutWrapper, Title, Section, SectionTitle, FormGroup, Input,
-  PaymentOption, ConditionalField, SummaryLine, GrandTotalLine, PixInstructions
+  PaymentOption, ConditionalField, SummaryLine, GrandTotalLine, 
+  PixInstructions, AddressGrid
 } from './styles';
 
 const CheckoutPage = () => {
@@ -70,16 +71,27 @@ const CheckoutPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!store?.id) return toast.error("Não foi possível identificar a loja.");
+    
+    // --- LÓGICA DO TROCO AQUI ---
+    const orderData = {
+      items: cart, grandTotal: finalTotal, itemsSubtotal: cartTotal, deliveryFee: deliveryFee,
+      status: 'Pendente', createdAt: serverTimestamp(), paymentMethod: paymentMethod,
+      customerName: customerData.name, phone: customerData.phone,
+      address: `${customerData.address}, ${customerData.number}`,
+      neighborhood: customerData.neighborhood,
+      complement: customerData.complement, 
+      tenantId: store.id, storeName: store.storeName,
+    };
+    
+    // Se o pagamento for em dinheiro e precisar de troco, adiciona a informação ao pedido
+    if (paymentMethod === 'dinheiro' && needsChange && parseFloat(changeFor) > 0) {
+        orderData.changeFor = parseFloat(changeFor);
+    }
+    // ----------------------------
+    
     setLoading(true);
-
     try {
-      await addDoc(collection(db, "tenants", store.id, "orders"), {
-        items: cart, grandTotal: finalTotal, itemsSubtotal: cartTotal, deliveryFee: deliveryFee,
-        status: 'Pendente', createdAt: serverTimestamp(), paymentMethod: paymentMethod,
-        customerName: customerData.name, phone: customerData.phone,
-        address: `${customerData.address}, ${customerData.number}, ${customerData.neighborhood}`,
-        complement: customerData.complement, tenantId: store.id, storeName: store.storeName,
-      });
+      await addDoc(collection(db, "tenants", store.id, "orders"), orderData);
       
       const message = formatOrderForWhatsApp();
       const whatsappUrl = `https://wa.me/${store.whatsapp}?text=${message}`;
@@ -118,14 +130,16 @@ const CheckoutPage = () => {
         
         <Section>
           <SectionTitle>2. Endereço de Entrega</SectionTitle>
-           <FormGroup><label htmlFor="address">Rua e Número</label><Input id="address" name="address" onChange={handleChange} value={customerData.address} required /></FormGroup>
-           <FormGroup><label htmlFor="neighborhood">Bairro</label><Input id="neighborhood" name="neighborhood" onChange={handleChange} value={customerData.neighborhood} required /></FormGroup>
-           <FormGroup><label htmlFor="complement">Complemento (Opcional)</label><Input id="complement" name="complement" onChange={handleChange} value={customerData.complement} placeholder="Ex: Casa, Apto, Bloco, etc."/></FormGroup>
+          <AddressGrid>
+            <FormGroup><label htmlFor="address">Rua</label><Input id="address" name="address" onChange={handleChange} value={customerData.address} required /></FormGroup>
+            <FormGroup><label htmlFor="number">Número</label><Input id="number" name="number" onChange={handleChange} value={customerData.number} required /></FormGroup>
+          </AddressGrid>
+          <FormGroup><label htmlFor="neighborhood">Bairro</label><Input id="neighborhood" name="neighborhood" onChange={handleChange} value={customerData.neighborhood} required /></FormGroup>
+          <FormGroup><label htmlFor="complement">Complemento (Opcional)</label><Input id="complement" name="complement" onChange={handleChange} value={customerData.complement} placeholder="Ex: Casa, Apto, Bloco, etc."/></FormGroup>
         </Section>
 
         <Section>
           <SectionTitle>3. Forma de Pagamento</SectionTitle>
-          {/* Opção Dinheiro */}
           <PaymentOption $isSelected={paymentMethod === 'dinheiro'}>
             <input type="radio" name="paymentMethod" value="dinheiro" checked={paymentMethod === 'dinheiro'} onChange={(e) => setPaymentMethod(e.target.value)} /> Dinheiro
           </PaymentOption>
@@ -136,12 +150,10 @@ const CheckoutPage = () => {
             </ConditionalField>
           )}
 
-          {/* Opção Cartão */}
           <PaymentOption $isSelected={paymentMethod === 'cartao'}>
             <input type="radio" name="paymentMethod" value="cartao" checked={paymentMethod === 'cartao'} onChange={(e) => setPaymentMethod(e.target.value)} /> Cartão (na entrega)
           </PaymentOption>
           
-          {/* Opção PIX */}
           {store.pixKey && (
             <>
               <PaymentOption $isSelected={paymentMethod === 'pix'}>
@@ -161,7 +173,6 @@ const CheckoutPage = () => {
         
         <Section>
              <SummaryLine><span>Subtotal:</span><span>R$ {cartTotal.toFixed(2).replace('.', ',')}</span></SummaryLine>
-             {/* --- ERRO DE DIGITAÇÃO CORRIGIDO AQUI --- */}
              <SummaryLine><span>Taxa de Entrega:</span><span>R$ {deliveryFee.toFixed(2).replace('.', ',')}</span></SummaryLine>
              <GrandTotalLine><span>Total a Pagar:</span><span>R$ {finalTotal.toFixed(2).replace('.', ',')}</span></GrandTotalLine>
         </Section>
