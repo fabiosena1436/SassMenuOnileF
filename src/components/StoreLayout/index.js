@@ -62,7 +62,7 @@ const StoreLayout = () => {
   return (
     <StoreContext.Provider value={storeData}>
       <Navbar />
-      <main style={{ paddingTop: '70px', minHeight: 'calc(100vh - 70px)' }}>
+      <main style={{ minHeight: 'calc(100vh - 70px)' }}>
         <Outlet /> 
       </main>
       
