@@ -26,7 +26,6 @@ import DashboardOverviewPage from '../pages/Admin/DashboardOverviewPage';
 import ProductsPage from '../pages/Admin/ProductsPage';
 import CategoriesPage from '../pages/Admin/CategoriesPage';
 import SettingsPage from '../pages/Admin/SettingsPage';
-import ToppingsPage from '../pages/Admin/ToppingsPage';
 import PromotionsPage from '../pages/Admin/PromotionsPage';
 import SubscriptionPage from '../pages/Admin/SubscriptionPage';
 
@@ -66,7 +65,6 @@ const AppRoutes = () => {
         <Route index element={<DashboardOverviewPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="categories" element={<CategoriesPage />} />
-        <Route path="toppings" element={<ToppingsPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="promotions" element={<PromotionsPage />} />
         <Route path="assinatura" element={<SubscriptionPage />} />

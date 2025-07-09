@@ -79,7 +79,6 @@ const AdminLayout = () => {
     if (path.includes('/products')) return 'Gerir Produtos';
     if (path.includes('/categories')) return 'Gerir Categorias';
     if (path.includes('/promotions')) return 'Gerir Promoções';
-    if (path.includes('/toppings')) return 'Gerir Adicionais';
     if (path.includes('/settings')) return 'Configurações da Loja';
     if (path.includes('/assinatura')) return 'Minha Assinatura';
     return 'Visão Geral';
@@ -109,7 +108,6 @@ const AdminLayout = () => {
           
           <StyledNavLink to="/admin/products" onClick={handleLinkClick}>Produtos</StyledNavLink>
           <StyledNavLink to="/admin/categories" onClick={handleLinkClick}>Categorias</StyledNavLink>
-          <StyledNavLink to="/admin/toppings" onClick={handleLinkClick}>Adicionais</StyledNavLink>
           {tenant?.plan === 'pro' && (
             <StyledNavLink to="/admin/promotions" onClick={handleLinkClick}>Promoções</StyledNavLink>
           )}
@@ -132,7 +130,7 @@ const AdminLayout = () => {
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <Button onClick={handleCopyStoreLink} variant="secondary">
                 <FaCopy style={{ marginRight: '8px' }} />
-                Copiar Link
+                Copiar Link da sua Loja para divulgar
             </Button>
             <NotificationBellWrapper onClick={() => navigate('/admin')}>
               <FaBell />
