@@ -1,4 +1,5 @@
-// src/components/StoreStatusBanner/styles.js
+// Arquivo: src/components/StoreStatusBanner/styles.js
+
 import styled from 'styled-components';
 
 export const Banner = styled.div`
@@ -7,8 +8,12 @@ export const Banner = styled.div`
   text-align: center;
   font-weight: bold;
   font-size: 16px;
-
-  /* Estilo para loja fechada */
-  background-color: ${({ isOpen }) => (isOpen ? '#2ecc71' : '#e74c3c')};
   color: #fff;
+  background-color: ${({ isOpen }) => (isOpen ? '#2ecc71' : '#e74c3c')};
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 600px) {
+    font-size: 14px; /* Fonte um pouco menor */
+    padding: 10px;   /* Padding um pouco menor */
+  }
 `;

@@ -1,67 +1,72 @@
-// src/components/ProductCard/styles.js
+// Arquivo: src/components/ProductCard/styles.js
+
 import styled from 'styled-components';
 
 export const CardWrapper = styled.div`
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  box-shadow: ${({ theme }) => theme.shadows.md};
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: ${({ theme }) => theme.transitions.default};
-  cursor: pointer;
+  height: 100%;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
   }
 `;
 
 export const ProductImage = styled.img`
   width: 100%;
-  height: 200px;
+  height: 180px;
   object-fit: cover;
 
   /* --- MUDANÇA PARA RESPONSIVIDADE --- */
-  @media (max-width: 400px) {
-    height: 150px; /* Diminui a altura da imagem em telas muito pequenas */
+  @media (max-width: 600px) {
+    height: 140px; /* Altura menor para a imagem em telas de celular */
   }
 `;
 
 export const ProductInfo = styled.div`
-  padding: ${({ theme }) => theme.spacing.md};
+  padding: 1rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
-export const ProductName = styled.h3`
-  font-size: 1.1rem; /* Leve ajuste no tamanho da fonte */
+export const ProductName = styled.h4`
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.text};
-  margin: 0 0 ${({ theme }) => theme.spacing.sm} 0; /* Margem ajustada */
+  color: #1f2937;
+  
+  /* Garante que o texto não quebre o layout */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
-export const ProductPrice = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: ${({ theme }) => theme.spacing.sm};
-  font-size: 1.25rem; /* Tamanho da fonte do preço */
-  font-weight: bold;
-  color: ${({ theme }) => theme.colors.primary};
+export const ProductPrice = styled.p`
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #4f46e5;
 `;
 
 export const PricePrefix = styled.span`
-  font-size: 0.8rem; /* Tamanho do prefixo */
+  font-size: 0.8rem;
   font-weight: 500;
-  color: ${({ theme }) => theme.colors.textLight};
+  color: #6b7280;
+  display: block;
 `;
 
-export const OldPrice = styled.s`
-  font-size: 0.9rem; /* Tamanho do preço antigo */
-  color: ${({ theme }) => theme.colors.textLight};
+export const OldPrice = styled.span`
   text-decoration: line-through;
-  font-weight: 500;
+  color: #9ca3af;
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
 `;
-
-// Removido o 'Price' duplicado, já que ProductPrice já define o estilo principal.
