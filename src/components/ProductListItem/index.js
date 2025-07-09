@@ -1,51 +1,64 @@
 // Arquivo: src/components/ProductListItem/index.js
 
 import React from 'react';
-import { FaEdit, FaTrash, FaStar } from 'react-icons/fa';
-import Button from '../Button'; // Usaremos nosso componente Button
-
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../../contexts/StoreContext';
 import {
   ListItemWrapper,
   ProductImage,
   ProductInfo,
   ProductName,
-  ProductDescription,
   ProductPrice,
-  ActionContainer
+  PricePrefix,
+  OldPrice
 } from './styles';
 
-// Recebemos as funções onEdit e onDelete
-const ProductListItem = ({ product, onEdit, onDelete }) => {
-  const price = typeof product.price === 'number' ? product.price : 0;
+const ProductListItem = ({ product, promotionalPrice, originalPrice }) => {
+  const navigate = useNavigate();
+  const store = useStore();
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+  const handleCardClick = () => {
+    if (store?.slug && product?.id) {
+      navigate(`/loja/${store.slug}/produto/${product.id}`);
+    }
+  };
+
+  const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+
+  const getDisplayPrice = () => {
+    if (typeof promotionalPrice === 'number') {
+      return (
+        <>
+          {typeof originalPrice === 'number' && (
+            <OldPrice>
+              {formatCurrency(originalPrice)}
+            </OldPrice>
+          )}
+          <span>{formatCurrency(promotionalPrice)}</span>
+        </>
+      );
+    }
+    
+    if (product.hasCustomizableSizes && product.availableSizes?.length > 0) {
+      const minPrice = Math.min(...product.availableSizes.map(size => size.price));
+      return (
+        <>
+          <PricePrefix>A partir de</PricePrefix>
+          {formatCurrency(minPrice)}
+        </>
+      );
+    }
+    
+    return formatCurrency(product.price || 0);
   };
 
   return (
-    <ListItemWrapper>
-        <ProductImage src={product.imageUrl || 'https://via.placeholder.com/150'} alt={product.name} />
-        <ProductInfo>
-            <div>
-                <ProductName>
-                    {product.name || 'Produto sem nome'}
-                    {product.isFeatured && <FaStar color="#ffc107" style={{ marginLeft: '8px' }} />}
-                </ProductName>
-                <ProductDescription>
-                    {product.description || 'Sem descrição.'}
-                </ProductDescription>
-            </div>
-            <div style={{marginTop: 'auto'}}>
-                <ProductPrice>{formatCurrency(price)}</ProductPrice>
-                <ActionContainer>
-                    <Button onClick={onEdit} $variant="secondary" style={{ flex: 1, padding: '8px', fontSize: '0.9em' }}><FaEdit /> Editar</Button>
-                    <Button onClick={onDelete} $variant="danger" style={{ flex: 1, padding: '8px', fontSize: '0.9em' }}><FaTrash /> Apagar</Button>
-                </ActionContainer>
-            </div>
-        </ProductInfo>
+    <ListItemWrapper onClick={handleCardClick}>
+      <ProductImage src={product.imageUrl || 'https://via.placeholder.com/150'} alt={product.name} />
+      <ProductInfo>
+        <ProductName>{product.name || 'Produto sem nome'}</ProductName>
+        <ProductPrice>{getDisplayPrice()}</ProductPrice>
+      </ProductInfo>
     </ListItemWrapper>
   );
 };

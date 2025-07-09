@@ -118,7 +118,7 @@ export const ProductListItem = styled.div`
   margin-bottom: 1rem;
   border-left: 5px solid ${({ $isAvailable, theme }) => $isAvailable ? theme.colors.successDark : theme.colors.neutral};
   
-  @media (max-width: 768px) {
+  @media (max-width: 992px) {
     grid-template-columns: 80px 1fr;
     gap: 1rem;
   }
@@ -129,16 +129,18 @@ export const ProductImage = styled.img`
   height: 100px;
   object-fit: cover;
   border-radius: ${({ theme }) => theme.borderRadius.md};
-    @media (max-width: 768px) {
+    
+  @media (max-width: 992px) {
     width: 80px;
     height: 80px;
+    grid-row: 1 / 3;
   }
 `;
 
 export const ProductInfo = styled.div`
-  @media (max-width: 768px) {
-    grid-column: 1 / -1;
-    grid-row: 2 / 3;
+  @media (max-width: 992px) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
   }
 
   h4 {
@@ -163,6 +165,11 @@ export const ProductDetails = styled.div`
   gap: 1rem;
   font-size: 0.9rem;
   align-items: center;
+
+  @media (max-width: 992px) {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+  }
 `;
 
 export const Price = styled.span`
@@ -183,12 +190,13 @@ export const ActionButtons = styled.div`
   flex-direction: column;
   gap: 0.5rem;
 
-  @media (max-width: 768px) {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
+  @media (max-width: 992px) {
+    grid-column: 1 / -1;
+    grid-row: 3 / 4;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    margin-top: 1rem;
   }
 
   button {

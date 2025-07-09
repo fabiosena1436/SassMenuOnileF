@@ -30,6 +30,10 @@ export const HeroContent = styled.div`
   background-color: rgba(0, 0, 0, 0.25); /* Mantido por ser específico */
   padding: 2rem;
   border-radius: 1.5rem;
+
+  @media (max-width: 480px) {
+    padding: 1.5rem;
+  }
 `;
 
 export const StoreLogo = styled.img`
@@ -74,12 +78,22 @@ export const SectionTitle = styled.h2`
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.8em;
+  }
 `;
 
 export const ContentGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 30px;
+
+  /* Alteração para telas de celular */
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
 `;
 
 export const CarouselWrapper = styled.div`
@@ -101,6 +115,10 @@ export const CarouselWrapper = styled.div`
     
     &:after {
       font-size: 1.5rem !important;
+    }
+
+    @media (max-width: 768px) {
+      display: none; /* Esconde as setas de navegação em telas menores */
     }
   }
 `;

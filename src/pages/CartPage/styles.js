@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Link } from 'react-router-dom'; // Adicionado para os botões
+import { Link } from 'react-router-dom';
 
 export const CartPageWrapper = styled.div`
   max-width: 800px;
@@ -31,7 +31,8 @@ export const Title = styled.h1`
 `;
 
 export const CartItem = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
   align-items: center;
   gap: 1.5rem;
   padding: 1rem 0;
@@ -41,9 +42,11 @@ export const CartItem = styled.div`
     border-bottom: none;
   }
 
-  @media (max-width: 480px) {
-    flex-wrap: wrap; // Permite que os itens quebrem a linha
-    gap: 1rem;
+  @media (max-width: 768px) {
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0.5rem 1rem;
+    padding: 1rem 0;
   }
 `;
 
@@ -53,14 +56,17 @@ export const ItemImage = styled.img`
   object-fit: cover;
   border-radius: 8px;
 
-  @media (max-width: 480px) {
-    width: 60px;
-    height: 60px;
+  @media (max-width: 768px) {
+    grid-row: 1 / 3;
   }
 `;
 
 export const ItemDetails = styled.div`
   flex-grow: 1;
+
+  @media (max-width: 768px) {
+    grid-column: 2 / 4;
+  }
 `;
 
 export const ItemName = styled.h4`
@@ -86,11 +92,10 @@ export const ItemSubtotal = styled.p`
   min-width: 80px;
   text-align: right;
 
-  @media (max-width: 480px) {
-    // No modo "wrap", o subtotal vai para a próxima linha
-    width: 100%;
+  @media (max-width: 768px) {
+    grid-column: 3 / 4;
+    grid-row: 2 / 3;
     text-align: right;
-    margin-top: 0.5rem;
   }
 `;
 
@@ -117,6 +122,12 @@ export const QuantityControl = styled.div`
     font-size: 1.1rem;
     min-width: 20px;
     text-align: center;
+  }
+  
+  @media (max-width: 768px) {
+    grid-row: 2 / 3;
+    grid-column: 2 / 3;
+    justify-self: start;
   }
 `;
 
@@ -191,38 +202,5 @@ export const EmptyCartMessage = styled.div`
 
   @media (max-width: 480px) {
     padding: 2rem 1rem;
-  }
-`;
-
-// Adicionando um link estilizado para "Continuar Comprando", caso precise.
-export const ContinueShoppingButton = styled(Link)`
-  flex-grow: 1;
-  text-align: center;
-  padding: 0.75rem 1rem;
-  background-color: #f3f4f6;
-  color: #374151;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  border: 1px solid #e5e7eb;
-
-  &:hover {
-    background-color: #e5e7eb;
-  }
-`;
-
-// Adicionando o botão de Checkout, caso precise.
-export const CheckoutButton = styled(Link)`
-  flex-grow: 1;
-  text-align: center;
-  padding: 0.75rem 1rem;
-  background-color: ${({ theme }) => theme.colors.success};
-  color: white;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.successDark};
   }
 `;

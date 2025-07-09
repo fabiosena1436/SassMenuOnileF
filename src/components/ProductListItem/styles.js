@@ -2,27 +2,30 @@
 
 import styled from 'styled-components';
 
-export const ListItemWrapper = styled.li` // Alterado para li para semântica
+export const ListItemWrapper = styled.div` 
   display: flex;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  align-items: center;
+  padding: 0.75rem;
+  gap: 1rem;
 `;
 
 export const ProductImage = styled.img`
-  width: 120px;
-  height: 140px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   flex-shrink: 0;
+  border-radius: 6px;
 `;
 
 export const ProductInfo = styled.div`
-  padding: 1rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   flex-grow: 1;
 `;
 
@@ -31,33 +34,25 @@ export const ProductName = styled.h3`
   font-size: 1.1em;
   color: #333;
   font-weight: 600;
-  display: flex;
-  align-items: center;
 `;
 
-export const ProductDescription = styled.p`
-  margin: 0 0 8px 0;
-  font-size: 0.9em;
-  color: #666;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex-grow: 1;
-`;
-
-export const ProductPrice = styled.p`
+export const ProductPrice = styled.div`
   margin: 0;
-  font-size: 1.2em;
+  font-size: 1.1em;
   font-weight: bold;
-  color: #16a34a;
-  margin-top: 8px;
+  color: #4f46e5;
 `;
 
-// NOVO: Container para os botões
-export const ActionContainer = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-top: 1rem;
+export const PricePrefix = styled.span`
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6b7280;
+  display: block;
+`;
+
+export const OldPrice = styled.span`
+  text-decoration: line-through;
+  color: #9ca3af;
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
 `;

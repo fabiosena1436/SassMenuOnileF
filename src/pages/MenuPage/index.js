@@ -8,13 +8,15 @@ import { useSearchParams } from 'react-router-dom';
 import { FiSearch } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import ProductCard from '../../components/ProductCard';
+import ProductListItem from '../../components/ProductListItem'; // Importa o novo componente
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 
 import {
   MenuPageWrapper, MenuHeader, MenuTitle, SearchContainer, SearchInput, 
-  CategoryCarouselWrapper, CategoryButton, ProductListContainer, LoadingText, NoProductsText
+  CategoryCarouselWrapper, CategoryButton, LoadingText, NoProductsText,
+  DesktopProductList, MobileProductList // Importa os novos containers
 } from './styles';
 
 const MenuPage = () => {
@@ -111,11 +113,18 @@ const MenuPage = () => {
       </CategoryCarouselWrapper>
       
       {filteredProducts.length > 0 ? (
-        <ProductListContainer>
-          {filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </ProductListContainer>
+        <>
+          <DesktopProductList>
+            {filteredProducts.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </DesktopProductList>
+          <MobileProductList>
+            {filteredProducts.map(product => (
+              <ProductListItem key={product.id} product={product} />
+            ))}
+          </MobileProductList>
+        </>
       ) : (
         <NoProductsText>Nenhum produto encontrado com estes filtros.</NoProductsText>
       )}

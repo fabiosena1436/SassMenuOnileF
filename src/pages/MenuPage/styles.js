@@ -16,6 +16,10 @@ export const MenuHeader = styled.div`
 export const MenuTitle = styled.h1`
   font-size: 2.5rem;
   color: #1f2937;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 export const SearchContainer = styled.div`
@@ -66,9 +70,17 @@ export const CategoryButton = styled.button`
 `;
 
 export const ProductListContainer = styled.div`
+  /* Estilo padrão para Desktop (Grid) */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
+
+  /* Em telas menores, muda para um container de lista */
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Espaçamento entre os itens da lista */
+  }
 `;
 
 export const LoadingText = styled.p`
@@ -83,4 +95,24 @@ export const NoProductsText = styled.p`
   padding: 3rem;
   color: #6b7280;
   font-size: 1.1rem;
+`;
+
+export const DesktopProductList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+export const MobileProductList = styled.div`
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 `;
