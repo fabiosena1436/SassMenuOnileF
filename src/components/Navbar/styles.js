@@ -1,50 +1,52 @@
-// Arquivo: src/components/Navbar/styles.js
+// Arquivo: src/components/Navbar/styles.js (VERSÃO CORRIGIDA)
+
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
-export const NavbarContainer = styled.nav`
+export const NavbarContainer = styled.header`
+  background-color: #fff;
+  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2rem; /* Aumentado o padding lateral */
-  height: 70px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  position: sticky; /* Mudado para 'sticky' para melhor performance */
+  border-bottom: 1px solid #eee;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
+  z-index: 100;
 
   @media (max-width: 768px) {
-    padding: 0 1rem;
+    padding: 0.75rem;
   }
 `;
 
-export const Logo = styled.div`
+export const Logo = styled(Link)`
   display: flex;
   align-items: center;
-  height: 100%;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  font-size: 1.2rem;
 
   img {
-    height: 45px;
+    max-height: 40px;
+    margin-right: 10px;
+    /* Adicionando borda arredondada ao logo */
+    border-radius: 30%;
+    object-fit: contain; /* Garante que a imagem caiba no círculo */
     width: auto;
-    object-fit: contain;
+    height: auto;
+    max-width: 40px;
   }
 
   span {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
+    /* Estilos para o nome da loja caso não haja logo */
   }
 `;
 
-export const NavLinks = styled.div`
+export const NavLinks = styled.nav`
   display: flex;
-  align-items: center;
-  gap: 30px;
+  gap: 1.5rem;
 
-  /* Os links do topo somem no mobile para dar lugar à barra inferior */
   @media (max-width: 768px) {
     display: none;
   }
@@ -52,100 +54,138 @@ export const NavLinks = styled.div`
 
 export const NavLinkItem = styled.div`
   a {
+    text-decoration: none;
+    color: #555;
     display: flex;
     align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: color 0.2s;
-    
-    /* Corrigido para usar a prop 'active' corretamente com styled-components */
-    color: ${({ active }) => (active ? '#e53e3e' : '#4a5568')};
-    font-weight: ${({ active }) => (active ? '600' : '500')};
-
-    &:hover {
-      color: #e53e3e;
-    }
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
 
     svg {
       font-size: 1.2rem;
     }
+
+    span {
+      display: block;
+    }
+
+    &:hover, &.active {
+      color: #007bff;
+      border-bottom-color: #007bff;
+    }
+  }
+
+  &.active a {
+    color: #007bff;
+    border-bottom-color: #007bff;
   }
 `;
 
 export const RightActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    gap: 0.75rem;
+  }
 `;
 
 export const AdminLink = styled(Link)`
+  color: #555;
+  text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: #4a5568;
-  
-  &:hover {
-    color: #000;
+  transition: color 0.3s ease;
+
+  svg {
+    font-size: 1.4rem;
   }
 
-  /* Admin link também some no mobile para manter a UI limpa */
+  &:hover {
+    color: #007bff;
+  }
+
   @media (max-width: 768px) {
-    display: none;
+    svg {
+      font-size: 1.2rem;
+    }
   }
 `;
 
 export const CartIcon = styled(Link)`
-  position: relative;
-  color: #333;
-  font-size: 1.8rem;
+  color: #555;
+  text-decoration: none;
   display: flex;
   align-items: center;
+  position: relative;
+  transition: color 0.3s ease;
+
+  svg {
+    font-size: 1.4rem;
+  }
+
+  &:hover {
+    color: #007bff;
+  }
+
+  @media (max-width: 768px) {
+    svg {
+      font-size: 1.2rem;
+    }
+  }
 `;
 
 export const CartCount = styled.span`
   position: absolute;
-  top: -5px;
-  right: -10px;
-  background-color: #e53e3e;
+  top: -0.5rem;
+  right: -0.5rem;
+  background-color: #dc3545;
   color: white;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 0.75rem;
-  font-weight: bold;
 `;
 
-/* --- NOVO COMPONENTE PARA NAVEGAÇÃO MOBILE --- */
-export const MobileBottomNav = styled.div`
-  display: none; /* Escondido em telas grandes */
+export const MobileBottomNav = styled.nav`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #f8f9fa;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  z-index: 99;
 
-  @media (max-width: 768px) {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 65px;
-    background-color: #fff;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-    z-index: 1000;
+  @media (min-width: 769px) {
+    display: none;
   }
 `;
 
-/* Item da barra de navegação inferior */
 export const MobileNavLink = styled(Link)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  color: #555;
   text-decoration: none;
-  font-size: 0.75rem;
-  color: ${({ active }) => (active ? '#e53e3e' : '#4a5568')};
-  font-weight: ${({ active }) => (active ? '600' : '500')};
+  font-size: 0.8rem;
+  transition: color 0.3s ease;
 
   svg {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+  }
+
+  &:hover, &.active {
+    color: #007bff;
+  }
+
+  &.active {
+    font-weight: bold;
   }
 `;

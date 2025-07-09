@@ -200,3 +200,22 @@ export const NotificationBadge = styled.span`
   justify-content: center;
   border: 2px solid ${({ theme }) => theme.colors.white};
 `;
+
+
+
+export const ExternalNavLink = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: ${({ theme }) => theme.colors.adminSidebarText};
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  margin: 0.25rem 0;
+  border-left: 4px solid transparent;
+  transition: ${({ theme }) => theme.transitions.colorBg};
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.adminSidebarHoverBg};
+    color: ${({ theme }) => theme.colors.white};
+  }
+`;

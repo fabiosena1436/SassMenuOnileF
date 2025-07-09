@@ -1,4 +1,4 @@
-// Arquivo: src/pages/Admin/AdminLayout/index.js
+// Arquivo: src/pages/Admin/AdminLayout/index.js (VERSÃO CORRIGIDA)
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -6,7 +6,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { auth, db } from '../../../services/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import Button from '../../../components/Button';
-import { FaBars, FaTimes, FaBell } from 'react-icons/fa';
+// Ícone da loja adicionado aqui
+import { FaBars, FaTimes, FaBell, FaStore } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
@@ -22,6 +23,8 @@ import {
   NavSeparator,
   NotificationBellWrapper,
   NotificationBadge,
+  // Novo estilo importado aqui
+  ExternalNavLink,
 } from './styles';
 
 const AdminLayout = () => {
@@ -54,7 +57,7 @@ const AdminLayout = () => {
     });
     return () => unsubscribe();
   }, [tenant]);
-
+  
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/admin/login');
@@ -62,7 +65,7 @@ const AdminLayout = () => {
   };
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
-
+  
   const handleLinkClick = () => {
     if (window.innerWidth <= 768) {
       setSidebarOpen(false);
@@ -79,7 +82,7 @@ const AdminLayout = () => {
     if (path.includes('/assinatura')) return 'Minha Assinatura';
     return 'Visão Geral';
   };
-
+  
   const handleCopyStoreLink = () => {
     if (!tenant?.slug) return toast.error("Link da loja não encontrado.");
     const storeUrl = `${window.location.origin}/loja/${tenant.slug}`;
@@ -105,7 +108,20 @@ const AdminLayout = () => {
             <StyledNavLink to="/admin/promotions" onClick={handleLinkClick}>Promoções</StyledNavLink>
           )}
           <StyledNavLink to="/admin/settings" onClick={handleLinkClick}>Configurações</StyledNavLink>
+          
           <NavSeparator />
+          
+          {/* --- NOVO LINK ADICIONADO AQUI --- */}
+          <ExternalNavLink 
+            href={`/loja/${tenant?.slug}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            onClick={handleLinkClick}
+          >
+            <FaStore style={{ marginRight: '10px' }} />
+            Ver minha Loja
+          </ExternalNavLink>
+
           <StyledNavLink to="/admin/assinatura" onClick={handleLinkClick}>Minha Assinatura</StyledNavLink>
         </NavList>
         <div style={{ marginTop: 'auto', padding: '20px' }}>

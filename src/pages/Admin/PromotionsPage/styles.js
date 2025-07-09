@@ -1,4 +1,5 @@
-// Arquivo: src/pages/Admin/PromotionsPage/styles.js
+// Arquivo: src/pages/Admin/PromotionsPage/styles.js (VERSÃO COM RESPONSIVIDADE APRIMORADA)
+
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
@@ -30,7 +31,8 @@ export const FormContainer = styled.form`
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 2.5rem;
+  margin: 0 auto 2.5rem auto; // Centraliza o formulário
+  max-width: 900px; // Limita a largura máxima para melhor leitura
 
   h3 {
     margin-top: 0;
@@ -69,6 +71,7 @@ export const Input = styled.input`
   border: 1px solid #cbd5e0;
   border-radius: 6px;
   font-size: 1rem;
+  width: 100%;
 `;
 
 export const Select = styled.select`
@@ -77,6 +80,7 @@ export const Select = styled.select`
   border-radius: 6px;
   font-size: 1rem;
   background-color: white;
+  width: 100%;
 `;
 
 export const ActionButtons = styled.div`
@@ -84,6 +88,15 @@ export const ActionButtons = styled.div`
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1.5rem;
+
+  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  @media (max-width: 768px) {
+    flex-direction: column-reverse; // "Salvar" fica acima de "Cancelar"
+    
+    button {
+      width: 100%; // Botões ocupam a largura total
+    }
+  }
 `;
 
 export const PromotionList = styled.div`
@@ -91,6 +104,8 @@ export const PromotionList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-width: 900px;
+  margin: 2rem auto 0 auto;
 `;
 
 export const PromotionListItem = styled.div`
@@ -103,10 +118,9 @@ export const PromotionListItem = styled.div`
   box-shadow: 0 2px 5px rgba(0,0,0,0.07);
   border-left: 5px solid ${({ $isActive }) => ($isActive ? '#22c55e' : '#a1a1aa')};
 
-  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
   @media (max-width: 768px) {
     flex-direction: column;
-    align-items: flex-start; /* Alinha itens à esquerda */
+    align-items: flex-start;
     gap: 1rem;
   }
 `;
@@ -117,31 +131,38 @@ export const PromoImage = styled.img`
   object-fit: cover;
   border-radius: 6px;
   flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    width: 100%; // Imagem ocupa toda a largura do card
+    height: 150px; // Altura fixa para a imagem no mobile
+  }
 `;
 
 export const PromoInfo = styled.div`
   flex-grow: 1;
   h4 {
     margin: 0 0 0.25rem;
+    font-size: 1.1rem;
   }
   p {
     margin: 0;
     font-size: 0.9rem;
     color: #6b7280;
+    line-height: 1.5;
   }
 `;
 
 export const PromoStatus = styled.span`
   font-size: 0.8rem;
   font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 9999px;
   color: ${({ $isActive }) => ($isActive ? '#166534' : '#3f3f46')};
   background-color: ${({ $isActive }) => ($isActive ? '#bbf7d0' : '#e4e4e7')};
 
-  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
   @media (max-width: 768px) {
     align-self: flex-start;
+    margin-top: 0.5rem; // Espaço acima do status
   }
 `;
 
@@ -149,13 +170,15 @@ export const PromoActions = styled.div`
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
-
-  /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+  
   @media (max-width: 768px) {
     width: 100%;
+    margin-top: 0.5rem; // Espaço acima dos botões
     
     button {
-      flex-grow: 1; /* Faz os botões ocuparem espaço igual */
+      flex-grow: 1;
+      padding: 0.75rem; // Aumenta a área de toque
+      font-size: 0.9rem;
     }
   }
 `;
