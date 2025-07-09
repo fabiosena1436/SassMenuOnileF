@@ -10,13 +10,13 @@
       <strong>Painel de Administração</strong><br>
       Gerenciamento completo de produtos, categorias e promoções.
       <br><br>
-      <img src="public/images/painel-admin.png" alt="Painel de Administração" width="400"/>
+      <img src="public/images/painel-admin.png" alt="Painel de Administração" width="200"/>
     </td>
     <td align="center">
       <strong>Cardápio Digital</strong><br>
       Visualização limpa e organizada dos produtos para o cliente.
       <br><br>
-      <img src="docs/cardapio.png" alt="Cardápio Digital" width="400"/>
+      <img src="public/images/cardapio.png" alt="Cardápio Digital" width="200"/>
     </td>
   </tr>
   <tr>
@@ -24,13 +24,13 @@
       <strong>Detalhes do Produto</strong><br>
       Página com descrição detalhada e botão para adicionar ao carrinho.
       <br><br>
-      <img src="docs/detalhe-produto.png" alt="Detalhes do Produto" width="400"/>
+      <img src="public/images/detalhe-produto.png" alt="Detalhes do Produto" width="200"/>
     </td>
     <td align="center">
       <strong>Carrinho de Compras</strong><br>
       Resumo do pedido pronto para o cliente finalizar a compra.
       <br><br>
-      <img src="docs/carrinho.png" alt="Carrinho de Compras" width="400"/>
+      <img src="public/images/carrinho.png" alt="Carrinho de Compras" width="200"/>
     </td>
   </tr>
 </table>
