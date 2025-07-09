@@ -11,9 +11,12 @@ import {
   Logo,
   NavLinks,
   NavLinkItem,
+  RightActions, // Adicionado para agrupar ações
   CartIcon,
   CartCount,
-  AdminLink
+  AdminLink,
+  MobileBottomNav,  // <-- NOVO: Importa o contêiner da navegação inferior
+  MobileNavLink   // <-- NOVO: Importa o link da navegação inferior
 } from './styles';
 
 const Navbar = () => {
@@ -22,56 +25,76 @@ const Navbar = () => {
   const { pathname } = useLocation();
 
   if (!store) {
-    return null; 
+    return null;
   }
 
-  // Define os links com base no slug da loja
   const homeLink = `/loja/${store.slug}`;
   const menuLink = `/loja/${store.slug}/cardapio`;
-  
-  // <<< MUDANÇA PRINCIPAL AQUI >>>
-  // Corrigimos o caminho de "cart" para "carrinho"
   const cartLink = `/loja/${store.slug}/carrinho`;
 
   const isActive = (path) => pathname === path;
 
   return (
-    <NavbarContainer>
-      <Link to={homeLink}>
-        <Logo>
-          {store.logoUrl ? (
-            <img src={store.logoUrl} alt={store.storeName} />
-          ) : (
-            <span>{store.storeName}</span>
-          )}
-        </Logo>
-      </Link>
+    <>
+      <NavbarContainer>
+        <Link to={homeLink}>
+          <Logo>
+            {store.logoUrl ? (
+              <img src={store.logoUrl} alt={store.storeName} />
+            ) : (
+              <span>{store.storeName}</span>
+            )}
+          </Logo>
+        </Link>
 
-      <NavLinks>
-        <NavLinkItem active={isActive(homeLink)}>
-          <Link to={homeLink}>
-            <FiHome />
-            <span>Início</span>
-          </Link>
-        </NavLinkItem>
-        <NavLinkItem active={isActive(menuLink)}>
-          <Link to={menuLink}>
-            <FiList />
-            <span>Cardápio</span>
-          </Link>
-        </NavLinkItem>
-      </NavLinks>
+        {/* Links de navegação para Desktop */}
+        <NavLinks>
+          <NavLinkItem active={isActive(homeLink)}>
+            <Link to={homeLink}>
+              <FiHome />
+              <span>Início</span>
+            </Link>
+          </NavLinkItem>
+          <NavLinkItem active={isActive(menuLink)}>
+            <Link to={menuLink}>
+              <FiList />
+              <span>Cardápio</span>
+            </Link>
+          </NavLinkItem>
+        </NavLinks>
 
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <AdminLink to="/admin">
-          <FiUser />
-        </AdminLink>
-        <CartIcon to={cartLink}>
+        {/* Ações da Direita (Admin e Carrinho) */}
+        <RightActions>
+          <AdminLink to="/admin">
+            <FiUser />
+          </AdminLink>
+          <CartIcon to={cartLink}>
+            <FiShoppingCart />
+            {totalItems > 0 && <CartCount>{totalItems}</CartCount>}
+          </CartIcon>
+        </RightActions>
+      </NavbarContainer>
+
+      {/* --- NOVA BARRA DE NAVEGAÇÃO INFERIOR PARA MOBILE --- */}
+      <MobileBottomNav>
+        <MobileNavLink to={homeLink} active={isActive(homeLink) ? 1 : 0}>
+          <FiHome />
+          <span>Início</span>
+        </MobileNavLink>
+        <MobileNavLink to={menuLink} active={isActive(menuLink) ? 1 : 0}>
+          <FiList />
+          <span>Cardápio</span>
+        </MobileNavLink>
+        <MobileNavLink to={cartLink} active={isActive(cartLink) ? 1 : 0}>
           <FiShoppingCart />
-          {totalItems > 0 && <CartCount>{totalItems}</CartCount>}
-        </CartIcon>
-      </div>
-    </NavbarContainer>
+          <span>Carrinho</span>
+        </MobileNavLink>
+        <MobileNavLink to="/admin" active={pathname.startsWith('/admin') ? 1 : 0}>
+          <FiUser />
+          <span>Admin</span>
+        </MobileNavLink>
+      </MobileBottomNav>
+    </>
   );
 };
 
