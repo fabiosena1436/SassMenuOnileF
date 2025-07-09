@@ -5,6 +5,9 @@ export const PageWrapper = styled.div`
   padding: 2rem;
   background-color: ${({ theme }) => theme.colors.backgroundLight};
   min-height: 100vh;
+   @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 export const Header = styled.header`
@@ -12,6 +15,8 @@ export const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 `;
 
 export const Title = styled.h1`
@@ -30,6 +35,9 @@ export const FormContainer = styled.form`
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
+  }
+    @media (max-width: 768px) {
+    padding: 1.5rem;
   }
 `;
 
@@ -109,6 +117,11 @@ export const ProductListItem = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.sm};
   margin-bottom: 1rem;
   border-left: 5px solid ${({ $isAvailable, theme }) => $isAvailable ? theme.colors.successDark : theme.colors.neutral};
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 80px 1fr;
+    gap: 1rem;
+  }
 `;
 
 export const ProductImage = styled.img`
@@ -116,9 +129,18 @@ export const ProductImage = styled.img`
   height: 100px;
   object-fit: cover;
   border-radius: ${({ theme }) => theme.borderRadius.md};
+    @media (max-width: 768px) {
+    width: 80px;
+    height: 80px;
+  }
 `;
 
 export const ProductInfo = styled.div`
+  @media (max-width: 768px) {
+    grid-column: 1 / -1;
+    grid-row: 2 / 3;
+  }
+
   h4 {
     margin: 0 0 0.25rem 0;
     font-size: 1.2rem;
@@ -161,8 +183,20 @@ export const ActionButtons = styled.div`
   flex-direction: column;
   gap: 0.5rem;
 
+  @media (max-width: 768px) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
   button {
     min-width: 150px;
+      @media (max-width: 768px) {
+      min-width: auto;
+      flex-grow: 1;
+    }
   }
 `;
 

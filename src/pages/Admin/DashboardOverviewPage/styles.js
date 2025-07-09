@@ -2,6 +2,12 @@
 import styled from 'styled-components';
 
 export const PageWrapper = styled.div`
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+
   h1 {
     font-size: 2em;
     color: ${({ theme }) => theme.colors.textDark};

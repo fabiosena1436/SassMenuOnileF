@@ -101,6 +101,9 @@ export const ContentArea = styled.main`
     .admin-header {
       padding-left: 60px;
     }
+    .admin-main-content {
+      padding: 1rem;
+    }
   }
 `;
 

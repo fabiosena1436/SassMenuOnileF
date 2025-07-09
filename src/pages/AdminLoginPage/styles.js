@@ -54,6 +54,10 @@ export const LoginForm = styled.form`
   max-width: 420px;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 480px) {
+    padding: 2rem;
+  }
 `;
 
 // NOVO: Estilo para o Logo
