@@ -1,15 +1,15 @@
-// Arquivo: src/pages/Admin/PrintableReceiptPage/styles.js (Versão Completa e Final)
-
-import styled from 'styled-components';
+// src/pages/Admin/PrintableReceiptPage/styles.js
+import styled, { createGlobalStyle } from 'styled-components';
 
 export const ReceiptWrapper = styled.div`
-  width: 300px; /* Largura comum para impressoras de 80mm */
+  width: 300px; 
   margin: 2rem auto;
-  padding: 1.5rem;
+  padding: 1rem;
   background: #fff;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para alinhamento */
+  font-family: 'Courier New', Courier, monospace; 
   color: #000;
+  border: 1px solid #ccc;
 `;
 
 export const Header = styled.header`
@@ -39,6 +39,12 @@ export const Section = styled.section`
 
   &:last-of-type {
     border-bottom: none;
+  }
+
+  h4 {
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    font-size: 0.9rem;
   }
 `;
 
@@ -97,9 +103,22 @@ export const PrintButton = styled.button`
   cursor: pointer;
 `;
 
-// --- REGRAS DE IMPRESSÃO ---
-// Isto garante que na hora de imprimir, o layout fique perfeito.
-export const PrintStyles = styled.div`
+export const AddressBlock = styled.div`
+  font-size: 0.9rem;
+  line-height: 1.4;
+
+  p {
+    margin: 0;
+  }
+`;
+
+/* --- MUDANÇA PARA MELHORAR A VISUALIZAÇÃO NO NAVEGADOR --- */
+// Usando createGlobalStyle para aplicar estilos no body da página
+export const PrintStyles = createGlobalStyle`
+  body {
+    background-color: #f0f2f5; /* Fundo cinza para a página de preview */
+  }
+
   @media print {
     body, html {
       margin: 0;
@@ -116,19 +135,11 @@ export const PrintStyles = styled.div`
       margin: 0;
       padding: 0;
       box-shadow: none;
+      border: none;
     }
 
     ${PrintButton} {
-      display: none; /* Esconde o botão de imprimir na impressão */
+      display: none;
     }
-  }
-`;
-
-export const AddressBlock = styled.div`
-  font-size: 0.9rem;
-  line-height: 1.4;
-
-  p {
-    margin: 0;
   }
 `;

@@ -12,6 +12,12 @@ export const PageWrapper = styled.div`
     font-size: 2em;
     color: ${({ theme }) => theme.colors.textDark};
     margin-bottom: 30px;
+
+    /* --- MUDANÇA PARA RESPONSIVIDADE --- */
+    @media (max-width: 768px) {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+    }
   }
 `;
 
@@ -33,6 +39,7 @@ export const LoadingText = styled.p`
   color: ${({ theme }) => theme.colors.textMedium}; 
   font-style: italic; 
   margin-top: 20px;
+  padding: 2rem;
 `;
 
 export const ReportsSection = styled.div`
@@ -42,7 +49,7 @@ export const ReportsSection = styled.div`
   margin-bottom: 40px; 
   box-shadow: ${({ theme }) => theme.shadows.sm};
   display: grid; 
-  grid-template-columns: 1fr 1fr; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Mais flexível */
   gap: 20px 40px; 
 
   h3 { 
@@ -66,15 +73,19 @@ export const ReportsSection = styled.div`
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
     gap: 25px;
+    padding: 15px;
+
+    p {
+        font-size: 1em; /* Fonte um pouco menor nos relatórios mobile */
+    }
   }
 `;
 
 export const MobileCardList = styled.div`
   display: none;
-  padding: 15px;
-  background-color: ${({ theme }) => theme.colors.background};
+  padding: 15px 0; /* Removido padding lateral */
+  background-color: transparent;
 
   @media (max-width: 768px) {
     display: block;
