@@ -1,5 +1,3 @@
-// Arquivo: src/pages/RegistrationPage/index.js
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -9,12 +7,17 @@ import { slugify } from '../../utils/slugify';
 import toast from 'react-hot-toast';
 import Button from '../../components/Button';
 import {
-  RegistrationContainer, // Nome correto
+  RegistrationPageWrapper, // Alterado para o novo wrapper
+  BrandingPanel,
+  FormPanel,
+  Form,
+  Logo,
   Title,
-  Form,                 // Nome correto
+  Subtitle,
   FormGroup,
   Input,
-  ErrorMessage
+  ErrorMessage,
+  BackLink,
 } from './styles';
 
 const RegistrationPage = () => {
@@ -82,28 +85,41 @@ const RegistrationPage = () => {
   };
 
   return (
-    <RegistrationContainer>
-      <Title>Crie o seu Cardápio Online</Title>
-      <p style={{textAlign: 'center', marginBottom: '2rem'}}>Comece a vender em minutos.</p>
-      <Form onSubmit={handleSubmit}>
-        <FormGroup>
-          <label htmlFor="storeName">Nome da sua Loja</label>
-          <Input type="text" name="storeName" id="storeName" onChange={handleChange} required />
-        </FormGroup>
-        <FormGroup>
-          <label htmlFor="email">O seu Email de Acesso</label>
-          <Input type="email" name="email" id="email" onChange={handleChange} required />
-        </FormGroup>
-        <FormGroup>
-          <label htmlFor="password">Crie uma Password</label>
-          <Input type="password" name="password" id="password" onChange={handleChange} required />
-        </FormGroup>
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        <Button type="submit" disabled={loading} style={{width: '100%', marginTop: '1rem'}}>
-          {loading ? 'A criar...' : 'Criar a Minha Loja'}
-        </Button>
-      </Form>
-    </RegistrationContainer>
+    <RegistrationPageWrapper>
+      <BrandingPanel>
+        <h2>A sua vitrine digital. Pronta em minutos.</h2>
+        <p>Junte-se a centenas de lojistas que já transformaram a sua operação com um cardápio online rápido e eficiente.</p>
+      </BrandingPanel>
+
+      <FormPanel>
+        <Form onSubmit={handleSubmit}>
+          <Logo to="/">SassMenu</Logo>
+          <Title>Crie o seu Cardápio Online</Title>
+          <Subtitle>Comece a vender em minutos.</Subtitle>
+          
+          <FormGroup>
+            <label htmlFor="storeName">Nome da sua Loja</label>
+            <Input type="text" name="storeName" id="storeName" onChange={handleChange} required />
+          </FormGroup>
+          <FormGroup>
+            <label htmlFor="email">O seu Email de Acesso</label>
+            <Input type="email" name="email" id="email" onChange={handleChange} required />
+          </FormGroup>
+          <FormGroup>
+            <label htmlFor="password">Crie uma Password</label>
+            <Input type="password" name="password" id="password" onChange={handleChange} required />
+          </FormGroup>
+          
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+          
+          <Button type="submit" disabled={loading} style={{ width: '100%', marginTop: '1rem' }}>
+            {loading ? 'A criar...' : 'Criar a Minha Loja Grátis'}
+          </Button>
+          
+          <BackLink to="/admin/login">Já tenho uma conta</BackLink>
+        </Form>
+      </FormPanel>
+    </RegistrationPageWrapper>
   );
 };
 
