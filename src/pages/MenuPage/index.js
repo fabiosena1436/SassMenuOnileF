@@ -1,22 +1,25 @@
-// Arquivo: src/pages/MenuPage/index.js
-
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useStore } from '../../contexts/StoreContext';
 import { db } from '../../services/firebaseConfig';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom'; // Reintroduzido
 import { FiSearch } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import ProductCard from '../../components/ProductCard';
-import ProductListItem from '../../components/ProductListItem'; // Importa o novo componente
+import ProductListItem from '../../components/ProductListItem';
 
+// Importando Swiper para o carrossel
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 
 import {
-  MenuPageWrapper, MenuHeader, MenuTitle, SearchContainer, SearchInput, 
-  CategoryCarouselWrapper, CategoryButton, LoadingText, NoProductsText,
-  DesktopProductList, MobileProductList // Importa os novos containers
+  MenuPageWrapper, MenuHeader, MenuTitle, SearchContainer, SearchInput,
+  CategoryCarouselWrapper, // Reintroduzido
+  CategoryButton,          // Reintroduzido
+  LoadingText, NoProductsText,
+  ProductGrid,
+  ProductList,
+  CategoryTitle
 } from './styles';
 
 const MenuPage = () => {
@@ -25,10 +28,11 @@ const MenuPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados para os filtros
+  // --- LÓGICA DO FILTRO E CARROSSEL RESTAURADA ---
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const activeCategory = searchParams.get('category') || 'Todos';
+  const categoryRefs = useRef({});
 
   const fetchMenuData = useCallback(async () => {
     if (!store?.id) {
@@ -63,38 +67,49 @@ const MenuPage = () => {
     fetchMenuData();
   }, [fetchMenuData]);
 
+  // --- NOVA FUNÇÃO DE SCROLL ---
   const handleCategoryClick = (categoryName) => {
     setSearchParams(categoryName === 'Todos' ? {} : { category: categoryName });
+    
+    const ref = categoryRefs.current[categoryName];
+    if (ref) {
+      // O 'block: start' garante que o topo do elemento fique no topo da tela
+      ref.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
-  
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
-      const matchesCategory = activeCategory === 'Todos' || product.category === activeCategory;
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [products, activeCategory, searchTerm]);
+
+  const groupedProducts = useMemo(() => {
+    const searchedProducts = products.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return categories.map(category => ({
+      ...category,
+      products: searchedProducts.filter(product => product.category === category.name)
+    })).filter(category => category.products.length > 0);
+  }, [categories, products, searchTerm]);
 
   if (loading) {
     return <LoadingText>A carregar o cardápio...</LoadingText>;
   }
 
   return (
-    <MenuPageWrapper>
+    <MenuPageWrapper ref={ref => (categoryRefs.current['Todos'] = ref)}>
       <MenuHeader>
         <MenuTitle>Nosso Cardápio</MenuTitle>
       </MenuHeader>
 
       <SearchContainer>
         <FiSearch size={20} />
-        <SearchInput 
-          type="text" 
+        <SearchInput
+          type="text"
           placeholder="Pesquisar no cardápio..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </SearchContainer>
 
+      {/* --- CARROSSEL DE CATEGORIAS RESTAURADO --- */}
       <CategoryCarouselWrapper>
         <Swiper slidesPerView="auto" spaceBetween={10}>
           <SwiperSlide>
@@ -112,21 +127,33 @@ const MenuPage = () => {
         </Swiper>
       </CategoryCarouselWrapper>
       
-      {filteredProducts.length > 0 ? (
-        <>
-          <DesktopProductList>
-            {filteredProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </DesktopProductList>
-          <MobileProductList>
-            {filteredProducts.map(product => (
-              <ProductListItem key={product.id} product={product} />
-            ))}
-          </MobileProductList>
-        </>
+      {/* --- RENDERIZAÇÃO AGRUPADA MANTIDA --- */}
+      {groupedProducts.length > 0 ? (
+        groupedProducts.map(category => (
+          // Adicionamos a 'ref' para a função de scroll encontrar esta secção
+          <div key={category.id} ref={ref => (categoryRefs.current[category.name] = ref)}>
+            <CategoryTitle>{category.name}</CategoryTitle>
+            
+            <ProductGrid>
+              {category.products.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </ProductGrid>
+
+            <ProductList>
+              {category.products.map(product => (
+                <ProductListItem key={product.id} product={product} />
+              ))}
+            </ProductList>
+          </div>
+        ))
       ) : (
-        <NoProductsText>Nenhum produto encontrado com estes filtros.</NoProductsText>
+        <NoProductsText>
+          {searchTerm 
+            ? "Nenhum produto encontrado para sua busca." 
+            : "Nenhum produto disponível no momento."
+          }
+        </NoProductsText>
       )}
     </MenuPageWrapper>
   );

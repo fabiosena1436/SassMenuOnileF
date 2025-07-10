@@ -1,17 +1,14 @@
-// Arquivo: src/pages/MenuPage/styles.js (VERSÃO CORRIGIDA)
-
 import styled from 'styled-components';
 
 export const MenuPageWrapper = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  /* O padding-top foi removido para eliminar o espaço extra */
   padding: 0 1rem 2rem;
 `;
 
 export const MenuHeader = styled.div`
   text-align: center;
-  margin-bottom: 2rem;
+  margin: 2rem 0;
 `;
 
 export const MenuTitle = styled.h1`
@@ -51,6 +48,7 @@ export const SearchInput = styled.input`
   }
 `;
 
+// --- ESTILOS RESTAURADOS ---
 export const CategoryCarouselWrapper = styled.div`
   margin-bottom: 2.5rem;
   .swiper-slide {
@@ -69,6 +67,7 @@ export const CategoryButton = styled.button`
   white-space: nowrap;
   transition: all 0.2s ease-in-out;
 `;
+// --- FIM DOS ESTILOS RESTAURADOS ---
 
 export const LoadingText = styled.p`
   text-align: center;
@@ -84,7 +83,17 @@ export const NoProductsText = styled.p`
   font-size: 1.1rem;
 `;
 
-export const DesktopProductList = styled.div`
+export const CategoryTitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+`;
+
+export const ProductGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
@@ -94,24 +103,13 @@ export const DesktopProductList = styled.div`
   }
 `;
 
-export const MobileProductList = styled.div`
+export const ProductList = styled.div`
   display: none;
 
   @media (max-width: 768px) {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    /* Adicionado para dar espaço no final da lista */
-    padding-bottom: 80px; 
+    padding-bottom: 80px;
   }
-`;
-
-// --- NOVO ESTILO PARA O TÍTULO DO GRUPO DE PRODUTOS ---
-export const ProductGroupTitle = styled.h2`
-    font-size: 1.5rem;
-    color: ${({ theme }) => theme.colors.textDark};
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.borderLight};
 `;

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 export const NavbarContainer = styled.header`
-  background-color: #fff;
+  background-color: rgb(250, 243, 243);
   padding: 1rem;
   display: flex;
   justify-content: space-between;
@@ -154,8 +154,8 @@ export const MobileBottomNav = styled.nav`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #f8f9fa;
-  border-top: 1px solid #eee;
+  background-color:rgb(15, 15, 15);
+  border-top: 1px solid rgb(59, 59, 59);
   display: flex;
   justify-content: space-around;
   padding: 0.5rem 0;
@@ -171,7 +171,7 @@ export const MobileNavLink = styled(Link)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #555;
+  color: rgb(252, 247, 247);
   text-decoration: none;
   font-size: 0.8rem;
   transition: color 0.3s ease;
