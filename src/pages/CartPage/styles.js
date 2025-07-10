@@ -180,6 +180,7 @@ export const ActionsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-bottom: 3rem;
 `;
 
 export const TopButtonsContainer = styled.div`

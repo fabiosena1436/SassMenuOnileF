@@ -11,6 +11,7 @@ export const CheckoutWrapper = styled.div`
 
   @media (max-width: 768px) {
     margin: 0;
+    margin-bottom: 3rem;
     padding: 1.5rem;
     border-radius: 0;
     box-shadow: none;

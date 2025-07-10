@@ -1,3 +1,4 @@
+// src/routes/index.js
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
@@ -66,14 +67,25 @@ const AppRoutes = () => {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="promotions" element={<PromotionsPage />} />
         <Route path="assinatura" element={<SubscriptionPage />} />
-        <Route path="print/order/:orderId" element={<PrintableReceiptPage />} />
+        {/* A ROTA DE IMPRESSÃO FOI REMOVIDA DE DENTRO DESTE BLOCO */}
       </Route>
 
-      {/* --- ROTAS SUPER ADMIN --- */}
-      {/* Rota de login exclusiva para Super Admin */}
-      <Route path="/super-admin/login" element={<SuperAdminLoginPage />} />
+      {/* --- MUDANÇA PRINCIPAL AQUI --- */}
+      {/* A rota de impressão agora é uma rota de nível superior. */}
+      {/* Ela continua protegida, mas não carrega mais o AdminLayout. */}
+      <Route
+        path="/admin/print/order/:orderId"
+        element={
+          <ProtectedRoute>
+            <PrintableReceiptPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* --- FIM DA MUDANÇA --- */}
 
-      {/* Rota protegida para o painel de Super Admin */}
+
+      {/* --- ROTAS SUPER ADMIN --- */}
+      <Route path="/super-admin/login" element={<SuperAdminLoginPage />} />
       <Route
         path="/super-admin"
         element={
@@ -82,7 +94,6 @@ const AppRoutes = () => {
           </SuperAdminRoute>
         }
       />
-      {/* Fim das rotas Super Admin */}
 
       <Route path="*" element={<div><h1>404 - Página Não Encontrada</h1></div>} />
     </Routes>
