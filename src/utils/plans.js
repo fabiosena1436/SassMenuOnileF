@@ -22,7 +22,7 @@ export const PLANS = [
     id: 'pro',
     name: 'Pro',
     description: 'A solução completa para profissionalizar e escalar as suas vendas.',
-    price: 'R$ 49,90',
+    price: 'R$ 59,90',
     priceDetails: '/mês',
     isFeatured: true,
     mercadoPagoPlanId: 'plano_pro_mensal_menu_online', // ID único para o plano no MP

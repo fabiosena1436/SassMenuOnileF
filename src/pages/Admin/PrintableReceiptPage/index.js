@@ -107,7 +107,7 @@ const PrintableReceiptPage = () => {
           <Totals>
             <InfoLine><span>Subtotal:</span> <span>R$ {order.itemsSubtotal.toFixed(2)}</span></InfoLine>
             <InfoLine><span>Taxa de Entrega:</span> <span>R$ {order.deliveryFee.toFixed(2)}</span></InfoLine>
-            <InfoLine style={{fontWeight: 'bold', fontSize: '1.1rem', marginTop: '0.5rem'}}>
+            <InfoLine style={{fontWeight: 'bold', fontSize: '1rem', marginTop: '0.5rem'}}>
               <span>TOTAL:</span> 
               <span>R$ {order.grandTotal.toFixed(2)}</span>
             </InfoLine>

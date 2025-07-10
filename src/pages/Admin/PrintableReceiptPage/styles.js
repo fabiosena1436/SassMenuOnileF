@@ -3,7 +3,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 
 export const ReceiptWrapper = styled.div`
   width: 210px; 
-  margin: 2rem auto;
+  margin: 0.8rem auto;
   padding: 1rem;
   background: #fff;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -14,7 +14,7 @@ export const ReceiptWrapper = styled.div`
 
 export const Header = styled.header`
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   
   img {
     max-width: 120px;
@@ -22,20 +22,21 @@ export const Header = styled.header`
   }
 
   h1 {
-    font-size: 1.4rem;
+    font-size: 0.8rem;
     margin: 0;
   }
 
   p {
-    font-size: 0.8rem;
-    margin: 0.2rem 0;
+    font-size: 0.6rem;
+    margin: 0.1rem 0;
   }
 `;
 
 export const Section = styled.section`
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 0.20rem;
+  padding-bottom: 0.20rem;
   border-bottom: 1px dashed #888;
+  padding: 0 5px 0 0;
 
   &:last-of-type {
     border-bottom: none;
@@ -44,15 +45,16 @@ export const Section = styled.section`
   h4 {
     margin: 0 0 0.5rem 0;
     text-transform: uppercase;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
   }
 `;
 
 export const InfoLine = styled.div`
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
+  font-size: 0.6rem;
   margin-bottom: 0.3rem;
+  margin: 0 10 0 0;
 
   span:first-child {
     font-weight: bold;
@@ -61,10 +63,11 @@ export const InfoLine = styled.div`
 
 export const ItemList = styled.div`
   margin-top: 0.5rem;
+  margin: 0 10px 0 0;
 `;
 
 export const Item = styled.div`
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   margin-bottom: 0.5rem;
 
   .item-header {
@@ -82,11 +85,12 @@ export const Item = styled.div`
 
 export const Totals = styled.div`
   margin-top: 0.5rem;
+  margin: 0 10px 0 0;
 `;
 
 export const Footer = styled.footer`
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 0.3rem;
   font-size: 0.8rem;
 `;
 
@@ -99,7 +103,7 @@ export const PrintButton = styled.button`
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.7rem;
   cursor: pointer;
 
   @media print {
@@ -108,7 +112,7 @@ export const PrintButton = styled.button`
 `;
 
 export const AddressBlock = styled.div`
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   line-height: 1.4;
 
   p {

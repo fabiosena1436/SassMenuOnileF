@@ -145,3 +145,5 @@ Para executar uma cópia deste projeto na sua máquina local, siga os passos aba
 * **Email:** [seu-email@exemplo.com](mailto:seu-email@exemplo.com)
 
 ---
+
+<!-- firebase deploy --only functions -->

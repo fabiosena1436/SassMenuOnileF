@@ -35,7 +35,7 @@ exports.createSubscription = functions.https.onCall(async (data, context) => {
     const client = new MercadoPagoConfig({ accessToken });
     const preApprovalClient = new PreApproval(client);
 
-    const backUrl = `https://sass-menu-onile-f-11iv.vercel.app/admin/assinatura`;
+    const backUrl = `https://www.saas-menu-onile.com.br/admin/assinatura`;
 
     const response = await preApprovalClient.create({
       body: {
@@ -43,7 +43,7 @@ exports.createSubscription = functions.https.onCall(async (data, context) => {
         auto_recurring: {
           frequency: 1,
           frequency_type: "months",
-          transaction_amount: 9.99, // O preço correto do plano Pro
+          transaction_amount: 59.90, // O preço correto do plano Pro
           currency_id: "BRL",
         },
         payer_email: userEmail,
