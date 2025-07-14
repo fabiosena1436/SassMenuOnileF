@@ -1,6 +1,6 @@
 // src/pages/AdminLoginPage/index.js
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Importando o Link
+import { useNavigate } from 'react-router-dom'; // Importando o Link
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/Button';
 import {

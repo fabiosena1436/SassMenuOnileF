@@ -63,6 +63,93 @@ exports.createSubscription = functions.https.onCall(async (data, context) => {
   }
 });
 
+exports.updateTenantReports = functions
+  .region("southamerica-east1") // Use a região mais próxima de seus usuários
+  .pubsub.schedule("every 1 hours")
+  .onRun(async (context) => {
+    console.log("Iniciando a geração de relatórios de vendas.");
+    const tenantsSnapshot = await db.collection("tenants").get();
+
+    if (tenantsSnapshot.empty) {
+      console.log("Nenhum tenant encontrado.");
+      return null;
+    }
+
+    const promises = [];
+    tenantsSnapshot.forEach((tenantDoc) => {
+      const tenantId = tenantDoc.id;
+      const job = processTenant(tenantId);
+      promises.push(job);
+    });
+
+    await Promise.all(promises);
+    console.log("Geração de relatórios concluída para todos os tenants.");
+    return null;
+  });
+
+async function processTenant(tenantId) {
+  try {
+    console.log(`Processando relatórios para o tenant: ${tenantId}`);
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const ordersRef = db.collection(`tenants/${tenantId}/orders`);
+
+    // Busca todos os pedidos do mês (otimização para não ler todos os pedidos sempre)
+    const ordersSnapshot = await ordersRef
+      .where("createdAt", ">=", admin.firestore.Timestamp.fromDate(startOfMonth))
+      .where("status", "==", "paid") // Apenas pedidos pagos
+      .get();
+
+    let dailyTotal = 0;
+    let weeklyTotal = 0;
+    let monthlyTotal = 0;
+    let dailyCount = 0;
+    let weeklyCount = 0;
+    let monthlyCount = 0;
+
+    ordersSnapshot.forEach((doc) => {
+      const order = doc.data();
+      const orderDate = order.createdAt.toDate();
+
+      // Total Mensal
+      monthlyTotal += order.total;
+      monthlyCount++;
+
+      // Total Semanal
+      if (orderDate >= startOfWeek) {
+        weeklyTotal += order.total;
+        weeklyCount++;
+      }
+
+      // Total Diário
+      if (orderDate >= startOfToday) {
+        dailyTotal += order.total;
+        dailyCount++;
+      }
+    });
+
+    const reportData = {
+      daily: { total: dailyTotal, count: dailyCount },
+      weekly: { total: weeklyTotal, count: weeklyCount },
+      monthly: { total: monthlyTotal, count: monthlyCount },
+      lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    // Salva o relatório em um documento específico
+    const reportRef = db.doc(`tenants/${tenantId}/reports/summary`);
+    await reportRef.set(reportData);
+
+    console.log(`Relatório salvo com sucesso para o tenant: ${tenantId}`);
+  } catch (error) {
+    console.error(`Erro ao processar o tenant ${tenantId}:`, error);
+  }
+}
+
 // --- Função para cancelar uma assinatura ---
 exports.cancelSubscription = functions.https.onCall(async (data, context) => {
     if (!context.auth) {

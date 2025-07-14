@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useCart } from '../../contexts/CartContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
 import { FiTrash2 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
