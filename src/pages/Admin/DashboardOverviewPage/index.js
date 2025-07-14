@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../../../services/firebaseConfig';
-import { collection, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { FaPrint } from 'react-icons/fa';
 import Box from '@mui/material/Box';
@@ -9,8 +9,6 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-
-// --- NOVO: Importa o useAuth para saber qual é o lojista logado ---
 import { useAuth } from '../../../contexts/AuthContext';
 
 import {
@@ -30,81 +28,67 @@ import {
 
 
 const DashboardOverviewPage = () => {
-  // --- NOVO: Obtém os dados do lojista (tenant) ---
   const { tenant } = useAuth();
 
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [salesToday, setSalesToday] = useState(0);
-  const [ordersTodayCount, setOrdersTodayCount] = useState(0);
-  const [salesThisWeek, setSalesThisWeek] = useState(0);
-  const [ordersThisWeekCount, setOrdersThisWeekCount] = useState(0);
-  const [salesThisMonth, setSalesThisMonth] = useState(0);
-  const [ordersThisMonthCount, setOrdersThisMonthCount] = useState(0);
-  const [salesThisYear, setSalesThisYear] = useState(0);
-  const [ordersThisYearCount, setOrdersThisYearCount] = useState(0);
+  // NOVO: Estado específico para os relatórios
+  const [report, setReport] = useState(null);
+
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadingReport, setLoadingReport] = useState(true);
+
   const [selectedStatusTab, setSelectedStatusTab] = useState('Ativos');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // --- ALTERADO: A função agora depende do tenant.id ---
-  const fetchData = useCallback(async () => {
-    // Não executa a função se ainda não sabemos qual é o lojista
+  // --- OTIMIZAÇÃO: Hook para buscar os relatórios pré-calculados ---
+  useEffect(() => {
     if (!tenant?.id) {
-        setLoading(false);
-        return;
+      setLoadingReport(false);
+      return;
     }
+    const reportRef = doc(db, 'tenants', tenant.id, 'reports', 'summary');
+    const unsubscribe = onSnapshot(reportRef, (doc) => {
+      if (doc.exists()) {
+        setReport(doc.data());
+      } else {
+        // Se não existir, define valores padrão para não quebrar a UI
+        setReport({
+          daily: { total: 0, count: 0 },
+          weekly: { total: 0, count: 0 },
+          monthly: { total: 0, count: 0 },
+        });
+      }
+      setLoadingReport(false);
+    });
+    return () => unsubscribe();
+  }, [tenant]);
 
-    setLoading(true);
-    try {
-      // --- CORREÇÃO PRINCIPAL AQUI ---
-      // A consulta agora aponta para a sub-coleção de pedidos DENTRO do lojista logado.
-      // O caminho é /tenants/{ID do lojista}/orders
-      const ordersCollectionRef = collection(db, 'tenants', tenant.id, 'orders');
-      
-      const q = query(ordersCollectionRef, orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
+  // --- Hook para buscar a lista de pedidos (em tempo real) ---
+  useEffect(() => {
+    if (!tenant?.id) {
+      setLoadingOrders(false);
+      return;
+    }
+    const ordersCollectionRef = collection(db, 'tenants', tenant.id, 'orders');
+    const q = query(ordersCollectionRef, orderBy("createdAt", "desc"));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const ordersData = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
       setOrders(ordersData);
+      setLoadingOrders(false);
+    }, (error) => {
+      console.error("Erro ao buscar pedidos:", error);
+      toast.error("Erro ao carregar os pedidos.");
+      setLoadingOrders(false);
+    });
 
-      let todaySales = 0, todayCount = 0, weekSales = 0, weekCount = 0, monthSales = 0, monthCount = 0, yearSales = 0, yearCount = 0;
-      const now = new Date();
-      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
-      
-      ordersData.forEach(order => {
-        if (order.createdAt?.toDate) {
-          const orderDate = order.createdAt.toDate();
-          const orderTotal = order.grandTotal || 0;
-          if (orderDate >= startOfToday) { todaySales += orderTotal; todayCount++; }
-          if (orderDate >= startOfWeek) { weekSales += orderTotal; weekCount++; }
-          if (orderDate >= startOfMonth) { monthSales += orderTotal; monthCount++; }
-          if (orderDate >= startOfYear) { yearSales += orderTotal; yearCount++; }
-        }
-      });
+    return () => unsubscribe();
+  }, [tenant]);
 
-      setSalesToday(todaySales); setOrdersTodayCount(todayCount);
-      setSalesThisWeek(weekSales); setOrdersThisWeekCount(weekCount);
-      setSalesThisMonth(monthSales); setOrdersThisMonthCount(monthCount);
-      setSalesThisYear(yearSales); setOrdersThisYearCount(yearCount);
-
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      toast.error("Erro ao carregar os dados. Verifique as suas permissões.");
-    } finally {
-      setLoading(false);
-    }
-  }, [tenant]); // Adicionamos tenant como dependência
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   const sendWhatsAppNotification = (phone, customerName, orderId) => {
     const cleanedPhone = phone.replace(/\D/g, '');
-    // --- MELHORIA: A mensagem agora pode usar o nome da loja ---
     const storeName = tenant?.storeName || "a nossa loja";
     const message = `Olá, ${customerName}! Seu pedido #${orderId.substring(0, 5)} da ${storeName} saiu para entrega e chegará em breve! 🛵`;
     const whatsappLink = `https://wa.me/55${cleanedPhone}?text=${encodeURIComponent(message)}`;
@@ -114,8 +98,6 @@ const DashboardOverviewPage = () => {
   };
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
-    // --- CORREÇÃO DE SEGURANÇA ---
-    // Garante que a atualização também aconteça na sub-coleção correta.
     if (!tenant?.id) return toast.error("Não foi possível identificar a sua loja.");
 
     const orderDocRef = doc(db, 'tenants', tenant.id, 'orders', orderId);
@@ -131,9 +113,6 @@ const DashboardOverviewPage = () => {
           toast.error("Cliente não possui telefone para notificar.");
         }
       }
-      // Otimização: Em vez de re-buscar tudo, apenas atualiza o estado localmente.
-      setOrders(prevOrders => prevOrders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-
     } catch (error) {
       console.error("Erro ao atualizar status:", error);
       toast.error("Falha ao atualizar o status.");
@@ -194,13 +173,13 @@ const DashboardOverviewPage = () => {
     <PageWrapper>
       <h1>Visão Geral do Dashboard</h1>
       <SectionTitle>Relatórios Rápidos</SectionTitle>
-      {loading ? (<LoadingText>Calculando relatórios...</LoadingText>) : (
+      {loadingReport ? (<LoadingText>A carregar relatórios...</LoadingText>) : (
         <ReportsSection>
           <h3>Resumo de Vendas</h3>
-          <div><h4>Hoje ({new Date().toLocaleDateString('pt-BR')})</h4><p>Total de Vendas: <strong>R$ {salesToday.toFixed(2).replace('.', ',')}</strong></p><p>Número de Pedidos: <strong>{ordersTodayCount}</strong></p></div>
-          <div><h4>Esta Semana</h4><p>Total de Vendas: <strong>R$ {salesThisWeek.toFixed(2).replace('.', ',')}</strong></p><p>Número de Pedidos: <strong>{ordersThisWeekCount}</strong></p></div>
-          <div><h4>Este Mês ({new Date().toLocaleString('pt-BR', { month: 'long' })})</h4><p>Total de Vendas: <strong>R$ {salesThisMonth.toFixed(2).replace('.', ',')}</strong></p><p>Número de Pedidos: <strong>{ordersThisMonthCount}</strong></p></div>
-          <div><h4>Este Ano ({new Date().getFullYear()})</h4><p>Total de Vendas: <strong>R$ {salesThisYear.toFixed(2).replace('.', ',')}</strong></p><p>Número de Pedidos: <strong>{ordersThisYearCount}</strong></p></div>
+          {/* --- ALTERADO: Usar os dados do estado 'report' --- */}
+          <div><h4>Hoje</h4><p>Vendas: <strong>R$ {report.daily.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.daily.count}</strong></p></div>
+          <div><h4>Esta Semana</h4><p>Vendas: <strong>R$ {report.weekly.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.weekly.count}</strong></p></div>
+          <div><h4>Este Mês</h4><p>Vendas: <strong>R$ {report.monthly.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.monthly.count}</strong></p></div>
         </ReportsSection>
       )}
 
@@ -229,14 +208,14 @@ const DashboardOverviewPage = () => {
               columns={columns}
               initialState={{ columns: { columnVisibilityModel: { id: false } } }}
               pageSizeOptions={[5, 10, 20]}
-              loading={loading}
+              loading={loadingOrders}
               localeText={{ noRowsLabel: 'Nenhum pedido para exibir nesta categoria' }}
             />
           </Box>
         </DesktopDataGrid>
 
         <MobileCardList>
-          {loading ? <LoadingText>Carregando pedidos...</LoadingText> : (
+          {loadingOrders ? <LoadingText>A carregar pedidos...</LoadingText> : (
             filteredOrders.length > 0 ? filteredOrders.map(order => (
               <OrderCard key={order.id}>
                 <CardHeader>
