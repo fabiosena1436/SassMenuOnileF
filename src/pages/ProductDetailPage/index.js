@@ -1,5 +1,3 @@
-// Arquivo: src/pages/ProductDetailPage/index.js
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../../contexts/StoreContext';
@@ -30,9 +28,12 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
   
+  // <<< A CORREÇÃO ESTÁ NESTA FUNÇÃO >>>
   const fetchData = useCallback(async () => {
     if (!store?.id || !productId) return;
     setLoading(true);
+
+    // Etapa 1: Tentar carregar o produto. Se isto falhar, é um erro crítico.
     try {
       const productRef = doc(db, 'tenants', store.id, 'products', productId);
       const productSnap = await getDoc(productRef);
@@ -40,27 +41,38 @@ const ProductDetailPage = () => {
       if (!productSnap.exists() || !productSnap.data().isAvailable) {
         toast.error("Produto não encontrado ou indisponível.");
         navigate(`/loja/${store.slug}/cardapio`);
+        setLoading(false);
         return;
       }
 
       const productData = { id: productSnap.id, ...productSnap.data() };
       setProduct(productData);
 
+      // Seta o tamanho padrão se houver
       if (productData.hasCustomizableSizes && productData.availableSizes?.length > 0) {
         setSelectedSize(productData.availableSizes[0]);
-      } else {
-        setTotalPrice(productData.price * quantity);
       }
-      
+
+    } catch (error) {
+      console.error("Erro CRÍTICO ao carregar o produto:", error);
+      toast.error("Erro ao carregar o produto.");
+      setLoading(false);
+      return; // Interrompe a execução
+    }
+
+    // Etapa 2: Tentar carregar os adicionais. Se isto falhar, a página ainda funciona.
+    try {
       const toppingsRef = collection(db, 'tenants', store.id, 'toppings');
       const toppingsSnap = await getDocs(toppingsRef);
       setToppings(toppingsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-
     } catch (error) {
-      toast.error("Erro ao carregar o produto.");
-    } finally {
-      setLoading(false);
+      console.warn("Aviso: Não foi possível carregar os adicionais (toppings).", error);
+      // Não mostramos um erro para o utilizador, pois o produto principal carregou.
     }
+    
+    // Etapa 3: Finalizar o carregamento
+    setLoading(false);
+
   }, [store, productId, navigate]);
 
   useEffect(() => {
@@ -86,7 +98,6 @@ const ProductDetailPage = () => {
   };
   
   const handleAddToCart = () => {
-    // <<< VERIFICAÇÃO ADICIONADA AQUI >>>
     if (!store.isStoreOpen) {
       toast.error("A loja está fechada e não aceita pedidos no momento.");
       return;
@@ -116,10 +127,20 @@ const ProductDetailPage = () => {
 
   if (loading || !store) return <LoadingText>A carregar produto...</LoadingText>;
 
+  // Adicionado um retorno seguro caso o produto não seja carregado por algum motivo
+  if (!product) {
+    return (
+      <PageWrapper>
+        <LoadingText>Não foi possível encontrar o produto.</LoadingText>
+        <BackButton to={`/loja/${store.slug}/cardapio`}>&larr; Voltar ao Cardápio</BackButton>
+      </PageWrapper>
+    );
+  }
+
   return (
     <PageWrapper>
       <BackButton to={`/loja/${store.slug}/cardapio`}>&larr;</BackButton>
-      <ProductBanner src={product.imageUrl || 'https://via.placeholder.com/1200x400'} alt={product.name} />
+      <ProductBanner src={product.imageUrl || 'https://placehold.co/1200x400/E9ECEF/495057?text=Sem+Foto'} alt={product.name} />
       <ProductContent>
         <ProductName>{product.name}</ProductName>
         <ProductDescription>{product.description}</ProductDescription>
@@ -140,21 +161,21 @@ const ProductDetailPage = () => {
 
         {toppings.length > 0 && (
           <CustomizationSection>
-             <SectionTitle>2. Adicionais</SectionTitle>
-             <ToppingGrid>
-              {toppings.map(topping => (
-                <ToppingItemLabel key={topping.id}>
-                  <input type="checkbox" checked={selectedToppings.some(t => t.id === topping.id)} onChange={() => handleToppingChange(topping)} />
-                  <div className="custom-checkbox" />
-                  <ToppingImage src={topping.imageUrl || 'https://via.placeholder.com/50'} alt={topping.name} />
-                  <ToppingInfo>
-                    <span>{topping.name}</span>
-                    <strong>+ R$ {topping.price.toFixed(2)}</strong>
-                  </ToppingInfo>
-                </ToppingItemLabel>
-              ))}
-            </ToppingGrid>
-          </CustomizationSection>
+              <SectionTitle>2. Adicionais</SectionTitle>
+              <ToppingGrid>
+               {toppings.map(topping => (
+                 <ToppingItemLabel key={topping.id}>
+                   <input type="checkbox" checked={selectedToppings.some(t => t.id === topping.id)} onChange={() => handleToppingChange(topping)} />
+                   <div className="custom-checkbox" />
+                   <ToppingImage src={topping.imageUrl || 'https://placehold.co/50x50/E9ECEF/495057?text=Sem+Foto'} alt={topping.name} />
+                   <ToppingInfo>
+                     <span>{topping.name}</span>
+                     <strong>+ R$ {topping.price.toFixed(2)}</strong>
+                   </ToppingInfo>
+                 </ToppingItemLabel>
+               ))}
+              </ToppingGrid>
+            </CustomizationSection>
         )}
       </ProductContent>
 
@@ -165,7 +186,6 @@ const ProductDetailPage = () => {
           <button onClick={() => setQuantity(q => q + 1)} disabled={!store.isStoreOpen}>+</button>
         </QuantityControl>
         
-        {/* <<< BOTÃO DINÂMICO AQUI >>> */}
         <Button onClick={handleAddToCart} disabled={!store.isStoreOpen}>
           {store.isStoreOpen ? (
             <>Adicionar <TotalPrice>R$ {totalPrice.toFixed(2)}</TotalPrice></>
