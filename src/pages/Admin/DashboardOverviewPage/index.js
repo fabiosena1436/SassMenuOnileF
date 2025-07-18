@@ -31,7 +31,6 @@ const DashboardOverviewPage = () => {
   const { tenant } = useAuth();
 
   const [orders, setOrders] = useState([]);
-  // NOVO: Estado específico para os relatórios
   const [report, setReport] = useState(null);
 
   const [loadingOrders, setLoadingOrders] = useState(true);
@@ -41,7 +40,6 @@ const DashboardOverviewPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // --- OTIMIZAÇÃO: Hook para buscar os relatórios pré-calculados ---
   useEffect(() => {
     if (!tenant?.id) {
       setLoadingReport(false);
@@ -52,7 +50,6 @@ const DashboardOverviewPage = () => {
       if (doc.exists()) {
         setReport(doc.data());
       } else {
-        // Se não existir, define valores padrão para não quebrar a UI
         setReport({
           daily: { total: 0, count: 0 },
           weekly: { total: 0, count: 0 },
@@ -64,7 +61,6 @@ const DashboardOverviewPage = () => {
     return () => unsubscribe();
   }, [tenant]);
 
-  // --- Hook para buscar a lista de pedidos (em tempo real) ---
   useEffect(() => {
     if (!tenant?.id) {
       setLoadingOrders(false);
@@ -173,10 +169,14 @@ const DashboardOverviewPage = () => {
     <PageWrapper>
       <h1>Visão Geral do Dashboard</h1>
       <SectionTitle>Relatórios Rápidos</SectionTitle>
-      {loadingReport ? (<LoadingText>A carregar relatórios...</LoadingText>) : (
+
+      {/* --- A CORREÇÃO ESTÁ AQUI --- */}
+      {/* Verificamos se está a carregar OU se o 'report' ainda é nulo */}
+      {loadingReport || !report ? (
+        <LoadingText>A carregar relatórios...</LoadingText>
+      ) : (
         <ReportsSection>
           <h3>Resumo de Vendas</h3>
-          {/* --- ALTERADO: Usar os dados do estado 'report' --- */}
           <div><h4>Hoje</h4><p>Vendas: <strong>R$ {report.daily.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.daily.count}</strong></p></div>
           <div><h4>Esta Semana</h4><p>Vendas: <strong>R$ {report.weekly.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.weekly.count}</strong></p></div>
           <div><h4>Este Mês</h4><p>Vendas: <strong>R$ {report.monthly.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.monthly.count}</strong></p></div>
