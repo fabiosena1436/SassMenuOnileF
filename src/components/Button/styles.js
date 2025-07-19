@@ -1,18 +1,5 @@
-// src/components/Button/styles.js
 import styled, { css } from 'styled-components';
 
-/**
- * Documentação das Alterações:
- * - Variedades de Botão (variants): Em vez de definirmos as cores diretamente,
- * agora cada variante (primary, secondary, danger) busca as cores do nosso
- * objeto de tema. Ex: theme.colors.primary.
- * - Propriedades Gerais: O border-radius, a transição e a opacidade para o estado
- * desabilitado também vêm do tema. Isso garante que todos os botões na aplicação
- * tenham o mesmo raio de borda e o mesmo comportamento.
- * - Propriedade $variant: Usamos $variant em vez de variant para indicar ao
- * styled-components que esta é uma prop transitória e não deve ser passada
- * para o elemento HTML final.
- */
 const variants = {
   primary: css`
     background-color: ${({ theme }) => theme.colors.primary};
@@ -51,6 +38,7 @@ export const ButtonWrapper = styled.button`
   transition: ${({ theme }) => theme.transitions.default};
   text-align: center;
   line-height: 1.5;
+  white-space: nowrap; // Impede que o texto do botão quebre a linha
 
   /* Aplica o estilo da variante (primary, secondary, etc.) */
   ${({ $variant }) => variants[$variant] || variants.primary}
@@ -62,5 +50,12 @@ export const ButtonWrapper = styled.button`
 
   &:active:not(:disabled) {
     transform: scale(0.98);
+  }
+  
+  // --- ALTERAÇÃO PARA RESPONSIVIDADE ADICIONADA AQUI ---
+  @media (max-width: 768px) {
+    // Usamos o padding menor do tema para manter a consistência
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.md};
+    font-size: 0.9rem;
   }
 `;

@@ -245,3 +245,65 @@ export const InfoText = styled.div`
     font-weight: bold;
   }
 `;
+
+export const UploadGroup = styled(FormGroup)`
+  grid-column: span 2; // Ocupa mais espaço
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  span { // Estilo para o "ou"
+    text-align: center;
+    color: ${({ theme }) => theme.colors.textSubtle};
+    margin: 0.5rem 0;
+  }
+`;
+
+export const UploadLabel = styled.label`
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.textMedium};
+  margin-bottom: 5px;
+`;
+
+export const FileInput = styled.input`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: 10px;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
+
+export const ProgressBar = styled.div`
+  height: 5px;
+  background-color: ${({ theme }) => theme.colors.primary};
+  border-radius: 5px;
+  margin-top: 5px;
+  transition: width 0.3s ease-in-out;
+`;
+
+export const ImageInputMethodToggle = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+
+  label {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    border-radius: ${({ theme }) => theme.borderRadius.md};
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background-color: ${({ theme }) => theme.colors.white};
+
+    input {
+      display: none; // Esconde o radio button original
+    }
+  }
+
+  // Estilo para a opção selecionada
+  input:checked + label {
+    background-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.white};
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
