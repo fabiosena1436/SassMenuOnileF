@@ -50,8 +50,8 @@ const SuperAdminLoginPage = () => {
     <LoginPageWrapper>
       {/* Painel de Branding específico para Super Admin */}
       <BrandingPanel>
-        <h2>Controlo Total</h2>
-        <p>Acesso ao painel de controlo geral da plataforma.</p>
+        <h2>Acesso Super Admin</h2>
+        <p>Acesso ao painel de controle geral da plataforma.</p>
       </BrandingPanel>
 
       {/* Painel de Formulário */}
