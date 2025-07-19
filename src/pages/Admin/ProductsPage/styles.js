@@ -247,12 +247,16 @@ export const InfoText = styled.div`
 `;
 
 export const UploadGroup = styled(FormGroup)`
-  grid-column: span 2; // Ocupa mais espaço
+  grid-column: span 2;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 
-  span { // Estilo para o "ou"
+  @media (max-width: 768px) {
+    grid-column: span 1; /* Ocupa apenas 1 coluna no mobile */
+  }
+
+  span {
     text-align: center;
     color: ${({ theme }) => theme.colors.textSubtle};
     margin: 0.5rem 0;
@@ -270,6 +274,7 @@ export const FileInput = styled.input`
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: 10px;
   background-color: ${({ theme }) => theme.colors.background};
+  width: 100%;
 `;
 
 export const ProgressBar = styled.div`
@@ -284,26 +289,65 @@ export const ImageInputMethodToggle = styled.div`
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
+  position: relative;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
+
+  /* Esconde os radio buttons mas mantém funcionais */
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
 
   label {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 10px;
-    border: 1px solid ${({ theme }) => theme.colors.border};
+    padding: 12px 16px;
+    border: 2px solid ${({ theme }) => theme.colors.border};
     border-radius: ${({ theme }) => theme.borderRadius.md};
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     background-color: ${({ theme }) => theme.colors.white};
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-height: 44px; /* Tamanho mínimo para touch */
 
-    input {
-      display: none; // Esconde o radio button original
+    @media (max-width: 768px) {
+      padding: 10px 8px;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 480px) {
+      padding: 8px 6px;
+      font-size: 0.8rem;
     }
   }
 
-  // Estilo para a opção selecionada
-  input:checked + label {
+  /* Estilo para quando está selecionado */
+  input[type="radio"]:checked + label {
     background-color: ${({ theme }) => theme.colors.primary};
     color: ${({ theme }) => theme.colors.white};
     border-color: ${({ theme }) => theme.colors.primary};
+    font-weight: 600;
+  }
+
+  /* Hover effect para desktop */
+  @media (hover: hover) {
+    label:hover {
+      border-color: ${({ theme }) => theme.colors.primary};
+      background-color: ${({ theme }) => theme.colors.backgroundLight};
+    }
+
+    input[type="radio"]:checked + label:hover {
+      background-color: ${({ theme }) => theme.colors.primaryDark};
+      border-color: ${({ theme }) => theme.colors.primaryDark};
+    }
   }
 `;

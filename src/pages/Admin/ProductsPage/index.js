@@ -217,7 +217,7 @@ const ProductsPage = () => {
     <PageWrapper>
       <Header>
         <Title>Gerenciamento de Produtos</Title>
-        <Button onClick={() => navigate(`/loja/${tenant.slug}`)} variant="secondary">Ver a minha Loja</Button>
+       
       </Header>
       
       {isLimitReached && (
