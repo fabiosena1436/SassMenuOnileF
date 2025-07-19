@@ -7,7 +7,7 @@ import { slugify } from '../../utils/slugify';
 import toast from 'react-hot-toast';
 import Button from '../../components/Button';
 import {
-  RegistrationPageWrapper, // Alterado para o novo wrapper
+  RegistrationPageWrapper,
   BrandingPanel,
   FormPanel,
   Form,
@@ -25,6 +25,7 @@ const RegistrationPage = () => {
     storeName: '',
     email: '',
     password: '',
+    confirmPassword: '', // <<< NOVO CAMPO NO ESTADO
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,12 +37,20 @@ const RegistrationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    // --- NOVA VALIDAÇÃO ---
+    if (formData.password !== formData.confirmPassword) {
+      setError("As senhas não coincidem. Por favor, tente novamente.");
+      return;
+    }
+    // --- FIM DA NOVA VALIDAÇÃO ---
+
     if (!formData.storeName || !formData.email || !formData.password) {
       setError("Todos os campos são obrigatórios.");
       return;
     }
     setLoading(true);
-    setError('');
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
@@ -109,6 +118,13 @@ const RegistrationPage = () => {
             <label htmlFor="password">Crie uma Password</label>
             <Input type="password" name="password" id="password" onChange={handleChange} required />
           </FormGroup>
+          
+          {/* --- NOVO CAMPO DE CONFIRMAÇÃO --- */}
+          <FormGroup>
+            <label htmlFor="confirmPassword">Confirme a sua Password</label>
+            <Input type="password" name="confirmPassword" id="confirmPassword" onChange={handleChange} required />
+          </FormGroup>
+          {/* --- FIM DO NOVO CAMPO --- */}
           
           {error && <ErrorMessage>{error}</ErrorMessage>}
           
