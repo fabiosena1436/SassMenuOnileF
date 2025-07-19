@@ -27,8 +27,11 @@ export const PLANS = [
     isFeatured: true,
     mercadoPagoPlanId: 'plano_pro_mensal_menu_online', // ID único para o plano no MP
     features: [
-      'Tudo do plano Básico',
+      'Cardápio Online Responsivo',
+      'Pedidos via WhatsApp',
+      'Painel de Gestão',
       'Produtos Ilimitados',
+      'Fazer uploads de suas imagens',
       'Gestão de Promoções',
       'Suporte Prioritário',
     ],
