@@ -10,39 +10,19 @@ import Tab from '@mui/material/Tab';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAuth } from '../../../contexts/AuthContext';
-import { PageWrapper, SectionTitle, LoadingText, ReportsSection, MobileCardList, DesktopDataGrid, OrderCard, CardHeader, CustomerInfo, OrderTotal, StatusSelector, CardActionsContainer } from './styles';
+import { PageWrapper, SectionTitle, LoadingText, MobileCardList, DesktopDataGrid, OrderCard, CardHeader, CustomerInfo, OrderTotal, StatusSelector, CardActionsContainer } from './styles';
 
 const DashboardOverviewPage = () => {
-    const { tenant, loading: isAuthLoading } = useAuth(); // Usamos o loading do AuthContext
+    const { tenant, loading: isAuthLoading } = useAuth();
     const [orders, setOrders] = useState([]);
-    const [report, setReport] = useState(null);
     const [loadingOrders, setLoadingOrders] = useState(true);
-    const [loadingReport, setLoadingReport] = useState(true);
     const [selectedStatusTab, setSelectedStatusTab] = useState('Ativos');
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    useEffect(() => {
-        // Aguarda o fim do carregamento da autenticação e a existência do tenant
-        if (isAuthLoading || !tenant?.id) {
-            setLoadingReport(false);
-            return;
-        }
-        setLoadingReport(true);
-        const reportRef = doc(db, 'tenants', tenant.id, 'reports', 'summary');
-        const unsubscribe = onSnapshot(reportRef, (doc) => {
-            if (doc.exists()) {
-                setReport(doc.data());
-            } else {
-                setReport({ daily: { total: 0, count: 0 }, weekly: { total: 0, count: 0 }, monthly: { total: 0, count: 0 } });
-            }
-            setLoadingReport(false);
-        });
-        return () => unsubscribe();
-    }, [tenant, isAuthLoading]);
+    // O useEffect que carregava os relatórios foi completamente removido.
 
     useEffect(() => {
-        // Aguarda o fim do carregamento da autenticação e a existência do tenant
         if (isAuthLoading || !tenant?.id) {
             setLoadingOrders(false);
             return;
@@ -126,17 +106,8 @@ const DashboardOverviewPage = () => {
     return (
         <PageWrapper>
             <h1>Visão Geral do Dashboard</h1>
-            <SectionTitle>Relatórios Rápidos</SectionTitle>
-            {loadingReport || !report ? (
-                <LoadingText>A carregar relatórios...</LoadingText>
-            ) : (
-                <ReportsSection>
-                    <h3>Resumo de Vendas</h3>
-                    <div><h4>Hoje</h4><p>Vendas: <strong>R$ {report.daily.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.daily.count}</strong></p></div>
-                    <div><h4>Esta Semana</h4><p>Vendas: <strong>R$ {report.weekly.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.weekly.count}</strong></p></div>
-                    <div><h4>Este Mês</h4><p>Vendas: <strong>R$ {report.monthly.total.toFixed(2).replace('.', ',')}</strong></p><p>Pedidos: <strong>{report.monthly.count}</strong></p></div>
-                </ReportsSection>
-            )}
+            
+            {/* A SECÇÃO DE RELATÓRIOS RÁPIDOS FOI COMPLETAMENTE REMOVIDA DAQUI */}
 
             <SectionTitle>Pedidos</SectionTitle>
             <Box sx={{ width: '100%', bgcolor: 'background.paper', borderRadius: '8px', boxShadow: 1, overflow: 'hidden' }}>

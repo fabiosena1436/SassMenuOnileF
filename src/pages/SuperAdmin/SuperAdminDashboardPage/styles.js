@@ -1,4 +1,5 @@
 import styled, { keyframes } from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const fadeIn = keyframes`
   from {
@@ -129,6 +130,14 @@ export const Table = styled.table`
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
   border-radius: 10px;
   overflow: hidden;
+
+  /* --- CORREÇÃO AQUI --- */
+  /* A regra para esconder o thead agora está dentro do Table */
+  @media (max-width: 768px) {
+    thead {
+      display: none;
+    }
+  }
 `;
 
 export const Th = styled.th`
@@ -145,6 +154,27 @@ export const Td = styled.td`
   padding: 1rem;
   border-bottom: 1px solid #f0f0f0;
   color: #34495e;
+
+  /* --- CORREÇÃO AQUI --- */
+  /* A regra para a célula agora tem a sua própria media query */
+  @media (max-width: 768px) {
+    display: block;
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+
+    &::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 1rem;
+      width: calc(50% - 2rem);
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+  }
 `;
 
 export const Tr = styled.tr`
@@ -153,6 +183,25 @@ export const Tr = styled.tr`
   }
   &:hover {
     background-color: #f8f9fa;
+  }
+
+  /* --- CORREÇÃO AQUI --- */
+  /* A regra para a linha agora tem a sua própria media query */
+  @media (max-width: 768px) {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+    &:hover {
+      background-color: white;
+    }
+
+    /* Remove a borda da última célula do "cartão" */
+    ${Td}:last-child {
+      border-bottom: none;
+    }
   }
 `;
 
@@ -166,6 +215,11 @@ export const SelectRole = styled.select`
   &:disabled {
     background-color: #ecf0f1;
     cursor: not-allowed;
+  }
+
+  /* --- CORREÇÃO AQUI --- */
+  @media (max-width: 768px) {
+    width: 100%;
   }
 `;
 
@@ -193,7 +247,7 @@ export const LogoutButton = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.2rem;
-  background-color: #e74c3c; // Um vermelho suave para a ação de sair
+  background-color: #e74c3c;
   color: white;
   border: none;
   border-radius: 8px;
@@ -207,6 +261,6 @@ export const LogoutButton = styled.button`
   }
 
   &:hover {
-    background-color: #c0392b; // Um vermelho mais escuro no hover
+    background-color: #c0392b;
   }
 `;

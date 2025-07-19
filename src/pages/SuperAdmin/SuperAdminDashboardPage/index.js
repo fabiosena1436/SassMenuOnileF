@@ -68,9 +68,7 @@ const SuperAdminDashboardPage = () => {
     }
     try {
       const userDocRef = doc(db, 'users', userId);
-      // --- AQUI ESTÁ A CORREÇÃO ---
-      // Corrigido de userDocR para userDocRef
-      await updateDoc(userDocRef, { role: newRole }); 
+      await updateDoc(userDocRef, { role: newRole });
       toast.success("Função do utilizador atualizada!");
     } catch (error) {
       console.error("Erro ao atualizar função:", error);
