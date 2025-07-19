@@ -9,7 +9,6 @@ export const LoginPageWrapper = styled.div`
 
 export const BrandingPanel = styled.div`
   flex: 1;
-  /* Cor diferente para o painel do super admin */
   background: linear-gradient(135deg, #2c3e50, #4ca1af); 
   color: white;
   display: flex;
@@ -64,7 +63,7 @@ export const Logo = styled(Link)`
   text-align: center;
   font-size: 2rem;
   font-weight: bold;
-  color: #34495e; /* Cor do logo ajustada */
+  color: #34495e;
   text-decoration: none;
   margin-bottom: 1rem;
 `;
@@ -107,7 +106,7 @@ export const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #2c3e50; /* Cor de foco ajustada */
+    border-color: #2c3e50;
     background-color: ${({ theme }) => theme.colors.white};
     box-shadow: 0 0 0 3px #2c3e5033;
   }

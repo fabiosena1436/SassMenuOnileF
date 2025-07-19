@@ -1,11 +1,25 @@
-// Arquivo: src/pages/SuperAdmin/SuperAdminDashboardPage/styles.js
+import styled, { keyframes } from 'styled-components';
 
-import styled from 'styled-components';
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
 export const PageWrapper = styled.div`
-  padding: 2rem;
-  background-color: #f4f7f6;
+  padding: 2rem 3rem;
+  background-color: #f8f9fa;
   min-height: 100vh;
+  animation: ${fadeIn} 0.5s ease-out;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
 `;
 
 export const Header = styled.header`
@@ -18,22 +32,89 @@ export const Header = styled.header`
 `;
 
 export const Title = styled.h1`
-  font-size: 2.5rem;
-  color: #2c3e50;
+  font-size: 2.2rem;
+  color: #343a40;
+  font-weight: 700;
 `;
 
 export const SearchInput = styled.input`
   padding: 0.75rem 1rem;
-  border: 1px solid #dcdcdc;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
-  width: 300px;
+  width: 100%;
+  max-width: 350px;
   font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}33;
+  }
+`;
+
+export const StatsGrid = styled.section`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+`;
+
+export const StatCard = styled.div`
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+`;
+
+export const StatIcon = styled.div`
+  background-color: ${props => props.color || '#3498db'}1A;
+  color: ${props => props.color || '#3498db'};
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+`;
+
+export const StatInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const StatLabel = styled.span`
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  font-weight: 600;
+`;
+
+export const StatValue = styled.p`
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
 `;
 
 export const LoadingText = styled.p`
   text-align: center;
   font-size: 1.2rem;
   color: #7f8c8d;
+  padding-top: 5rem;
 `;
 
 export const InfoText = styled.p`
@@ -104,5 +185,28 @@ export const TenantLink = styled.a`
   font-weight: 500;
   &:hover {
     text-decoration: underline;
+  }
+`;
+
+export const LogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  background-color: #e74c3c; // Um vermelho suave para a ação de sair
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  svg {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    background-color: #c0392b; // Um vermelho mais escuro no hover
   }
 `;

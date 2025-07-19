@@ -24,7 +24,7 @@ const SuperAdminLoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // A mesma função de login pode ser usada, o back-end validará a role
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,9 +35,8 @@ const SuperAdminLoginPage = () => {
     }
     setLoading(true);
     try {
-      // Tenta fazer o login. A validação de 'superadmin' deve ocorrer no ProtectedRoute/SuperAdminRoute
       await login(email, password);
-      navigate('/super-admin'); // Redireciona para o dashboard do Super Admin
+      navigate('/super-admin');
     } catch (err) {
       setError('Credenciais de Super Admin inválidas.');
       console.error("Erro no login do Super Admin:", err);
@@ -48,17 +47,13 @@ const SuperAdminLoginPage = () => {
 
   return (
     <LoginPageWrapper>
-      {/* Painel de Branding específico para Super Admin */}
       <BrandingPanel>
         <h2>Acesso Super Admin</h2>
         <p>Acesso ao painel de controle geral da plataforma.</p>
       </BrandingPanel>
-
-      {/* Painel de Formulário */}
       <FormPanel>
         <LoginForm onSubmit={handleLogin}>
           <Logo to="/">SassMenu</Logo>
-          
           <Title>Acesso Super Admin</Title>
           <Subtitle>Utilize as suas credenciais para aceder.</Subtitle>
           
